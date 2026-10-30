@@ -1,0 +1,68 @@
+body {
+  background-color: #0b0c10;
+  background-image:
+    radial-gradient(circle at 50% 20%, rgba(30,41,59,0.45) 0%, transparent 70%),
+    radial-gradient(circle at 10% 80%, rgba(185,28,28,0.08) 0%, transparent 50%);
+}
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #0f1218; }
+::-webkit-scrollbar-thumb { background: #2a3346; border-radius: 4px; }
+
+.seal-stamp {
+  border: 2px solid #b91c1c; color: #dc2626;
+  display: inline-block; padding: 2px 8px;
+  font-weight: 900; letter-spacing: 2px;
+  transform: rotate(-3deg);
+  box-shadow: inset 0 0 4px rgba(185,28,28,0.4);
+  user-select: none;
+}
+
+.step-dot {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 12px;
+  border: 2px solid #323c52; color: #6b7280;
+}
+.step-dot.active { border-color: #d97706; color: #f59e0b; background: rgba(217,119,6,0.1); }
+.step-dot.done { border-color: #059669; color: #10b981; background: rgba(5,150,105,0.15); }
+
+@keyframes rollD20 {
+  0%   { transform: scale(0.6) rotateX(0) rotateY(0) rotateZ(0); opacity: 0.2; }
+  25%  { transform: scale(1.15) rotateX(180deg) rotateY(360deg) rotateZ(90deg); }
+  50%  { transform: scale(0.95) rotateX(360deg) rotateY(720deg) rotateZ(270deg); }
+  75%  { transform: scale(1.08) rotateX(540deg) rotateY(900deg) rotateZ(360deg); }
+  100% { transform: scale(1) rotateX(720deg) rotateY(1080deg) rotateZ(360deg); opacity: 1; }
+}
+.dice-rolling { animation: rollD20 0.85s cubic-bezier(0.18,0.89,0.32,1.28) forwards; }
+
+/* ★ 傷害飄字動畫 */
+@keyframes floatUp {
+  0% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  70% { opacity: 1; transform: translate(-50%, -40px) scale(1.1); }
+  100% { opacity: 0; transform: translate(-50%, -60px) scale(0.8); }
+}
+.damage-float {
+  position: fixed;
+  pointer-events: none;
+  font-weight: 900;
+  font-size: 1.5rem;
+  z-index: 9999;
+  text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+  animation: floatUp 1s ease-out forwards;
+}
+.text-dmg-normal { color: #f87171; } /* 紅色 */
+.text-dmg-crit { color: #fbbf24; font-size: 2.2rem; } /* 金色大字 */
+.text-dmg-heal { color: #34d399; } /* 綠色 */
+.text-dmg-dodge { color: #9ca3af; font-size: 1.2rem; } /* 灰色 */
+
+/* ★ 畫面震動 */
+@keyframes shakeScreen {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px) rotate(-1deg); }
+  40% { transform: translateX(8px) rotate(1deg); }
+  60% { transform: translateX(-5px) rotate(-0.5deg); }
+  80% { transform: translateX(5px) rotate(0.5deg); }
+}
+.shake-active {
+  animation: shakeScreen 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
