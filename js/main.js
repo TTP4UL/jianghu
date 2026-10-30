@@ -1,21 +1,25 @@
+const GAME_VERSION = 'v1.0.0'; 
+
 window.addEventListener('DOMContentLoaded', () => {
-  // ★ 1. 瞬間載入本地數據（移除 await，唔使等雲端）
+  // ★ 將版本號顯示喺畫面
+  const vEl = document.getElementById('gameVersion');
+  if (vEl) vEl.textContent = GAME_VERSION;
+
   DataLoader.init();
   
-  // 2. 檢查是否本地環境，載入 DevTools
+  // ★ 只有本地端 (localhost) 才自動載入開發者工具
   const isLocal = window.location.hostname === '127.0.0.1' || 
                   window.location.hostname === 'localhost';
+                  
   if (isLocal) {
     DevTools.init();
   }
 
-  // 3. 檢查存檔
   const saved = SaveSystem.load();
   if (saved) {
     document.getElementById('loadBtn').classList.remove('hidden');
   }
   
-  // ★ 4. 即刻切換到創角系統（0 秒開啟）
   switchSystem('characterCreation');
 });
 

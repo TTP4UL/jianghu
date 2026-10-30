@@ -3,10 +3,15 @@ const CharacterCreationSystem = {
 
   enter() {
     this.state = { step: 1, gender: 'male', origin: null, sect: null, freePoints: 10, stats: {} };
-    // ★ 移除 this.renderOrigins(); 因為 Step 1 仲未需要睇 Origin
     this.selectGender('male');
     this.renderStatBoard();
     this.goToStep(1);
+    
+    // 清空舊嘅 UI 狀態
+    const originPicker = document.getElementById('originPicker');
+    if (originPicker) originPicker.innerHTML = '';
+    const sectPicker = document.getElementById('sectPicker');
+    if (sectPicker) sectPicker.classList.add('hidden');
   },
 
   goToStep(n) {
@@ -22,10 +27,9 @@ const CharacterCreationSystem = {
     });
     s.step = n;
     
-    // ★ 關鍵：當去到 Step 2 嗰陣，先至渲染 Origins
     if (n === 2) {
       const picker = document.getElementById('originPicker');
-      if (Object.keys(G.data.ORIGINS).length === 0) {
+      if (!G.data.ORIGINS || Object.keys(G.data.ORIGINS).length === 0) {
         picker.innerHTML = '<div class="col-span-2 text-center text-gray-400 py-6"><i class="fa-solid fa-spinner fa-spin mr-2"></i>江湖卷宗下載中，請稍候...</div>';
       } else {
         this.renderOrigins();
@@ -40,7 +44,7 @@ const CharacterCreationSystem = {
     document.getElementById('gender-male').className = this._genderCls(g === 'male');
     document.getElementById('gender-female').className = this._genderCls(g === 'female');
     this.renderOrigins();
-    if (this.state.origin === 'entered_sect') this.renderSects();
+    this.updateSectPicker();
   },
 
   _genderCls(active) {
@@ -56,7 +60,11 @@ const CharacterCreationSystem = {
 
   renderOrigins() {
     const picker = document.getElementById('originPicker');
+    if (!picker) return;
     picker.innerHTML = '';
+    
+    if (!G.data.ORIGINS || Object.keys(G.data.ORIGINS).length === 0) return;
+
     Object.values(G.data.ORIGINS).forEach(o => {
       const selected = this.state.origin === o.id;
       const div = document.createElement('div');
@@ -69,78 +77,122 @@ const CharacterCreationSystem = {
           <span class="text-[10px] px-1.5 py-0.5 rounded bg-wuxiaGold/20 text-wuxiaGold border border-wuxiaGold/30 font-bold">${o.gold} 兩</span>
         </div>
         <p class="text-[11px] text-gray-400 mb-2">${o.desc}</p>
-        <div class="text-[10px] text-gray-500">屬性總和：${Object.values(o.baseStats).reduce((a, b) => a + b, 0)}</div>`;
+        <div class="text-[10px] text-gray-500">屬性總和：${Object.values(o.baseStats || {}).reduce((a, b) => a + b, 0)}</div>`;
       picker.appendChild(div);
     });
   },
 
-   selectOrigin(id) {
+  selectOrigin(id) {
     const o = G.data.ORIGINS[id];
+    if (!o) return;
+
     this.state.origin = id;
     this.state.sect = null;
     this.state.stats = { ...o.baseStats };
     this.state.freePoints = 10;
-    
-    const sectPicker = document.getElementById('sectPicker');
-    
-    // ★ 安全檢查：確保 special 存在且等於 showSectPicker
-    if (o.special && o.special.trim() === 'showSectPicker') {
-      sectPicker.classList.remove('hidden');
-      this.renderSects();
-    } else {
-      sectPicker.classList.add('hidden');
-    }
 
+    this.updateSectPicker();
     this.renderOrigins();
     this.renderStatBoard();
   },
-  
-  renderSects() {
+
+  // ★ 必須要有呢個方法，供 data.js 下載完呼叫
+  refreshUI() {
+    if (this.state.step === 2) {
+      this.renderOrigins();
+    }
+    this.updateSectPicker();
+  },
+
+  updateSectPicker() {
+    const sectPicker = document.getElementById('sectPicker');
     const grid = document.getElementById('sectGrid');
-    if (!grid) return;
-    grid.innerHTML = '';
     
-    if (!G.data.SECTS || Object.keys(G.data.SECTS).length === 0) {
-      grid.innerHTML = '<div class="text-red-500 text-xs col-span-3">錯誤：未載入門派數據</div>';
+    if (!sectPicker || !grid) return;
+
+    if (!this.state.origin) {
+      sectPicker.classList.add('hidden');
+      sectPicker.style.display = 'none';
       return;
     }
 
-    Object.values(G.data.SECTS).forEach(s => {
-      const blocked = s.genderLimit && s.genderLimit !== this.state.gender;
-      const selected = this.state.sect === s.id;
-      const div = document.createElement('div');
-      div.className = 'p-3 rounded-xl border-2 transition ' +
-        (blocked ? 'opacity-40 cursor-not-allowed border-ink-border' :
-         selected ? 'border-cinnabar bg-ink-900 cursor-pointer' :
-         'border-ink-border bg-ink-900/60 hover:bg-ink-900 cursor-pointer');
-      if (!blocked) div.onclick = () => { 
-        this.state.sect = s.id; 
-        this.renderSects(); 
-      };
-      div.innerHTML = `
-        <div class="flex items-center justify-between mb-1">
-          <span class="font-black text-sm text-parchment-100">${s.name}</span>
-          ${blocked ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-red-950 text-red-400">限制</span>' : ''}
-        </div>
-        <p class="text-[10px] text-gray-400">${s.desc}</p>`;
-      grid.appendChild(div);
-    });
+    const o = G.data.ORIGINS[this.state.origin];
+    if (!o) return;
+
+    const specialStr = String(o.special || '').toLowerCase().trim();
+
+    // ★ 終極防禦：只要係 entered_sect，或者有 show 字眼，就強制顯示！
+    if (specialStr.includes('show') || this.state.origin === 'entered_sect') {
+      sectPicker.classList.remove('hidden');
+      sectPicker.style.display = 'block';
+      this.renderSects();
+    } else {
+      sectPicker.classList.add('hidden');
+      sectPicker.style.display = 'none';
+    }
+  },
+
+  renderSects() {
+    try {
+      const grid = document.getElementById('sectGrid');
+      if (!grid) return;
+      
+      grid.innerHTML = '';
+      let html = '';
+      const sects = G.data.SECTS || {};
+      
+      if (Object.keys(sects).length === 0) {
+        grid.innerHTML = '<div class="text-red-500 font-bold text-sm col-span-3 text-center py-4 border border-red-500/50 rounded bg-red-500/10">⚠️ 錯誤：讀取不到門派數據！請檢查 Google Sheet 嘅 Sects 表。</div>';
+        return;
+      }
+
+      Object.keys(sects).forEach(key => {
+        const s = sects[key];
+        const blocked = s.genderLimit && s.genderLimit !== this.state.gender;
+        const selected = this.state.sect === s.id;
+        const borderClass = blocked ? 'border-ink-border opacity-40' : (selected ? 'border-cinnabar bg-ink-900' : 'border-ink-border bg-ink-900/60 hover:bg-ink-900');
+        
+        html += `
+          <div onclick="${blocked ? '' : `CharacterCreationSystem.selectSect('${s.id}')`}" 
+               class="p-3 rounded-xl border-2 cursor-pointer transition ${borderClass}">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-black text-sm text-parchment-100">${s.name || '未命名門派'}</span>
+              ${blocked ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-red-950 text-red-400">限制</span>' : ''}
+            </div>
+            <p class="text-[10px] text-gray-400">${s.desc || ''}</p>
+          </div>
+        `;
+      });
+
+      grid.innerHTML = html;
+    } catch (e) {
+      alert('門派渲染出錯: ' + e.message);
+      console.error(e);
+    }
+  },
+
+  selectSect(id) {
+    this.state.sect = id;
+    this.renderSects();
+    this.renderStatBoard();
   },
 
   applyOrigin() {
     const o = G.data.ORIGINS[this.state.origin];
-    this.state.stats = { ...o.baseStats }; // 呢度會讀取 Excel 嘅 0、2、3
+    if (!o) return;
+    this.state.stats = { ...o.baseStats }; 
     
-    if (this.state.origin === 'entered_sect' && this.state.sect) {
+    if (this.state.origin === 'entered_sect' && this.state.sect && G.data.SECTS[this.state.sect]) {
       this.state.stats = { ...G.data.SECTS[this.state.sect].sectStats };
     }
-    this.state.freePoints = 10; // ★ 改成 10 點
+    this.state.freePoints = 10; 
     this.renderStatBoard();
     this.renderSummary();
   },
 
- renderStatBoard() {
+  renderStatBoard() {
     const board = document.getElementById('statBoard');
+    if (!board) return;
     board.innerHTML = '';
     
     Object.keys(STATS_INFO).forEach(k => {
@@ -150,7 +202,6 @@ const CharacterCreationSystem = {
       div.className = 'bg-ink-800 p-2.5 rounded-lg border border-ink-border text-xs';
       div.innerHTML = `
         <div class="flex items-center justify-between mb-1">
-          <!-- ★ 只顯示屬性名，冇咗修正值 -->
           <span class="font-bold text-parchment-200">${STATS_INFO[k].name}</span>
         </div>
         <div class="flex items-center justify-between mt-2">
@@ -176,13 +227,14 @@ const CharacterCreationSystem = {
   },
 
   _baseStats() {
-    if (this.state.origin === 'entered_sect' && this.state.sect)
+    if (this.state.origin === 'entered_sect' && this.state.sect && G.data.SECTS[this.state.sect])
       return G.data.SECTS[this.state.sect].sectStats;
-    return G.data.ORIGINS[this.state.origin].baseStats; // 回傳 0, 2, 3 等
+    return G.data.ORIGINS[this.state.origin]?.baseStats || {str:0,dex:0,con:0,int:0,wis:0,cha:0};
   },
 
   renderSummary() {
     const o = G.data.ORIGINS[this.state.origin];
+    if (!o) return;
     const s = this.state.sect ? G.data.SECTS[this.state.sect] : null;
     const arts = [...(o.initialMartialArts || [])];
     if (s) arts.push(...(s.startingArts || []));
@@ -203,13 +255,11 @@ const CharacterCreationSystem = {
     const o = G.data.ORIGINS[s.origin];
     const sect = s.sect ? G.data.SECTS[s.sect] : null;
 
-    // ★ 修改 1：喺計修正值之前，先計出「真實屬性」（UI數值 + 10 基礎值）
     const finalStats = {};
     Object.keys(s.stats).forEach(k => {
       finalStats[k] = 10 + s.stats[k];
     });
 
-    // ★ 修改 2：用 finalStats 嚟計修正值（conMod, dexMod, wisMod）
     const conMod = Math.floor((finalStats.con - 10) / 2);
     const dexMod = Math.floor((finalStats.dex - 10) / 2);
     const wisMod = Math.floor((finalStats.wis - 10) / 2);
@@ -223,7 +273,9 @@ const CharacterCreationSystem = {
     if (s.sect && G.data.TAGS['sect_' + s.sect]) tags.push('sect_' + s.sect);
     tags.push(s.gender === 'male' ? 'gender_male' : 'gender_female');
     (o.initialTags || []).forEach(t => { if (G.data.TAGS[t]) tags.push(t); });
-        if (s.stats.cha === 0) {
+    
+    // ★ 奇醜無比判斷
+    if (s.stats.cha === 0) {
       tags.push('ugly_af');
     }
 
@@ -240,7 +292,7 @@ const CharacterCreationSystem = {
 
     G.player = {
       name, gender: s.gender, origin: s.origin, sect: s.sect,
-      stats: finalStats, // ★ 修改 3：將包含 +10 嘅真實屬性傳入玩家數據
+      stats: finalStats, 
       hp: maxHp, maxHp, pos: maxPos, maxPos, qi: maxQi, maxQi,
       ac: 10 + dexMod,
       gold: o.gold,

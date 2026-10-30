@@ -29,6 +29,7 @@ tailwind.config = {
         <div class="flex items-center gap-2">
           <h1 class="font-black text-base md:text-lg tracking-wider text-parchment-200">江湖行 · 武俠 DND</h1>
           <span id="ageBadge" class="hidden text-[10px] px-1.5 py-0.5 rounded bg-jade/20 text-jade-light border border-jade/30 font-bold">13歲</span>
+          <span id="gameVersion" class="text-[10px] text-gray-500 font-mono">v1.0.0</span>
         </div>
         <p class="text-[11px] text-gray-400">見招拆招 · 內力罡氣 · 快意恩仇</p>
       </div>
@@ -96,10 +97,10 @@ tailwind.config = {
     <div id="step-2" class="hidden">
       <label class="block text-xs font-bold text-parchment-200 uppercase tracking-widest mb-2.5">選擇起源</label>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="originPicker"></div>
-      <div id="sectPicker" class="hidden mt-4 pt-4 border-t border-ink-border">
-        <label class="block text-xs font-bold text-parchment-200 uppercase tracking-widest mb-2.5">選擇已入門派</label>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3" id="sectGrid"></div>
-      </div>
+  <div id="sectPicker" class="hidden mt-4 pt-4 border-t border-ink-border">
+    <label class="block text-xs font-bold text-parchment-200 uppercase tracking-widest mb-2.5">選擇已入門派</label>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3" id="sectGrid"></div>
+  </div>
       <div class="flex justify-between pt-4">
         <button onclick="CharacterCreationSystem.goToStep(1)" class="px-6 py-2.5 rounded-xl text-sm text-gray-400 border border-ink-border hover:bg-ink-700 transition"><i class="fa-solid fa-arrow-left mr-1"></i>上一步</button>
         <button onclick="CharacterCreationSystem.goToStep(3)" class="px-8 py-2.5 rounded-xl font-black text-sm text-white bg-cinnabar hover:bg-cinnabar-light shadow-lg transition">下一步：分配潛力 <i class="fa-solid fa-arrow-right ml-1"></i></button>
@@ -250,23 +251,37 @@ tailwind.config = {
   </div>
 </div>
 
-<script src="js/core/sound.js"></script>
-<script src="js/core/state.js"></script>
-<script src="js/core/tags.js"></script>
-<script src="js/core/data.js"></script>
-<script src="data/fallback.js"></script>
-<script src="js/core/dice.js"></script>
-<script src="js/core/effects.js"></script>
-<script src="js/core/save.js"></script>    <!-- ★ 確保有 save.js -->
-<script src="js/ui/hud.js"></script>
-<script src="js/ui/overview.js"></script>
-<script src="js/ui/loadout.js"></script>
-<script src="js/ui/devtools.js"></script>  <!-- ★ 確保有 devtools.js -->
-<script src="js/systems/characterCreation.js"></script>
-<script src="js/systems/lifepath.js"></script>
-<script src="js/systems/events.js"></script>
-<script src="js/systems/combat.js"></script>
-<script src="js/systems/ending.js"></script>
-<script src="js/main.js"></script>
+  <!-- ★ 終極自動加載器：利用當前時間戳強制破解瀏覽器 Cache -->
+  <script>
+    const jsFiles = [
+      'js/core/sound.js',
+      'js/core/state.js',
+      'js/core/tags.js',
+      'js/core/data.js',
+      'data/fallback.js',
+      'js/core/dice.js',
+      'js/core/effects.js',
+      'js/core/save.js',
+      'js/ui/hud.js',
+      'js/ui/overview.js',
+      'js/ui/loadout.js',
+      'js/ui/devtools.js',
+      'js/systems/characterCreation.js',
+      'js/systems/lifepath.js',
+      'js/systems/events.js',
+      'js/systems/combat.js',
+      'js/systems/ending.js',
+      'js/main.js'
+    ];
+
+    // 獲取當前時間戳，每次刷新都唔同
+    const timestamp = new Date().getTime();
+
+    // 按順序動態插入 <script>
+    jsFiles.forEach(file => {
+      document.write(`<script src="${file}?v=${timestamp}"><\/script>`);
+    });
+  </script>
 </body>
+</html>
 </html>

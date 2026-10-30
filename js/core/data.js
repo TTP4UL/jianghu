@@ -22,9 +22,9 @@ const DataLoader = {
       this._apply(data);
       console.log('[DataLoader] ✅ 雲端數據已更新！');
       
-      // ★ 關鍵：如果玩家已經喺 Step 2 等緊，即刻幫佢畫返出嚟！
-      if (G.currentSystem === 'characterCreation' && CharacterCreationSystem.state.step === 2) {
-        CharacterCreationSystem.renderOrigins();
+      // ★ 修改：如果玩家仲喺創角畫面，調用無縫刷新
+      if (G.currentSystem === 'characterCreation' && typeof CharacterCreationSystem !== 'undefined') {
+        CharacterCreationSystem.refreshUI();
       }
       
     } catch (err) {
