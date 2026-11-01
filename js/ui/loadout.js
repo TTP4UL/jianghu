@@ -1,90 +1,102 @@
 const LoadoutUI = {
   open() {
-    if (G.currentSystem === 'combat') {
-      alert('戰鬥中無法切換功法！');
-      return;
-    }
+    if (!G.player) return;
     const modal = document.getElementById('loadoutModal');
+    const content = document.getElementById('loadoutContent');
+    const p = G.player;
+    if (!p.loadout) p.loadout = { attack: [null, null], inner: [null], utility: [null] };
+
+    const slotsConfig = [
+      { key: 'attack', name: '招式武學', limit: 2, desc: '對敵出招，消耗真氣造成殺傷' },
+      { key: 'inner', name: '內功心法', limit: 1, desc: '運氣調息，提供被動護體與回氣' },
+      { key: 'utility', name: '身法絕技', limit: 1, desc: '閃轉騰挪，化解危局' }
+    ];
+
+    content.innerHTML = slotsConfig.map(cfg => {
+      const equipped = p.loadout[cfg.key] || [];
+      
+      // 1. 已裝備槽位 (紙墨風虛線框)
+      const slotsHTML = Array.from({ length: cfg.limit }).map((_, i) => {
+        const id = equipped[i];
+        const art = id ? G.data.MARTIAL_ARTS[id] : null;
+        if (art) {
+          const gradeColor = {
+            EX: 'text-[#b45309]', S: 'text-[#b91c1c]', A: 'text-[#7e22ce]',
+            B: 'text-[#1d4ed8]', C: 'text-[#047857]', D: 'text-[#57534e]', E: 'text-[#78716c]'
+          }[art.grade] || 'text-[#57534e]';
+
+          return `
+            <div class="p-3 bg-white border border-[#d8ccb8] rounded-xl flex items-center justify-between shadow-xs mb-2">
+              <div>
+                <span class="${gradeColor} font-black font-mono">[${art.grade}]</span>
+                <span class="font-black text-[#2c1f14] ml-1">${art.name}</span>
+                <div class="text-[11px] text-[#78614c] mt-0.5">${art.desc || ''}</div>
+              </div>
+              <button onclick="LoadoutUI.unequip('${cfg.key}', ${i})" class="text-xs px-2.5 py-1 rounded-lg bg-[#fff1f2] border border-[#fecdd3] text-[#b91c1c] font-bold hover:bg-[#ffe4e6] cursor-pointer">
+                卸下
+              </button>
+            </div>`;
+        }
+        return `
+          <div class="p-4 border-2 border-dashed border-[#d8ccb8] bg-[#fbf9f4] rounded-xl text-center text-xs text-[#8a7561] font-bold mb-2">
+            【 空置槽位 】
+          </div>`;
+      }).join('');
+
+      // 2. 背包中可裝備功法
+      const available = (p.martialArts || []).filter(id => {
+        const a = G.data.MARTIAL_ARTS[id];
+        return a && a.slot === cfg.key && !equipped.includes(id);
+      });
+
+      const poolHTML = available.length ? available.map(id => {
+        const art = G.data.MARTIAL_ARTS[id];
+        return `
+          <div class="p-2.5 bg-white border border-[#e5dcce] rounded-lg flex items-center justify-between text-xs mb-1.5 shadow-xs">
+            <span class="font-bold text-[#2c1f14]">${art.name}</span>
+            <button onclick="LoadoutUI.equip('${cfg.key}', '${id}')" class="text-xs px-2.5 py-0.5 rounded bg-[#f5ede0] border border-[#cfc0a9] text-[#2c1f14] font-bold hover:bg-[#e8decb] cursor-pointer">
+              裝備
+            </button>
+          </div>`;
+      }).join('') : '<div class="text-xs text-[#8a7561] italic py-1">暫無可用功法</div>';
+
+      return `
+        <div class="p-4 bg-[#f8f5ee] border border-[#d8ccb8] rounded-xl">
+          <div class="flex items-center justify-between mb-1">
+            <h4 class="font-black text-sm text-[#2c1f14]">${cfg.name}（最多 ${cfg.limit} 個）</h4>
+          </div>
+          <p class="text-[11px] text-[#78614c] mb-3">${cfg.desc}</p>
+          <div class="mb-3">${slotsHTML}</div>
+          <div class="pt-2.5 border-t border-[#e5dcce]">
+            <span class="text-[11px] font-black text-[#594432] block mb-1.5">【 可裝備 】</span>
+            <div>${poolHTML}</div>
+          </div>
+        </div>`;
+    }).join('');
+
     modal.classList.remove('hidden');
-    this.render();
+  },
+
+  equip(slotKey, artId) {
+    const p = G.player;
+    const list = p.loadout[slotKey];
+    const emptyIndex = list.indexOf(null);
+    if (emptyIndex !== -1) {
+      list[emptyIndex] = artId;
+    } else {
+      list[0] = artId; // 頂替第一個
+    }
+    this.open();
+    SaveSystem.save();
+  },
+
+  unequip(slotKey, index) {
+    G.player.loadout[slotKey][index] = null;
+    this.open();
+    SaveSystem.save();
   },
 
   close() {
     document.getElementById('loadoutModal').classList.add('hidden');
-  },
-
-  render() {
-    const p = G.player;
-    const content = document.getElementById('loadoutContent');
-    
-    // 確保玩家有 loadout 結構
-    if (!p.loadout) p.loadout = { attack: [null, null], inner: [null], utility: [null] };
-
-    const slots = [
-      { key: 'attack', label: '攻擊武學 (最多 2 個)', count: 2 },
-      { key: 'inner', label: '內功心法 (最多 1 個)', count: 1 },
-      { key: 'utility', label: '特殊技藝 (最多 1 個)', count: 1 }
-    ];
-
-    content.innerHTML = slots.map(slot => {
-      const equipped = p.loadout[slot.key] || [];
-      // 已裝備區域
-      const equippedHTML = Array.from({ length: slot.count }).map((_, i) => {
-        const id = equipped[i];
-        const art = id ? G.data.MARTIAL_ARTS[id] : null;
-        return art
-          ? `<div class="bg-cinnabar/20 border border-cinnabar/50 rounded p-2 text-xs cursor-pointer hover:bg-cinnabar/30 transition" onclick="LoadoutUI.unequip('${slot.key}', ${i})">
-               <div class="flex justify-between items-center">
-                 <span><span class="text-wuxiaGold font-bold">[${art.grade}]</span> <span class="text-parchment-100 font-bold">${art.name}</span></span>
-                 <i class="fa-solid fa-xmark text-red-400"></i>
-               </div>
-               <div class="text-gray-400 text-[10px] mt-1">${art.desc}</div>
-             </div>`
-          : `<div class="bg-ink-900/50 border border-dashed border-ink-border rounded p-2 text-xs text-gray-500 text-center flex items-center justify-center h-full min-h-[60px]">
-               空槽位
-             </div>`;
-      }).join('');
-
-      // 可裝備區域
-      const available = (p.martialArts || [])
-        .filter(id => {
-          const a = G.data.MARTIAL_ARTS[id];
-          return a && a.slot === slot.key && !equipped.includes(id);
-        })
-        .map(id => {
-          const a = G.data.MARTIAL_ARTS[id];
-          return `<button onclick="LoadoutUI.equip('${slot.key}', '${id}')"
-                    class="w-full text-left bg-ink-900 hover:bg-ink-700 border border-ink-border rounded p-2 text-xs transition">
-            <div class="flex justify-between items-center">
-              <span><span class="text-wuxiaGold font-bold">[${a.grade}]</span> <span class="text-parchment-200 font-bold">${a.name}</span></span>
-              <i class="fa-solid fa-plus text-jade"></i>
-            </div>
-            <div class="text-gray-400 text-[10px] mt-1">${a.desc}</div>
-          </button>`;
-        }).join('');
-
-      return `<div>
-        <div class="text-xs font-bold text-parchment-200 mb-2 border-b border-ink-border pb-1">${slot.label}</div>
-        <div class="space-y-2 mb-4">${equippedHTML}</div>
-        <div class="text-[10px] text-gray-500 mb-1">可裝備：</div>
-        <div class="space-y-1 max-h-40 overflow-y-auto pr-1">${available || '<div class="text-[10px] text-gray-600">無可用功法</div>'}</div>
-      </div>`;
-    }).join('');
-  },
-
-  equip(slotKey, artId) {
-    const loadout = G.player.loadout[slotKey];
-    const emptyIdx = loadout.indexOf(null);
-    if (emptyIdx !== -1) {
-      loadout[emptyIdx] = artId;
-    } else {
-      alert('該槽位已滿，請先卸下其他功法！');
-    }
-    this.render();
-  },
-
-  unequip(slotKey, idx) {
-    G.player.loadout[slotKey][idx] = null;
-    this.render();
   }
 };

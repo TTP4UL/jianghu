@@ -3,6 +3,9 @@ const G = {
   player: null,
   currentSystem: null,
   currentAge: 13,
+  forceDiceMode: 'random', 
+  currentSeason: 0, // 0:春, 1:夏, 2:秋, 3:冬
+  seasons: ['春', '夏', '秋', '冬'],
   data: {
     TAGS: {}, ORIGINS: {}, SECTS: {}, MARTIAL_ARTS: {},
     LIFEPATH_EVENTS: {}, LIFEPATH_CHOICES: {}, EVENTS: {}, COMPANIONS: {}
@@ -20,7 +23,8 @@ const Systems = {
   lifepath: null,
   events: null,
   combat: null,   // ★ 新增戰鬥系統
-  ending: null
+  ending: null,
+  exploration: null
 };
 
 function switchSystem(name, payload) {

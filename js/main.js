@@ -7,12 +7,16 @@ window.addEventListener('DOMContentLoaded', () => {
 
   DataLoader.init();
   
-  // ★ 只有本地端 (localhost) 才自動載入開發者工具
+  // 判斷是否本地端 (localhost)
   const isLocal = window.location.hostname === '127.0.0.1' || 
                   window.location.hostname === 'localhost';
                   
-  if (isLocal) {
+  // ★ 初始化並顯示開發者工具
+  if (typeof DevTools !== 'undefined') {
     DevTools.init();
+    if (isLocal) {
+      DevTools.show(); // ★ 呢句係關鍵！本地端自動顯示
+    }
   }
 
   const saved = SaveSystem.load();
@@ -21,6 +25,17 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   
   switchSystem('characterCreation');
+
+  // ★ 秘密功能：喺網頁任何地方快速撳鍵盤「d e v」，就會強制彈出開發者工具 (防君子不防小人)
+  let keys = '';
+  window.addEventListener('keydown', (e) => {
+    keys += e.key.toLowerCase();
+    if (keys.includes('dev')) {
+      if (typeof DevTools !== 'undefined') DevTools.enable();
+      keys = '';
+    }
+    if (keys.length > 3) keys = keys.slice(-3);
+  });
 });
 
 // ★ 全域讀檔函數
@@ -44,7 +59,7 @@ function mainLoadGame() {
   
   // 如果是本地端，顯示開發者按鈕
   const isLocal = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
-  if (isLocal) DevTools.show();
+  if (isLocal && typeof DevTools !== 'undefined') DevTools.show();
 
   if (saved.currentAge >= 18 && !saved.currentCombatEvent) {
     switchSystem('events', { startEvent: 'act1_inn' });

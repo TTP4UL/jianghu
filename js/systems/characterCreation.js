@@ -7,7 +7,6 @@ const CharacterCreationSystem = {
     this.renderStatBoard();
     this.goToStep(1);
     
-    // 清空舊嘅 UI 狀態
     const originPicker = document.getElementById('originPicker');
     if (originPicker) originPicker.innerHTML = '';
     const sectPicker = document.getElementById('sectPicker');
@@ -48,8 +47,10 @@ const CharacterCreationSystem = {
   },
 
   _genderCls(active) {
-    return 'py-2.5 rounded-xl border-2 text-sm font-bold transition ' +
-      (active ? 'border-cinnabar bg-ink-900 text-parchment-100' : 'border-ink-border bg-ink-900/60 text-gray-400');
+    return 'py-2.5 rounded-xl border text-sm font-black transition cursor-pointer shadow-xs ' +
+      (active 
+        ? 'border-[#a82d25] bg-[#fff5f5] text-[#a82d25]' 
+        : 'border-[#cfc0a9] bg-white text-[#78614c] hover:bg-[#f7efe0]');
   },
 
   rollName() {
@@ -68,16 +69,19 @@ const CharacterCreationSystem = {
     Object.values(G.data.ORIGINS).forEach(o => {
       const selected = this.state.origin === o.id;
       const div = document.createElement('div');
-      div.className = `p-3.5 rounded-xl border-2 cursor-pointer transition ${
-        selected ? 'border-cinnabar bg-ink-900' : 'border-ink-border bg-ink-900/60 hover:bg-ink-900'}`;
+      div.className = `p-4 rounded-xl border cursor-pointer transition shadow-xs ${
+        selected 
+          ? 'border-2 border-[#a82d25] bg-[#fffaf8]' 
+          : 'border-[#d8ccb8] bg-white hover:border-[#a82d25] hover:bg-[#fffdfa]'
+      }`;
       div.onclick = () => this.selectOrigin(o.id);
       div.innerHTML = `
-        <div class="flex items-center justify-between mb-1">
-          <span class="font-black text-sm text-parchment-100">${o.name}</span>
-          <span class="text-[10px] px-1.5 py-0.5 rounded bg-wuxiaGold/20 text-wuxiaGold border border-wuxiaGold/30 font-bold">${o.gold} 兩</span>
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="font-black text-sm text-[#2c1f14] tracking-wider">${o.name}</span>
+          <span class="text-xs px-2 py-0.5 rounded bg-[#fef3c7] text-[#92400e] border border-[#f59e0b] font-bold font-mono">${o.gold} 兩</span>
         </div>
-        <p class="text-[11px] text-gray-400 mb-2">${o.desc}</p>
-        <div class="text-[10px] text-gray-500">屬性總和：${Object.values(o.baseStats || {}).reduce((a, b) => a + b, 0)}</div>`;
+        <p class="text-xs text-[#594432] leading-relaxed mb-2">${o.desc}</p>
+        <div class="text-[11px] font-bold text-[#8a7561] tracking-wider">先天屬性總和：${Object.values(o.baseStats || {}).reduce((a, b) => a + b, 0)}</div>`;
       picker.appendChild(div);
     });
   },
@@ -96,7 +100,6 @@ const CharacterCreationSystem = {
     this.renderStatBoard();
   },
 
-  // ★ 必須要有呢個方法，供 data.js 下載完呼叫
   refreshUI() {
     if (this.state.step === 2) {
       this.renderOrigins();
@@ -121,7 +124,6 @@ const CharacterCreationSystem = {
 
     const specialStr = String(o.special || '').toLowerCase().trim();
 
-    // ★ 終極防禦：只要係 entered_sect，或者有 show 字眼，就強制顯示！
     if (specialStr.includes('show') || this.state.origin === 'entered_sect') {
       sectPicker.classList.remove('hidden');
       sectPicker.style.display = 'block';
@@ -136,13 +138,11 @@ const CharacterCreationSystem = {
     try {
       const grid = document.getElementById('sectGrid');
       if (!grid) return;
-      
       grid.innerHTML = '';
-      let html = '';
       const sects = G.data.SECTS || {};
       
       if (Object.keys(sects).length === 0) {
-        grid.innerHTML = '<div class="text-red-500 font-bold text-sm col-span-3 text-center py-4 border border-red-500/50 rounded bg-red-500/10">⚠️ 錯誤：讀取不到門派數據！請檢查 Google Sheet 嘅 Sects 表。</div>';
+        grid.innerHTML = '<div class="text-[#a82d25] text-sm col-span-3 text-center py-4 border border-[#fca5a5] rounded-xl bg-[#fff5f5]">門派卷宗載入中...</div>';
         return;
       }
 
@@ -150,23 +150,26 @@ const CharacterCreationSystem = {
         const s = sects[key];
         const blocked = s.genderLimit && s.genderLimit !== this.state.gender;
         const selected = this.state.sect === s.id;
-        const borderClass = blocked ? 'border-ink-border opacity-40' : (selected ? 'border-cinnabar bg-ink-900' : 'border-ink-border bg-ink-900/60 hover:bg-ink-900');
+        const borderClass = blocked 
+          ? 'border-[#e5dcce] bg-[#f5ede0] opacity-50 cursor-not-allowed' 
+          : (selected 
+              ? 'border-2 border-[#a82d25] bg-[#fffaf8] shadow-xs' 
+              : 'border-[#d8ccb8] bg-white hover:border-[#a82d25] hover:bg-[#fffdfa]');
         
-        html += `
-          <div onclick="${blocked ? '' : `CharacterCreationSystem.selectSect('${s.id}')`}" 
-               class="p-3 rounded-xl border-2 cursor-pointer transition ${borderClass}">
-            <div class="flex items-center justify-between mb-1">
-              <span class="font-black text-sm text-parchment-100">${s.name || '未命名門派'}</span>
-              ${blocked ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-red-950 text-red-400">限制</span>' : ''}
-            </div>
-            <p class="text-[10px] text-gray-400">${s.desc || ''}</p>
+        const card = document.createElement('div');
+        card.className = `p-3.5 rounded-xl border cursor-pointer transition ${borderClass}`;
+        if (!blocked) card.onclick = () => this.selectSect(s.id);
+        
+        card.innerHTML = `
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-black text-sm text-[#2c1f14]">${s.name || '未命名門派'}</span>
+            ${blocked ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-[#fee2e2] text-[#991b1b] border border-[#fca5a5]">限制</span>' : ''}
           </div>
+          <p class="text-xs text-[#594432]">${s.desc || ''}</p>
         `;
+        grid.appendChild(card);
       });
-
-      grid.innerHTML = html;
     } catch (e) {
-      alert('門派渲染出錯: ' + e.message);
       console.error(e);
     }
   },
@@ -190,6 +193,22 @@ const CharacterCreationSystem = {
     this.renderSummary();
   },
 
+  // ★ 新增：計算升級所需潛力點
+  getCostForNextPoint(currentVal) {
+    if (currentVal < 3) return 1;
+    if (currentVal < 6) return 2;
+    if (currentVal < 9) return 3;
+    return 4;
+  },
+
+  // ★ 新增：計算降級退還潛力點
+  getRefundForPoint(prevVal) {
+    if (prevVal < 3) return 1;
+    if (prevVal < 6) return 2;
+    if (prevVal < 9) return 3;
+    return 4;
+  },
+
   renderStatBoard() {
     const board = document.getElementById('statBoard');
     if (!board) return;
@@ -197,17 +216,23 @@ const CharacterCreationSystem = {
     
     Object.keys(STATS_INFO).forEach(k => {
       const val = this.state.stats[k] !== undefined ? this.state.stats[k] : 0; 
+      const cost = this.getCostForNextPoint(val);
+      const canAfford = this.state.freePoints >= cost;
       
       const div = document.createElement('div');
-      div.className = 'bg-ink-800 p-2.5 rounded-lg border border-ink-border text-xs';
+      div.className = 'bg-white p-3 rounded-xl border border-[#d8ccb8] flex flex-col justify-between shadow-xs';
       div.innerHTML = `
-        <div class="flex items-center justify-between mb-1">
-          <span class="font-bold text-parchment-200">${STATS_INFO[k].name}</span>
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-black text-xs tracking-widest text-[#2c1f14] font-serif">${STATS_INFO[k].name}</span>
+          <span class="text-[10px] text-[#8a7561] font-mono font-bold">[+10]</span>
         </div>
-        <div class="flex items-center justify-between mt-2">
-          <button onclick="CharacterCreationSystem.adjustStat('${k}',-1)" class="w-6 h-6 rounded bg-ink-700 hover:bg-ink-600 text-white font-bold">-</button>
-          <span class="font-mono text-base font-bold text-white">${val}</span>
-          <button onclick="CharacterCreationSystem.adjustStat('${k}',1)" class="w-6 h-6 rounded bg-ink-700 hover:bg-ink-600 text-white font-bold">+</button>
+        <div class="flex items-center justify-between">
+          <button onclick="CharacterCreationSystem.adjustStat('${k}',-1)" class="w-7 h-7 rounded-lg border border-[#cfc0a9] bg-[#f5ede0] hover:bg-[#e8decb] text-[#2c1f14] font-black text-base flex items-center justify-center transition shadow-xs cursor-pointer">-</button>
+          <div class="flex flex-col items-center">
+            <span class="font-mono text-xl font-black text-[#a82d25] leading-none">${val}</span>
+            <span class="text-[9px] text-[#8a7561] mt-0.5">消耗 ${cost}</span>
+          </div>
+          <button onclick="CharacterCreationSystem.adjustStat('${k}',1)" class="w-7 h-7 rounded-lg border border-[#cfc0a9] bg-[#f5ede0] hover:bg-[#e8decb] text-[#2c1f14] font-black text-base flex items-center justify-center transition shadow-xs cursor-pointer ${!canAfford ? 'opacity-30 cursor-not-allowed' : ''}">+</button>
         </div>`;
       board.appendChild(div);
     });
@@ -216,14 +241,55 @@ const CharacterCreationSystem = {
 
   adjustStat(k, delta) {
     const base = this._baseStats()[k];
-    if (delta > 0 && this.state.freePoints > 0) {
-      if (this.state.stats[k] >= 18) return;
-      this.state.stats[k]++; this.state.freePoints--;
+    if (delta > 0) {
+      if (this.state.stats[k] >= 28) return; // ★ 改為 28 (顯示 18)
+      const cost = this.getCostForNextPoint(this.state.stats[k]);
+      if (this.state.freePoints >= cost) {
+        this.state.stats[k]++; 
+        this.state.freePoints -= cost;
+      }
     } else if (delta < 0) {
       if (this.state.stats[k] <= base) return;
-      this.state.stats[k]--; this.state.freePoints++;
+      const refund = this.getRefundForPoint(this.state.stats[k] - 1);
+      this.state.stats[k]--; 
+      this.state.freePoints += refund;
     }
     this.renderStatBoard(); this.renderSummary();
+  },
+
+  randomizeStats() {
+    const baseStats = this._baseStats();
+    Object.keys(STATS_INFO).forEach(k => {
+      this.state.stats[k] = baseStats[k] || 0;
+    });
+    this.state.freePoints = 10;
+
+    const keys = Object.keys(STATS_INFO);
+    let attempts = 0;
+
+    while (this.state.freePoints > 0 && attempts < 200) {
+      attempts++;
+      const availableKeys = keys.filter(k => this.state.stats[k] < 28); // ★ 改為 28
+      if (availableKeys.length === 0) break;
+
+      const randomKey = availableKeys[Math.floor(Math.random() * availableKeys.length)];
+      const cost = this.getCostForNextPoint(this.state.stats[randomKey]);
+      
+      if (this.state.freePoints >= cost) {
+        this.state.stats[randomKey]++;
+        this.state.freePoints -= cost;
+      } else {
+        let canAddAny = false;
+        for (const k of availableKeys) {
+          if (this.state.freePoints >= this.getCostForNextPoint(this.state.stats[k])) {
+            canAddAny = true; break;
+          }
+        }
+        if (!canAddAny) break;
+      }
+    }
+    this.renderStatBoard();
+    this.renderSummary();
   },
 
   _baseStats() {
@@ -274,11 +340,6 @@ const CharacterCreationSystem = {
     tags.push(s.gender === 'male' ? 'gender_male' : 'gender_female');
     (o.initialTags || []).forEach(t => { if (G.data.TAGS[t]) tags.push(t); });
     
-    // ★ 奇醜無比判斷
-    if (s.stats.cha === 0) {
-      tags.push('ugly_af');
-    }
-
     const martialArts = [...(o.initialMartialArts || [])];
     if (sect) martialArts.push(...(sect.startingArts || []));
 
@@ -309,14 +370,15 @@ const CharacterCreationSystem = {
     document.getElementById('overviewBtn').classList.remove('hidden');
     document.getElementById('loadoutBtn').classList.remove('hidden');
     document.getElementById('ageBadge').classList.remove('hidden');
-    soundEngine.playGong();
 
     G.currentAge = 13;
     G.usedEvents = [];
     HUD.render();
     HUD.setScene('序幕', '江湖初現');
-    HUD.log('narrative', `十三歲，${name} 正式踏上江湖路。師門的庇護已經遠去，從此以後，一切靠自己。`);
-
+    
+    const introText = o.intro || `${name}，十三歲，正式踏上江湖路。師門的庇護已經遠去，從此以後，一切靠自己。`;
+    HUD.log('narrative', introText);
+    
     switchSystem('lifepath');
     SaveSystem.save();
   },

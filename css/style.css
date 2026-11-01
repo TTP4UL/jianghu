@@ -1,68 +1,243 @@
-body {
-  background-color: #0b0c10;
-  background-image:
-    radial-gradient(circle at 50% 20%, rgba(30,41,59,0.45) 0%, transparent 70%),
-    radial-gradient(circle at 10% 80%, rgba(185,28,28,0.08) 0%, transparent 50%);
-}
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: #0f1218; }
-::-webkit-scrollbar-thumb { background: #2a3346; border-radius: 4px; }
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;900&display=swap');
 
+/* 全局字體與宣紙底色 */
+body {
+  font-family: 'Noto Serif TC', 'STSong', serif;
+  background-color: #f2ece1;
+  background-image: 
+    radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.7) 0%, transparent 80%),
+    radial-gradient(circle at 10% 80%, rgba(168, 45, 37, 0.04) 0%, transparent 60%);
+  color: #2c1f14;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #e8decb; }
+::-webkit-scrollbar-thumb { background: #b8a892; border-radius: 3px; }
+
+/* 硃砂印章 */
 .seal-stamp {
-  border: 2px solid #b91c1c; color: #dc2626;
-  display: inline-block; padding: 2px 8px;
-  font-weight: 900; letter-spacing: 2px;
-  transform: rotate(-3deg);
-  box-shadow: inset 0 0 4px rgba(185,28,28,0.4);
+  border: 1.5px solid #a82d25;
+  color: #a82d25;
+  background: #fdf5f5;
+  display: inline-block;
+  padding: 1px 7px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  font-size: 11px;
+  transform: rotate(-1.5deg);
+  box-shadow: inset 0 0 3px rgba(168, 45, 37, 0.2);
   user-select: none;
 }
 
-.step-dot {
-  width: 28px; height: 28px; border-radius: 50%;
-  display: inline-flex; align-items: center; justify-content: center;
-  font-weight: 900; font-size: 12px;
-  border: 2px solid #323c52; color: #6b7280;
+/* 宣紙主舞台容器 (高亮紙面 + 細緻木紋框) */
+.wuxia-panel-box {
+  background-color: #fcfaf5;
+  border: 1px solid #c9bbaa;
+  box-shadow: 
+    0 0 0 3px #f7f3eb,
+    0 0 0 4.5px #a89680,
+    0 10px 25px rgba(60, 40, 20, 0.08);
 }
-.step-dot.active { border-color: #d97706; color: #f59e0b; background: rgba(217,119,6,0.1); }
-.step-dot.done { border-color: #059669; color: #10b981; background: rgba(5,150,105,0.15); }
 
+/* 核心選項卡片 (圖2、圖3：米白底、深色字、暗金細框) */
+.wuxia-choice-card {
+  background-color: #ffffff;
+  border: 1px solid #dcd1c2;
+  box-shadow: 0 2px 4px rgba(60, 45, 20, 0.04);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.wuxia-choice-card:hover:not(:disabled) {
+  background-color: #fffdf9;
+  border-color: #a82d25;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(168, 45, 37, 0.12);
+}
+
+/* 硃砂紅主行動按鈕 */
+.wuxia-primary-btn {
+  background-color: #a82d25;
+  color: #ffffff;
+  border: 1px solid #851e18;
+  box-shadow: 0 2px 6px rgba(168, 45, 37, 0.25);
+  transition: all 0.2s ease;
+}
+.wuxia-primary-btn:hover:not(:disabled) {
+  background-color: #ba342b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(168, 45, 37, 0.35);
+}
+
+/* D20 動畫 */
 @keyframes rollD20 {
   0%   { transform: scale(0.6) rotateX(0) rotateY(0) rotateZ(0); opacity: 0.2; }
-  25%  { transform: scale(1.15) rotateX(180deg) rotateY(360deg) rotateZ(90deg); }
-  50%  { transform: scale(0.95) rotateX(360deg) rotateY(720deg) rotateZ(270deg); }
-  75%  { transform: scale(1.08) rotateX(540deg) rotateY(900deg) rotateZ(360deg); }
+  50%  { transform: scale(1.1) rotateX(360deg) rotateY(720deg) rotateZ(270deg); }
   100% { transform: scale(1) rotateX(720deg) rotateY(1080deg) rotateZ(360deg); opacity: 1; }
 }
 .dice-rolling { animation: rollD20 0.85s cubic-bezier(0.18,0.89,0.32,1.28) forwards; }
 
-/* ★ 傷害飄字動畫 */
+/* 傷害飄字動畫 */
 @keyframes floatUp {
   0% { opacity: 1; transform: translate(-50%, 0) scale(1); }
-  70% { opacity: 1; transform: translate(-50%, -40px) scale(1.1); }
-  100% { opacity: 0; transform: translate(-50%, -60px) scale(0.8); }
+  70% { opacity: 1; transform: translate(-50%, -35px) scale(1.1); }
+  100% { opacity: 0; transform: translate(-50%, -55px) scale(0.85); }
 }
 .damage-float {
   position: fixed;
   pointer-events: none;
+  font-family: 'Noto Serif TC', serif;
   font-weight: 900;
   font-size: 1.5rem;
   z-index: 9999;
-  text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+  text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff;
   animation: floatUp 1s ease-out forwards;
 }
-.text-dmg-normal { color: #f87171; } /* 紅色 */
-.text-dmg-crit { color: #fbbf24; font-size: 2.2rem; } /* 金色大字 */
-.text-dmg-heal { color: #34d399; } /* 綠色 */
-.text-dmg-dodge { color: #9ca3af; font-size: 1.2rem; } /* 灰色 */
+.text-dmg-normal { color: #b91c1c; }
+.text-dmg-crit { color: #b45309; font-size: 2.1rem; }
+.text-dmg-heal { color: #15803d; }
+.text-dmg-dodge { color: #57534e; font-size: 1.2rem; }
 
-/* ★ 畫面震動 */
+/* 畫面震動 */
 @keyframes shakeScreen {
   0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-8px) rotate(-1deg); }
-  40% { transform: translateX(8px) rotate(1deg); }
-  60% { transform: translateX(-5px) rotate(-0.5deg); }
-  80% { transform: translateX(5px) rotate(0.5deg); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
 }
-.shake-active {
-  animation: shakeScreen 0.4s cubic-bezier(.36,.07,.19,.97) both;
+.shake-active { animation: shakeScreen 0.35s cubic-bezier(.36,.07,.19,.97) both; }
+
+/* 破防畫面紅光閃爍 */
+@keyframes flashRed {
+  0%, 100% { box-shadow: inset 0 0 0 rgba(168, 45, 37, 0); }
+  50% { box-shadow: inset 0 0 100px rgba(168, 45, 37, 0.4); }
+}
+.flash-red {
+  animation: flashRed 0.5s ease-in-out;
+}
+
+/* 破防中央大字彈出 */
+@keyframes popCenter {
+  0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+  50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}
+.break-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Noto Serif TC', serif;
+  font-size: 4rem;
+  font-weight: 900;
+  color: #a82d25;
+  text-shadow: 0 0 20px rgba(168, 45, 37, 0.8), 2px 2px 0px #fff;
+  pointer-events: none;
+  z-index: 9999;
+  animation: popCenter 1s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+}
+
+/* ★ 破防視覺特效升級：我方被破防（血煞震裂） vs 敵方被破防（金芒碎甲） */
+@keyframes flashBreakPlayer {
+  0% { box-shadow: inset 0 0 0 rgba(185, 28, 28, 0); }
+  25% { box-shadow: inset 0 0 120px rgba(185, 28, 28, 0.65); filter: contrast(120%); }
+  100% { box-shadow: inset 0 0 0 rgba(185, 28, 28, 0); filter: contrast(100%); }
+}
+
+@keyframes flashBreakEnemy {
+  0% { box-shadow: inset 0 0 0 rgba(16, 185, 129, 0); }
+  25% { box-shadow: inset 0 0 120px rgba(217, 119, 6, 0.6); filter: brightness(115%); }
+  100% { box-shadow: inset 0 0 0 rgba(16, 185, 129, 0); filter: brightness(100%); }
+}
+
+.flash-break-player { animation: flashBreakPlayer 0.6s ease-out; }
+.flash-break-enemy { animation: flashBreakEnemy 0.6s ease-out; }
+
+/* 破防碎甲字體彈跳動畫 */
+@keyframes breakTextPop {
+  0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; filter: blur(4px); }
+  35% { transform: translate(-50%, -50%) scale(1.35); opacity: 1; filter: blur(0); }
+  70% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; }
+  100% { transform: translate(-50%, -70%) scale(0.9); opacity: 0; }
+}
+
+.break-popup-player {
+  position: fixed;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Noto Serif TC', serif;
+  font-size: 3.5rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: #b91c1c;
+  text-shadow: 0 0 25px rgba(185, 28, 28, 0.8), 2px 2px 0px #fff;
+  pointer-events: none;
+  z-index: 9999;
+  animation: breakTextPop 0.9s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+}
+
+.break-popup-enemy {
+  position: fixed;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Noto Serif TC', serif;
+  font-size: 3.5rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: #d97706;
+  text-shadow: 0 0 25px rgba(217, 119, 6, 0.8), 2px 2px 0px #fff;
+  pointer-events: none;
+  z-index: 9999;
+  animation: breakTextPop 0.9s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+}
+
+/* 破防對應血條劇烈抖動 */
+@keyframes barShatter {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px) scaleY(1.3); }
+  40% { transform: translateX(8px) scaleY(0.8); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+.bar-shatter { animation: barShatter 0.4s ease-in-out; }
+
+/* ★ 架勢崩潰 (Posture Broken) 永久危險警示 */
+@keyframes postureBrokenPulse {
+  0%, 100% { border-color: #ef4444; box-shadow: 0 0 6px rgba(239, 68, 68, 0.4); }
+  50% { border-color: #7f1d1d; box-shadow: 0 0 14px rgba(185, 28, 28, 0.8); }
+}
+.posture-broken-box {
+  animation: postureBrokenPulse 1.2s infinite ease-in-out !important;
+  background-color: #fef2f2 !important;
+}
+
+/* ★ 戰鬥技能：真氣匱乏/不可用按鈕 */
+.wuxia-btn-disabled {
+  background-color: #f5f2eb !important;
+  border-color: #e2d9cc !important;
+  color: #a89f91 !important;
+  cursor: not-allowed !important;
+  opacity: 0.65;
+  filter: grayscale(40%);
+}
+.wuxia-btn-disabled:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ★ 歷練期 (Exploration) 行動木牌卡片 */
+.wuxia-explore-card {
+  background: #ffffff;
+  border: 1.5px solid #d4c5b0;
+  border-left: 5px solid #a82d25;
+  box-shadow: 0 2px 5px rgba(60, 45, 20, 0.05);
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.wuxia-explore-card:hover {
+  background: #fffdfa;
+  border-color: #a82d25;
+  border-left-color: #7f1d1d;
+  transform: translateX(4px);
+  box-shadow: 0 5px 15px rgba(168, 45, 37, 0.12);
 }

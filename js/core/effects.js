@@ -1,3 +1,20 @@
+// ★ 將 effects 物件翻譯成中文句子
+function parseEffectsToText(effects) {
+  if (!effects) return '';
+  const parts = [];
+  Object.entries(effects).forEach(([k, v]) => {
+    if (k === 'hp') parts.push(`氣血 ${v > 0 ? '+' : ''}${v}`);
+    else if (k === 'pos') parts.push(`架勢 ${v > 0 ? '+' : ''}${v}`);
+    else if (k === 'qi') parts.push(`真氣 ${v > 0 ? '+' : ''}${v}`);
+    else if (k === 'gold') parts.push(`金錢 ${v > 0 ? '+' : ''}${v}`);
+    else if (k === 'addTag') parts.push(`獲得特性【${G.data.TAGS[v]?.name || v}】`);
+    else if (k === 'addMartialArt') parts.push(`習得武學【${G.data.MARTIAL_ARTS[v]?.name || v}】`);
+    else if (k === 'addCompanion') parts.push(`結識同伴【${G.data.COMPANIONS[v]?.name || v}】`);
+    else if (k in STATS_INFO) parts.push(`${STATS_INFO[k].name} ${v > 0 ? '+' : ''}${v}`);
+  });
+  return parts.join(' · ');
+}
+
 const EffectSystem = {
   apply(effects) {
     if (!effects || !G.player) return;
@@ -27,12 +44,9 @@ const EffectSystem = {
         const arr = Array.isArray(v) ? v : [v];
         arr.forEach(cid => {
           if (p.companions.includes(cid) || !G.data.COMPANIONS[cid]) return;
-          if (p.companions.length >= 2) {
-            HUD.log('combat', '同伴已滿（最多 2 人）');
-            return;
-          }
+          if (p.companions.length >= 2) return;
           p.companions.push(cid);
-          HUD.log('lifepath', `${G.data.COMPANIONS[cid].name}（${G.data.COMPANIONS[cid].grade}）加入了你的旅途`);
+          HUD.log('lifepath', `${G.data.COMPANIONS[cid].name} 加入了你的旅途`);
         });
       }
       else if (k === 'removeCompanion') {

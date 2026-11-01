@@ -10,14 +10,11 @@ const LifepathSystem = {
     HUD.render();
     HUD.clearChoices();
 
-    // ★ 如果有未分配點數（例如存檔時未點完），強制彈出加點
     if (G.pendingPoints > 0) {
       return this.showAllocModal(G.pendingPoints);
     }
 
     const event = this.pickEvent();
-    
-    // 如果沒有事件，直接給閉關選項
     if (!event) {
       HUD.setScene(`${G.currentAge}歲 · 平淡`, '歲月靜好');
       HUD.log('narrative', `這一年平平淡淡，沒有發生什麼特別的事。`);
@@ -34,14 +31,12 @@ const LifepathSystem = {
   },
 
   renderLifepathChoices(choices) {
-    // ★ 1. 先過濾：檢查 requireTags 同 forbidTags
     const validChoices = choices.filter(c => {
       if (c.requireTags && c.requireTags.length > 0 && !TagUtils.hasAll(c.requireTags)) return false;
       if (c.forbidTags && c.forbidTags.length > 0 && !TagUtils.hasNone(c.forbidTags)) return false;
       return true;
     });
 
-    // ★ 2. 再生成選項按鈕
     const renderList = validChoices.map(c => ({
       label: c.text,
       checkText: c.type === 'check' ? `${STATS_INFO[c.attr]?.name || c.attr} DC ${c.dc}` : '',
@@ -50,75 +45,115 @@ const LifepathSystem = {
       action: () => this.handleChoice(c)
     }));
 
-    // ★ 追加閉關選項 (只有閉關先會有加點)
     renderList.push({
       label: '🧘 閉關修煉 (跳過事件)',
       desc: '專心修煉，回滿氣血與架勢，並額外獲得 1 點潛力。',
       primary: false,
       action: () => {
         HUD.log('narrative', '你選擇避開世俗，閉關修煉。');
-        EffectSystem.apply({ hp: 999, pos: 999, qi: 999 }); // 回滿狀態
-        this.endYear(1); // ★ 改成 1 點，或者你想 3 點就改 3
+        EffectSystem.apply({ hp: 999, pos: 999, qi: 999 });
+        this.endYear(1); 
       }
     });
 
-    HUD.renderChoices(renderList);
+    if (renderList.length > 0) {
+      HUD.renderChoices(renderList);
+    }
   },
 
   pickEvent() {
     if (!G.data.LIFEPATH_EVENTS) return null;
+    
     const all = Object.values(G.data.LIFEPATH_EVENTS).filter(e => 
       Number(e.age) === G.currentAge && !G.usedEvents.includes(e.id)
     );
+
     const specific = all.filter(e => 
-      e.requireTags && e.requireTags.length > 0 &&
-      TagUtils.hasAll(e.requireTags) &&
+      (e.requireTags && e.requireTags.length > 0 && TagUtils.hasAll(e.requireTags)) &&
       TagUtils.hasNone(e.forbidTags)
-    ).sort((a, b) => (b.priority || 0) - (a.priority || 0));
+    ).sort((a, b) => (Number(b.priority) || 0) - (Number(a.priority) || 0));
+
     if (specific.length > 0) return specific[0];
+
     const common = all.filter(e => 
       (!e.requireTags || e.requireTags.length === 0) &&
       TagUtils.hasNone(e.forbidTags)
     );
-    return common[0] || null;
+
+    if (common.length === 0) return null;
+
+    const totalWeight = common.reduce((sum, e) => sum + (Number(e.weight) || 10), 0);
+    let rand = Math.random() * totalWeight;
+
+    for (const ev of common) {
+      const w = Number(ev.weight) || 10;
+      if (rand < w) return ev;
+      rand -= w;
+    }
+
+    return common[0];
   },
 
   handleChoice(choice) {
     if (choice.type === 'direct') {
       if (choice.narrative) HUD.log('narrative', choice.narrative);
+      
+      const effectText = parseEffectsToText(choice.effects);
+      if (effectText) HUD.log('dice', `【結算】${effectText}`);
+      
       EffectSystem.apply(choice.effects);
       
-      // ★ 改動：普通選擇完結，直接跳下一年，不觸發加點
-      if (choice.next) return switchSystem('events', { startEvent: choice.next });
-      G.currentAge++;
-      SaveSystem.save();
-      setTimeout(() => this.runYear(), 300);
+      if (choice.next && G.data.EVENTS[choice.next]) {
+        EventSystem.load(choice.next);
+      } else {
+        this.nextYear();
+      }
       return;
     }
+
     if (choice.type === 'check') {
       DiceSystem.check({
-        title: choice.checkName, attr: choice.attr, dc: choice.dc, tags: choice.tags,
+        title: choice.checkName, 
+        attr: choice.attr, 
+        dc: choice.dc, 
+        tags: choice.tags,
+        successEffects: choice.success?.effects, 
+        failEffects: choice.fail?.effects,
+        critSuccessEffects: choice.critSuccess?.effects,
+        critFailEffects: choice.critFail?.effects,
         onComplete: (res) => {
-          const branch = res.success ? choice.success : choice.fail;
+          let branch = res.success ? choice.success : choice.fail;
+          if (res.nat20 && choice.critSuccess) branch = choice.critSuccess;
+          if (res.nat1 && choice.critFail) branch = choice.critFail;
+          if (!branch) branch = {};
+          
           if (branch.narrative) HUD.log('narrative', branch.narrative);
+          
           EffectSystem.apply(branch.effects);
+          
           if (!res.success && branch.failGameOver) return this.gameOver();
           
-          // ★ 改動：普通檢定完結，直接跳下一年，不觸發加點
-          if (branch.next) return switchSystem('events', { startEvent: branch.next });
-          G.currentAge++;
-          SaveSystem.save();
-          setTimeout(() => this.runYear(), 300);
+          if (branch.next && G.data.EVENTS[branch.next]) {
+            EventSystem.load(branch.next);
+          } else {
+            this.nextYear();
+          }
         }
       });
     }
   },
 
-  // ★ 年尾結算
+  nextYear() {
+    G.currentAge++;
+    setTimeout(() => this.runYear(), 300);
+  },
+
+  // ★ 結算時，將之前存落嘅點數加返埋一齊
   endYear(basePoints) {
-    G.pendingPoints = basePoints;
-    G.tempAllocStats = { ...G.player.stats }; // 備份用於加減
-    this.showAllocModal(basePoints);
+    G.pendingPoints = basePoints + (G.player.savedPoints || 0);
+    G.player.savedPoints = 0; // 清空儲備池，因為已經計入待分配點數
+    G.tempAllocStats = { ...G.player.stats };
+    this.showAllocModal(G.pendingPoints);
   },
 
   showAllocModal(points) {
@@ -127,83 +162,151 @@ const LifepathSystem = {
     this.renderAllocBoard();
   },
 
+  getCostForNextPoint(currentVal) {
+    const displayVal = currentVal - 10;
+    if (displayVal < 3) return 1;
+    if (displayVal < 6) return 2;
+    if (displayVal < 9) return 3;
+    return 4;
+  },
+
+  getRefundForPoint(prevVal) {
+    const displayVal = prevVal - 10;
+    if (displayVal < 3) return 1;
+    if (displayVal < 6) return 2;
+    if (displayVal < 9) return 3;
+    return 4;
+  },
+
   renderAllocBoard() {
     const board = document.getElementById('allocStatBoard');
     board.innerHTML = '';
-    const baseStats = G.player.stats; // 原始基礎值
+    const baseStats = G.player.stats;
     
+    // ★ 核心防呆：檢查玩家是否有任何屬性可以升級
+    let canUpgradeAny = false;
+
     Object.keys(STATS_INFO).forEach(k => {
-      const val = G.tempAllocStats[k];
-      const mod = Math.floor((val - 10) / 2);
+      const rawVal = G.tempAllocStats[k];
+      const displayVal = rawVal - 10;
+      const addedPoints = rawVal - baseStats[k];
+      const mod = Math.floor((rawVal - 10) / 2);
+      const cost = this.getCostForNextPoint(rawVal);
+      
+      // ★ 判斷呢個屬性係咪仲可以升級，而且點數足夠
+      const isMaxed = rawVal >= 28; // 上限顯示 18
+      const canAfford = G.pendingPoints >= cost;
+      if (!isMaxed && canAfford) canUpgradeAny = true;
+
       const div = document.createElement('div');
-      div.className = 'bg-ink-800 p-2.5 rounded-lg border border-ink-border text-xs';
+      div.className = 'bg-white p-3.5 rounded-xl border border-[#d8ccb8] flex flex-col justify-between shadow-xs';
       div.innerHTML = `
-        <div class="flex items-center justify-between mb-1">
-          <span class="font-bold text-parchment-200">${STATS_INFO[k].name}</span>
-          <span class="text-[10px] px-1.5 py-0.2 rounded bg-ink-700 text-wuxiaGold font-mono font-bold">${mod >= 0 ? '+' : ''}${mod}</span>
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-black text-sm tracking-wider text-[#3d2c1d]">${STATS_INFO[k].name}</span>
+          <div class="flex items-center gap-1 font-mono text-[11px]">
+            ${addedPoints > 0 ? `<span class="text-[#a82d25] font-black">[+${addedPoints}]</span>` : ''}
+            <span class="px-1.5 py-0.5 rounded bg-[#f5ede0] text-[#78614c] border border-[#d8ccb8] font-bold">檢定 ${mod >= 0 ? '+' : ''}${mod}</span>
+          </div>
         </div>
-        <div class="flex items-center justify-between mt-1">
-          <button onclick="LifepathSystem.adjustAlloc('${k}',-1)" class="w-6 h-6 rounded bg-ink-700 hover:bg-ink-600 text-white font-bold ${val <= baseStats[k] ? 'opacity-50 cursor-not-allowed' : ''}">-</button>
-          <span class="font-mono text-sm font-bold text-white">${val}</span>
-          <button onclick="LifepathSystem.adjustAlloc('${k}',1)" class="w-6 h-6 rounded bg-ink-700 hover:bg-ink-600 text-white font-bold ${G.pendingPoints <= 0 ? 'opacity-50 cursor-not-allowed' : ''}">+</button>
+        <div class="flex items-center justify-between">
+          <button onclick="LifepathSystem.adjustAlloc('${k}',-1)" 
+            class="w-8 h-8 rounded-lg border border-[#cfc0a9] bg-[#f5ede0] hover:bg-[#e8decb] text-[#2c1f14] font-black text-lg transition flex items-center justify-center cursor-pointer shadow-xs ${rawVal <= baseStats[k] ? 'opacity-30 cursor-not-allowed' : ''}">-</button>
+          
+          <div class="flex flex-col items-center">
+            <span class="font-mono text-2xl font-black text-[#2c1f14] leading-none ${isMaxed ? 'text-[#a82d25]' : ''}">${displayVal}</span>
+            <span class="text-[9px] text-[#8a7561] mt-1">${isMaxed ? '已達上限' : `消耗 ${cost}`}</span>
+          </div>
+
+          <button onclick="LifepathSystem.adjustAlloc('${k}',1)" 
+            class="w-8 h-8 rounded-lg border border-[#cfc0a9] bg-[#f5ede0] hover:bg-[#e8decb] text-[#2c1f14] font-black text-lg transition flex items-center justify-center cursor-pointer shadow-xs ${(!canAfford || isMaxed) ? 'opacity-30 cursor-not-allowed' : ''}">+</button>
         </div>`;
       board.appendChild(div);
     });
 
-    document.getElementById('allocPointsLeft').textContent = G.pendingPoints;
+    const savedText = G.player.savedPoints > 0 ? `<span class="text-[10px] text-jade-600 ml-1">(含儲備 ${G.player.savedPoints} 點)</span>` : '';
+    document.getElementById('allocPointsLeft').innerHTML = `${G.pendingPoints} ${savedText}`;
     
     const btn = document.getElementById('allocConfirmBtn');
+    
+    // ★ 如果仲有點數，但係已經冇任何屬性可以升（或者唔夠點數升），就俾佢撳「保留點數並繼續」
     if (G.pendingPoints === 0) {
       btn.disabled = false;
-      btn.className = 'w-full py-2.5 rounded-xl font-black text-sm bg-cinnabar hover:bg-cinnabar-light text-white shadow-lg transition';
+      btn.className = 'wuxia-primary-btn w-full py-3 rounded-xl font-black text-sm tracking-widest cursor-pointer shadow-md transition';
       btn.textContent = '完成分配，繼續前行';
+    } else if (!canUpgradeAny) {
+      btn.disabled = false;
+      btn.className = 'wuxia-primary-btn w-full py-3 rounded-xl font-black text-sm tracking-widest cursor-pointer shadow-md transition border-[#b45309] bg-[#b45309]';
+      btn.textContent = `保留 ${G.pendingPoints} 點，繼續前行`;
     } else {
       btn.disabled = true;
-      btn.className = 'w-full py-2.5 rounded-xl font-black text-sm bg-ink-700 text-gray-500 cursor-not-allowed transition';
+      btn.className = 'w-full py-3 rounded-xl font-bold text-sm bg-[#e8decb] text-[#78614c] border border-[#d8cca8] cursor-not-allowed tracking-widest';
       btn.textContent = `還剩 ${G.pendingPoints} 點未分配`;
     }
   },
 
   adjustAlloc(k, delta) {
     const base = G.player.stats[k];
-    if (delta > 0 && G.pendingPoints > 0) {
-      if (G.tempAllocStats[k] >= 20) return; // 屬性上限 20
-      G.tempAllocStats[k]++;
-      G.pendingPoints--;
+    const currentVal = G.tempAllocStats[k];
+
+    if (delta > 0) {
+      if (currentVal >= 28) return; // ★ 上限 28 (顯示 18)
+      const cost = this.getCostForNextPoint(currentVal);
+      if (G.pendingPoints >= cost) {
+        G.tempAllocStats[k]++;
+        G.pendingPoints -= cost;
+      }
     } else if (delta < 0) {
-      if (G.tempAllocStats[k] <= base) return;
+      if (currentVal <= base) return;
+      const refund = this.getRefundForPoint(currentVal - 1);
       G.tempAllocStats[k]--;
-      G.pendingPoints++;
+      G.pendingPoints += refund;
     }
     this.renderAllocBoard();
   },
 
-  confirmAllocation() {
-    if (G.pendingPoints > 0) return;
+    confirmAllocation() {
+    // 移除 if (G.pendingPoints > 0) return; 呢句阻擋！
+
+    // 1. 將未用完嘅點數存入儲備池
+    G.player.savedPoints = (G.player.savedPoints || 0) + G.pendingPoints;
     
-    // 應用到角色
-    G.player.stats = { ...G.tempAllocStats };
+    // 2. 清零待分配點數
     G.pendingPoints = 0;
     
+    // 3. 應用屬性變化
+    G.player.stats = { ...G.tempAllocStats };
+    
+    // 4. 關閉彈窗
     document.getElementById('allocModal').classList.add('hidden');
     HUD.render();
     SaveSystem.save();
     
-    // 進入下一年
-    G.currentAge++;
-    setTimeout(() => this.runYear(), 300);
+    // 5. 推進時間
+    if (G.currentSystem === 'exploration' || G.currentSystem === 'events') {
+      ExplorationSystem.nextSeason();
+    } else {
+      this.nextYear();
+    }
   },
 
   enterAdultStage() {
     G.currentAge = 18;
+    G.currentSeason = 0;
     HUD.render();
-    HUD.setScene('第壹章', '踏入江湖');
-    HUD.log('narrative', '十八歲，你正式踏入江湖。師門的庇護已經遠去，從此以後，一切靠自己。');
-    switchSystem('events', { startEvent: 'act1_inn' });
+    
+    // ★ 不再直接顯示文字並切換系統，而是彈出成年 Modal
+    document.getElementById('adultModal').classList.remove('hidden');
   },
 
-  gameOver() {
-    switchSystem('ending', { id: 'lifepath_death' });
+  // ★ 新增：玩家點擊 Modal 按鈕後，正式進入歷練
+  startAdultJourney() {
+    document.getElementById('adultModal').classList.add('hidden');
+    
+    HUD.setScene('第壹章', '江湖歷練');
+    HUD.log('lifepath', '十八歲，你正式踏入江湖。這一年，你開始了自己傳奇的江湖生涯。');
+    
+    switchSystem('exploration');
+    SaveSystem.save();
   }
 };
 Systems.lifepath = LifepathSystem;

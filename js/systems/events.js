@@ -1,36 +1,105 @@
 const EventSystem = {
   enter(payload) {
+    HUD.render();
     if (payload && payload.startEvent) {
-      this.load(payload.startEvent);
+      return this.load(payload.startEvent);
     }
+    ExplorationSystem.enter(); 
   },
 
   load(eventId) {
-    HUD.clearChoices(); // ★ 關鍵：載入新事件前，先清空舊按鈕！
     const ev = G.data.EVENTS[eventId];
-    if (!ev) return console.error('Event not found:', eventId);
-
-    HUD.setScene(ev.badge || '江湖', ev.title || '遭遇');
-    if (ev.text) HUD.log(ev.speaker ? 'dialogue' : 'narrative', ev.text, ev.speaker || '旁白');
-
-    if (ev.type === 'combat') {
-      // ★ 切換到戰鬥系統
-      return switchSystem('combat', { event: ev });
+    if (!ev) {
+      console.error('Event not found:', eventId);
+      return ExplorationSystem.endEvent();
     }
 
+    // 1. 結局事件
     if (ev.type === 'ending') {
-      switchSystem('ending', { id: eventId });
+      return switchSystem('ending', { id: eventId });
+    }
+
+    // 2. 戰鬥事件
+    if (ev.type === 'combat') {
+      // ★ 確保戰鬥系統存在，然後切換
+      if (typeof CombatSystem !== 'undefined') {
+        return switchSystem('combat', { event: ev });
+      } else {
+        alert('找不到戰鬥系統！');
+        return ExplorationSystem.endEvent();
+      }
+    }
+
+    // 3. 奇遇彈窗
+    if (ev.uiType === 'modal') {
+      document.getElementById('encounterBadge').textContent = ev.badge || '江湖奇遇';
+      document.getElementById('encounterTitle').textContent = ev.title || '未知遭遇';
+      document.getElementById('encounterText').innerHTML = `<p>${ev.text || ''}</p>`;
+      
+      const optsContainer = document.getElementById('encounterOptions');
+      optsContainer.innerHTML = '';
+      (ev.choices || []).forEach(c => {
+        if (c.requireTags && c.requireTags.length > 0 && !TagUtils.hasAll(c.requireTags)) return;
+        if (c.forbidTags && c.forbidTags.length > 0 && !TagUtils.hasNone(c.forbidTags)) return;
+
+        const btn = document.createElement('button');
+        btn.className = 'wuxia-choice-card w-full py-3 px-4 rounded-xl text-left border border-[#dcd1c2] flex flex-col justify-between mb-2';
+        btn.innerHTML = `<span class="font-bold text-[#2c1f14]">${c.text}</span><span class="text-xs text-[#8a7561] mt-1">${c.desc || ''}</span>`;
+        btn.onclick = () => {
+          document.getElementById('encounterModal').classList.add('hidden');
+          this.handleChoice(c);
+        };
+        optsContainer.appendChild(btn);
+      });
+
+      document.getElementById('encounterModal').classList.remove('hidden');
       return;
     }
 
     // 普通事件
+    HUD.setScene(ev.badge || '江湖', ev.title || '遭遇');
+    if (ev.text) HUD.log(ev.speaker ? 'dialogue' : 'narrative', ev.text, ev.speaker || '旁白');
+
+    if (ev.type === 'combat') {
+      return switchSystem('combat', { event: ev });
+    }
+
+    if (ev.type === 'ending') {
+      return switchSystem('ending', { id: eventId });
+    }
+
     const choices = ev.choices || [];
     const validChoices = choices.filter(c => {
       if (c.requireTags && c.requireTags.length > 0 && !TagUtils.hasAll(c.requireTags)) return false;
       if (c.forbidTags && c.forbidTags.length > 0 && !TagUtils.hasNone(c.forbidTags)) return false;
       return true;
     });
-    HUD.renderChoices(choices.map(c => ({
+
+    // ★ 核心修改：自動為酒館事件補上「離開酒館」選項
+    if (ev.badge === '酒館' || ev.uiType === 'tavern') {
+      // 檢查玩家自己填嘅選項入面，有冇已經寫咗「離開」或者「走」
+      const hasLeaveOption = validChoices.some(c => c.text.includes('離開') || c.text.includes('走'));
+      
+      if (!hasLeaveOption) {
+        validChoices.push({
+          text: '離開酒館',
+          desc: '不再逗留，轉身離去。',
+          type: 'direct',
+          directNarrative: '你放下酒杯，離開了喧囂的酒館。', // 呢度可以直接填對白
+          directEffects: null,
+          directNext: null
+        });
+      }
+    }
+
+    // ★ 防呆：如果真係一個選項都冇，自動結束
+    if (validChoices.length === 0) {
+      HUD.log('narrative', '（這件事就此告一段落）');
+      setTimeout(() => ExplorationSystem.endEvent(), 1000);
+      return;
+    }
+
+    HUD.renderChoices(validChoices.map(c => ({
       label: c.text,
       checkText: c.type === 'check' ? `${STATS_INFO[c.attr]?.name || c.attr} DC ${c.dc}` : '',
       desc: c.desc,
@@ -43,24 +112,53 @@ const EventSystem = {
     if (choice.type === 'direct') {
       if (choice.narrative) HUD.log('narrative', choice.narrative);
       EffectSystem.apply(choice.effects);
-      SaveSystem.save();
-      if (choice.next) this.load(choice.next);
+      this.resolveNext(choice.next);
       return;
     }
 
     if (choice.type === 'check') {
       DiceSystem.check({
-        title: choice.checkName,
-        attr: choice.attr,
-        dc: choice.dc,
-        tags: choice.tags,
+        title: choice.checkName, attr: choice.attr, dc: choice.dc, tags: choice.tags,
+        successEffects: choice.success?.effects, 
+        failEffects: choice.fail?.effects,
+        critSuccessEffects: choice.critSuccess?.effects,
+        critFailEffects: choice.critFail?.effects,
         onComplete: (res) => {
-          const branch = res.success ? choice.success : choice.fail;
+          let branch = res.success ? choice.success : choice.fail;
+          if (res.nat20 && choice.critSuccess) branch = choice.critSuccess;
+          if (res.nat1 && choice.critFail) branch = choice.critFail;
+          if (!branch) branch = {};
+
           if (branch.narrative) HUD.log('narrative', branch.narrative);
           EffectSystem.apply(branch.effects);
-          if (branch.next) this.load(branch.next);
+          
+          if (!res.success && branch.failGameOver) {
+            return switchSystem('ending', { id: 'lifepath_death' });
+          }
+          
+          this.resolveNext(branch.next);
         }
       });
+    }
+  },
+
+  // ★ 判定下一個節點：如果有 next 就繼續，冇 next 就返回歷練系統結算
+  resolveNext(nextTarget) {
+    if (nextTarget) {
+      const targets = String(nextTarget).split(',').map(s => s.trim()).filter(Boolean);
+      const chosenId = targets[Math.floor(Math.random() * targets.length)];
+      return this.load(chosenId); 
+    }
+    
+    // ★ 核心修正：判斷當前年齡
+    HUD.closeEncounterModal();
+    
+    if (G.currentAge < 18) {
+      // 如果玩家仲未夠 18 歲，跑完呢個 Event 節點後，返回 Lifepath 繼續成長
+      LifepathSystem.nextYear();
+    } else {
+      // 如果 18 歲後，照舊返回四季歷練結算
+      ExplorationSystem.endEvent(); 
     }
   }
 };
