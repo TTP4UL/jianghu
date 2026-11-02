@@ -333,3 +333,52 @@ body {
 #diceModal {
   animation: backdropFadeIn 0.25s ease-out forwards;
 }
+
+/* ★ 古風狀態徽章體系 (Buff & Debuff) */
+.wuxia-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-family: 'Noto Serif TC', serif;
+  font-weight: 900;
+  padding: 1px 6px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  user-select: none;
+}
+
+/* 劇毒 (幽暗綠煞 + 微爍) */
+.status-poison {
+  background-color: #064e3b;
+  color: #6ee7b7;
+  border: 1px solid #047857;
+  animation: poisonGlow 1.8s infinite ease-in-out;
+}
+@keyframes poisonGlow {
+  0%, 100% { box-shadow: 0 0 2px rgba(16, 185, 129, 0.3); }
+  50% { box-shadow: 0 0 8px rgba(16, 185, 129, 0.7); }
+}
+
+/* 眩暈 / 點穴 (金石氣滯) */
+.status-stun {
+  background-color: #78350f;
+  color: #fde68a;
+  border: 1px solid #d97706;
+}
+
+/* 護體 / 格擋 (金光防禦) */
+.status-shield {
+  background-color: #fef3c7;
+  color: #92400e;
+  border: 1px solid #f59e0b;
+}
+
+/* 狀態疊層小角標 */
+.status-badge-count {
+  font-family: monospace;
+  font-size: 10px;
+  padding: 0 3px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.25);
+}

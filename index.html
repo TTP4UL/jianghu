@@ -246,8 +246,8 @@ tailwind.config = {
 </aside>
 
   <!-- 右側：日誌與選項主視窗 (圖3同款純淨古風框) -->
-  <section class="lg:col-span-8 flex flex-col h-[78vh] min-h-[520px]">
-    <div class="wuxia-panel-box rounded-xl p-5 sm:p-7 flex-1 flex flex-col overflow-hidden">
+  <section class="lg:col-span-8 flex flex-col lg:h-[82dvh] lg:min-h-[600px] w-full">
+    <div class="wuxia-panel-box rounded-xl p-4 sm:p-6 flex-1 flex flex-col overflow-hidden">
       
       <!-- 頂部標題列 -->
       <div class="flex items-center justify-between pb-3 border-b border-[#d8ccb8] flex-shrink-0">
@@ -260,33 +260,41 @@ tailwind.config = {
         </div>
       </div>
       
-      <!-- 敵方 HUD (戰鬥時) -->
-      <div id="enemyHud" class="hidden bg-[#fdf5f5] border border-red-300 rounded-lg p-3 my-2.5 transition flex-shrink-0">
-        <div class="flex items-center justify-between mb-1.5">
-          <div>
-            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-800 border border-red-300">強敵</span>
-            <span id="enemyName" class="font-serif font-black text-sm text-red-900 ml-1.5"></span>
-            <span id="enemyStatusTag" class="text-[10px] ml-2 text-amber-700 font-bold"></span>
+      <!-- 敵方 HUD -->
+      <div id="enemyHud" class="hidden bg-[#fcfaf5] border border-[#d8ccb8] rounded-xl p-2.5 my-2 shadow-xs transition flex-shrink-0">
+        <div class="flex items-center justify-between pb-1.5 border-b border-[#ebdcca]">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="seal-stamp text-[10px] py-0.5 px-2 bg-[#fef2f2] text-[#991b1b] border-[#ef4444]">強敵</span>
+            <span id="enemyName" class="font-serif font-black text-sm text-[#2c1f14]">狂刀 · 厲煞</span>
+            <div id="enemyStatusTag" class="flex items-center gap-1.5 ml-1"></div>
           </div>
-          <div class="text-xs text-[#594432] font-serif">身法 (AC): <b id="enemyAC" class="text-[#a82d25] font-mono">13</b></div>
+          <div class="flex items-center gap-1 bg-[#f3ecdf] border border-[#d8ccb8] px-2 py-0.5 rounded-lg shadow-inner">
+            <span class="text-[10px] text-[#78614c] font-black tracking-wider">閃避</span>
+            <span id="enemyAC" class="text-sm font-mono font-black text-[#a82d25]">13</span>
+          </div>
         </div>
-        <div class="grid grid-cols-2 gap-3 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2 text-xs font-serif">
           <div>
-            <div class="flex justify-between text-[11px] mb-1 font-bold"><span class="text-[#6d5541]">氣血</span><span id="enemyHpText" class="font-mono text-red-700">0/0</span></div>
-            <div class="w-full bg-[#ebd5d5] rounded-full h-1.5 overflow-hidden"><div id="enemyHpBar" class="bg-red-600 h-full transition-all duration-300" style="width:100%"></div></div>
+            <div class="flex justify-between text-[10px] mb-0.5 font-bold"><span class="text-[#594432]">氣血</span><span id="enemyHpText" class="font-mono text-[#a82d25] font-black">48 / 48</span></div>
+            <div class="w-full bg-[#e8decb] rounded-full h-1.5 overflow-hidden border border-[#d8cca8]"><div id="enemyHpBar" class="bg-gradient-to-r from-red-700 to-red-500 h-full transition-all duration-300" style="width:100%"></div></div>
           </div>
           <div>
-            <div class="flex justify-between text-[11px] mb-1 font-bold"><span class="text-[#6d5541]">架勢</span><span id="enemyPosText" class="font-mono text-amber-700">0/0</span></div>
-            <div class="w-full bg-[#ebd5d5] rounded-full h-1.5 overflow-hidden"><div id="enemyPosBar" class="bg-amber-600 h-full transition-all duration-300" style="width:100%"></div></div>
+            <div class="flex justify-between text-[10px] mb-0.5 font-bold"><span class="text-[#594432]">架勢</span><span id="enemyPosText" class="font-mono text-[#b45309] font-black">24 / 24</span></div>
+            <div class="w-full bg-[#e8decb] rounded-full h-1.5 overflow-hidden border border-[#d8cca8]"><div id="enemyPosBar" class="bg-gradient-to-r from-amber-600 to-amber-400 h-full transition-all duration-300" style="width:100%"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between text-[10px] mb-0.5 font-bold"><span class="text-[#594432]">內力</span><span id="enemyQiText" class="font-mono text-[#047857] font-black">10 / 10</span></div>
+            <div class="w-full bg-[#e8decb] rounded-full h-1.5 overflow-hidden border border-[#d8cca8]"><div id="enemyQiBar" class="bg-gradient-to-r from-emerald-700 to-emerald-500 h-full transition-all duration-300" style="width:100%"></div></div>
           </div>
         </div>
       </div>
 
-      <!-- 劇情記錄區：底色乾淨、字體深刻分明 -->
-      <div id="narrativeLogs" class="flex-1 overflow-y-auto min-h-0 space-y-3 py-4 pr-2 font-serif text-sm sm:text-[15px] leading-relaxed"></div>
+      <!-- 劇情記錄區 (佔滿剩餘空間) -->
+      <div id="narrativeLogs" class="flex-1 overflow-y-auto min-h-[150px] space-y-3 py-3 pr-2 font-serif text-sm sm:text-[15px] leading-relaxed custom-scrollbar"></div>
       
-      <!-- 選項面板 (圖2、圖3純白卡片/硃砂紅按鈕) -->
-<div id="interactionPanel" class="pt-3 border-t border-[#d8ccb8] flex-shrink-0 z-10 flex flex-col gap-2.5 max-h-[40vh] overflow-y-auto custom-scrollbar pr-1"></div>
+      <!-- ★ 選項面板：電腦端放寬至 45vh，確保 4 個選項不用滾動；手機端維持 35dvh 保護日誌區 -->
+      <div id="interactionPanel" class="pt-3 border-t border-[#d8ccb8] flex-shrink-0 z-10 flex flex-col gap-2.5 max-h-[35dvh] lg:max-h-[45vh] overflow-y-auto custom-scrollbar pr-1"></div>
+      
     </div>
   </section>
 </div>

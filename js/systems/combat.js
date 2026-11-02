@@ -5,11 +5,9 @@ const CombatSystem = {
     G.enemy = { ...ev.enemy }; 
     G.enemy.arts = ev.enemyArts ? String(ev.enemyArts).split('|').map(s => s.trim()) : [];
     
-    // ★ 新增：讀取敵人的內功
     if (ev.enemyInner && G.data.MARTIAL_ARTS[ev.enemyInner]) {
       G.enemy.innerArt = G.data.MARTIAL_ARTS[ev.enemyInner];
     }
-    // ★ 新增：初始化敵人真氣（預設 10）
     G.enemy.maxQi = Number(ev.enemyQi) || 10;
     G.enemy.qi = G.enemy.maxQi;
     
@@ -19,31 +17,49 @@ const CombatSystem = {
     
     HUD.setScene(ev.badge || '戰鬥', ev.title || '遭遇強敵');
     this.updateHUD();
-    this.triggerInnerEffect(); // 戰鬥開場先觸發一次內功
+    this.triggerInnerEffect(); // 開局先觸發一次內功 (不回氣)
     this.renderActions();
   },
 
   updateHUD() {
     const e = G.enemy;
+    if (!e) return;
+
     document.getElementById('enemyName').textContent = e.name;
     document.getElementById('enemyAC').textContent = e.ac;
+
     document.getElementById('enemyHpText').textContent = `${Math.max(0, e.hp)} / ${e.maxHp}`;
     document.getElementById('enemyHpBar').style.width = `${Math.min(100, Math.max(0, (e.hp / e.maxHp) * 100))}%`;
+    
     document.getElementById('enemyPosText').textContent = `${Math.max(0, e.pos)} / ${e.maxPos}`;
     document.getElementById('enemyPosBar').style.width = `${Math.min(100, Math.max(0, (e.pos / e.maxPos) * 100))}%`;
-    
-    const status = [];
-    if (e.isStunned) status.push('【眩暈】');
-    if (e.isPoisoned > 0) status.push(`【劇毒:${e.isPoisoned}回合】`);
-    
-    // ★ 新增：顯示敵人內功與真氣
-    if (e.innerArt) status.push(`<span class="text-[#7e22ce] font-bold">【內功:${e.innerArt.name}】</span>`);
-    if (e.maxQi !== undefined) {
-        status.push(`<span class="text-[#1d4ed8] font-bold">【真氣:${e.qi}/${e.maxQi}】</span>`);
+
+    const curQi = e.qi !== undefined ? Math.max(0, e.qi) : (e.maxQi || 10);
+    const maxQi = e.maxQi || 10;
+    const qiTextEl = document.getElementById('enemyQiText');
+    const qiBarEl = document.getElementById('enemyQiBar');
+    if (qiTextEl) qiTextEl.textContent = `${curQi} / ${maxQi}`;
+    if (qiBarEl) qiBarEl.style.width = `${Math.min(100, Math.max(0, (curQi / maxQi) * 100))}%`;
+
+    const statusContainer = document.getElementById('enemyStatusTag');
+    if (statusContainer) {
+      statusContainer.innerHTML = '';
+      
+      if (e.isStunned) {
+        const stunBadge = document.createElement('span');
+        stunBadge.className = 'wuxia-status-badge status-stun';
+        stunBadge.innerHTML = '<span>⚡ 眩暈</span>';
+        statusContainer.appendChild(stunBadge);
+      }
+      
+      if (e.isPoisoned > 0) {
+        const poisonBadge = document.createElement('span');
+        poisonBadge.className = 'wuxia-status-badge status-poison';
+        poisonBadge.innerHTML = `<span>☠️ 劇毒</span><span class="status-badge-count">${e.isPoisoned}回</span>`;
+        statusContainer.appendChild(poisonBadge);
+      }
     }
-    
-    document.getElementById('enemyStatusTag').innerHTML = status.join(' ');
-    
+
     HUD.updateGauges();
   },
 
@@ -61,13 +77,13 @@ const CombatSystem = {
           
           if (key === 'regen' && p.hp < p.maxHp) { p.hp = Math.min(p.maxHp, p.hp + num); HUD.log('combat', `【你的${art.name}】運轉，回復 ${num} 氣血。`, 'player'); }
           if (key === 'hp_regen' && p.hp < p.maxHp) { p.hp = Math.min(p.maxHp, p.hp + num); HUD.log('combat', `【你的${art.name}】運轉，回復 ${num} 氣血。`, 'player'); }
-          if (key === 'qi_regen' && p.qi < p.maxQi) { p.qi = Math.min(p.maxQi, p.qi + num); HUD.log('combat', `【你的${art.name}】運轉，回復 ${num} 真氣。`, 'player'); }
+          if (key === 'qi_regen' && p.qi < p.maxQi) { p.qi = Math.min(p.maxQi, p.qi + num); HUD.log('combat', `【你的${art.name}】運轉，回復 ${num} 內力。`, 'player'); }
           if (key === 'pos_regen' && p.pos < p.maxPos) { p.pos = Math.min(p.maxPos, p.pos + num); HUD.log('combat', `【你的${art.name}】運轉，回復 ${num} 架勢。`, 'player'); }
         });
       }
     }
 
-    // ★ 2. 敵人內功與真氣結算
+    // 2. 敵人內功結算
     const e = G.enemy;
     if (e.innerArt && e.innerArt.innerEffect) {
       String(e.innerArt.innerEffect).split('|').forEach(eff => {
@@ -84,17 +100,31 @@ const CombatSystem = {
         }
         if (key === 'qi_regen' && e.qi < e.maxQi) {
           e.qi = Math.min(e.maxQi, e.qi + num);
-          HUD.log('combat', `【敵方${e.innerArt.name}】運轉，回復 ${num} 真氣。`, 'enemy');
+          HUD.log('combat', `【敵方${e.innerArt.name}】運轉，回復 ${num} 內力。`, 'enemy');
         }
       });
     }
     
-    // ★ 敵人基礎真氣回復（每回合回 1 點，防止後期變啞巴）
-    if (!e.innerArt || !String(e.innerArt.innerEffect).includes('qi_regen')) {
-      e.qi = Math.min(e.maxQi, (e.qi || 0) + 1);
-    }
-    
     this.updateHUD();
+  },
+
+  // ★ 新增：統一的玩家回合開始結算
+  startPlayerTurn() {
+    const p = G.player, e = G.enemy;
+
+    // 1. 結算 Buff 回合數
+    this.processBuffs();
+
+    // 2. 全體自然回復 1 點內力 (回合開始結算)
+    if (p.qi < p.maxQi) p.qi = Math.min(p.maxQi, p.qi + 1);
+    if (e.qi < e.maxQi) e.qi = Math.min(e.maxQi, e.qi + 1);
+
+    // 3. 觸發內功被動
+    this.triggerInnerEffect();
+
+    // 4. 更新 UI 並渲染選項
+    this.updateHUD();
+    this.renderActions();
   },
 
   renderActions() {
@@ -106,8 +136,8 @@ const CombatSystem = {
 
     actions.push({
       label: '⚔️ 普通攻擊',
-      checkText: `命中 vs AC ${G.enemy.ac}`,
-      desc: `1d${Number(p.punchDiceType) || 8} + 屬性調整，不消耗真氣。`,
+      checkText: `命中 vs 閃避 ${G.enemy.ac}`,
+      desc: '1d8 + 屬性調整，不消耗真氣。',
       primary: true,
       action: () => this.attack()
     });
@@ -383,7 +413,7 @@ const CombatSystem = {
   parry() {
     G.player.pos = Math.min(G.player.maxPos, G.player.pos + 5);
     G.player.parrying = true; 
-    HUD.log('combat', '你擺出防禦架勢，架勢回復。', 'player');
+    HUD.log('combat', '你沉肩墜肘，擺出防禦架勢。架勢回復 5 點，本回合受擊傷害將大幅減少。', 'player');
     HUD.updateGauges();
     setTimeout(() => this.enemyTurn(), 1000);
   },
@@ -401,7 +431,7 @@ const CombatSystem = {
     const d20 = Math.floor(Math.random() * 20) + 1;
     const total = d20 + hitBonus;
     
-    HUD.log('combat', `同伴【${c.name}】出手！擲出 ${d20} + ${hitBonus} = ${total} vs AC ${G.enemy.ac}`, 'neutral');
+    HUD.log('combat', `同伴【${c.name}】出手！擲出 ${d20} + ${hitBonus} = ${total} vs 閃避 ${G.enemy.ac}`, 'neutral');
     
     if (total >= G.enemy.ac) {
       const { isPierce } = this.applySpecialEffect(c.name, c.attackEffect, G.player, G.enemy);
@@ -449,12 +479,12 @@ const CombatSystem = {
       HUD.log('combat', '敵方處於眩暈，無法行動！', 'player');
       this.updateHUD();
       p.parrying = false; 
-      return this.renderActions();
+      // ★ 核心修正：敵人被眩暈，直接結算玩家回合開始（回氣+觸發內功）
+      return this.startPlayerTurn();
     }
 
     let usedArt = null;
     if (e.arts && e.arts.length > 0 && Math.random() > 0.4) { 
-      // ★ 核心：過濾出敵人真氣足夠施放的技能
       const affordableArts = e.arts.filter(id => {
         const art = G.data.MARTIAL_ARTS[id];
         return art && e.qi >= (Number(art.qiCost) || 2);
@@ -468,14 +498,14 @@ const CombatSystem = {
 
     if (usedArt) {
       const cost = Number(usedArt.qiCost) || 2;
-      e.qi = Math.max(0, e.qi - cost); // ★ 扣除真氣
+      e.qi = Math.max(0, e.qi - cost); 
       
       const eAtk = 4; 
       const targetAC = p.ac + (p.parrying ? 4 : 0); 
       const d20 = Math.floor(Math.random() * 20) + 1;
       const total = d20 + eAtk;
       
-      HUD.log('combat', `敵方施展【${usedArt.name}】！擲出 ${d20} + ${eAtk} = ${total} vs 你的 AC ${targetAC}`, 'neutral');
+      HUD.log('combat', `敵方施展【${usedArt.name}】！擲出 ${d20} + ${eAtk} = ${total} vs 你的閃避 ${targetAC}`, 'neutral');
 
       if (total >= targetAC) {
         const hits = Number(usedArt.hits) || 1;
@@ -519,9 +549,8 @@ const CombatSystem = {
           this.updateHUD();
           if (p.hp <= 0) this.end(false);
           else {
-            this.processBuffs(); // ★ 敵人打完結算 Buff
-            this.triggerInnerEffect(); 
-            this.renderActions();
+            // ★ 核心修正：敵人打完，進入玩家回合開始
+            this.startPlayerTurn();
           }
         }, hits * 600 + 500); 
 
@@ -536,7 +565,7 @@ const CombatSystem = {
       const targetAC = p.ac + (p.parrying ? 4 : 0); 
       const total = d20 + eAtk;
 
-      HUD.log('combat', `敵方普通攻擊！擲出 ${d20} + ${eAtk} = ${total} vs 你的 AC ${targetAC}`, 'neutral');
+      HUD.log('combat', `敵方普通攻擊！擲出 ${d20} + ${eAtk} = ${total} vs 你的閃避 ${targetAC}`, 'neutral');
 
       if (total >= targetAC) {
         let dmg = Math.floor(Math.random() * 10) + 4;
@@ -557,13 +586,11 @@ const CombatSystem = {
     if (p.hp <= 0) {
       this.end(false);
     } else {
-      this.processBuffs(); // ★ 統一結算 Buff 倒數
-      this.triggerInnerEffect();
-      this.renderActions();
+      // ★ 核心修正：敵人打完，進入玩家回合開始
+      this.startPlayerTurn();
     }
   },
 
-  // ★ 新增：統一的 Buff 回合結算
   processBuffs() {
     const p = G.player, e = G.enemy;
     if (p.buffs) {
