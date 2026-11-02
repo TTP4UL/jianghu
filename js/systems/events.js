@@ -26,6 +26,13 @@ const EventSystem = {
 
     // 3. ★ 奇遇彈窗 (uiType === 'modal')
     if (ev.uiType === 'modal') {
+      // ★ 核心修正：先寫入右側主日誌，留下歷史紀錄
+      HUD.setScene(ev.badge || '江湖奇遇', ev.title || '未知遭遇');
+      if (ev.text) {
+        HUD.log(ev.speaker ? 'dialogue' : 'narrative', ev.text, ev.speaker || '旁白');
+      }
+
+      // 然後再把內容填進彈窗
       document.getElementById('encounterBadge').textContent = ev.badge || '江湖奇遇';
       document.getElementById('encounterTitle').textContent = ev.title || '未知遭遇';
       document.getElementById('encounterText').innerHTML = `<p class="indent-7">${ev.text || ''}</p>`;
@@ -48,6 +55,8 @@ const EventSystem = {
         
         btn.onclick = () => {
           document.getElementById('encounterModal').classList.add('hidden');
+          // 選擇後，在日誌留下選擇的紀錄
+          HUD.log('narrative', `你選擇了：${c.text}`);
           this.handleChoice(c);
         };
         optsContainer.appendChild(btn);
