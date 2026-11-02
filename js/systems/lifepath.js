@@ -26,7 +26,8 @@ const LifepathSystem = {
     HUD.setScene(`${G.currentAge}歲 · 成長`, event.title);
     HUD.log(event.speaker ? 'dialogue' : 'narrative', event.text, event.speaker || '旁白');
     
-    const choices = G.data.LIFEPATH_CHOICES[event.id] || [];
+    // ★ 改動：從 EVENT_CHOICES 讀取選項
+    const choices = event.choices || [];
     this.renderLifepathChoices(choices);
   },
 
@@ -62,12 +63,35 @@ const LifepathSystem = {
   },
 
   pickEvent() {
-    if (!G.data.LIFEPATH_EVENTS) return null;
+    if (!G.data.EVENTS) return null;
     
-    const all = Object.values(G.data.LIFEPATH_EVENTS).filter(e => 
-      Number(e.age) === G.currentAge && !G.usedEvents.includes(e.id)
-    );
+    // ★ 核心改動：直接從 EVENTS 表抓取符合年齡的事件
+    const all = Object.values(G.data.EVENTS).filter(e => {
+      // 排除結局
+      if (e.type === 'ending') return false;
+      
+      // 判斷年齡是否符合（支援單一數字或 13-17 範圍）
+      if (e.age) {
+        if (String(e.age).includes('-')) {
+          const [min, max] = String(e.age).split('-').map(Number);
+          if (G.currentAge < min || G.currentAge > max) return false;
+        } else if (Number(e.age) !== G.currentAge) {
+          return false;
+        }
+      } else {
+        // 如果冇填 age，就唔會喺成長期觸發
+        return false; 
+      }
 
+      // 排除 18 歲以上才觸發嘅歷練事件
+      if (Number(e.age) >= 18) return false;
+
+      if (G.usedEvents.includes(e.id)) return false;
+
+      return true;
+    });
+
+    // 優先檢查專屬事件
     const specific = all.filter(e => 
       (e.requireTags && e.requireTags.length > 0 && TagUtils.hasAll(e.requireTags)) &&
       TagUtils.hasNone(e.forbidTags)
@@ -75,6 +99,7 @@ const LifepathSystem = {
 
     if (specific.length > 0) return specific[0];
 
+    // 普通事件池
     const common = all.filter(e => 
       (!e.requireTags || e.requireTags.length === 0) &&
       TagUtils.hasNone(e.forbidTags)
@@ -82,6 +107,7 @@ const LifepathSystem = {
 
     if (common.length === 0) return null;
 
+    // 權重抽籤
     const totalWeight = common.reduce((sum, e) => sum + (Number(e.weight) || 10), 0);
     let rand = Math.random() * totalWeight;
 

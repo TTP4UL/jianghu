@@ -96,6 +96,9 @@ const ExplorationSystem = {
         } else if (Number(e.age) !== G.currentAge) {
           return false;
         }
+      } else {
+        // 如果 Events 表冇填 age，預設當作 18 歲後歷練事件
+        if (G.currentAge < 18) return false;
       }
 
       // 4. Tag 檢查

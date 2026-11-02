@@ -45,8 +45,6 @@ const DataLoader = {
     G.data.ORIGINS = d.ORIGINS || {};
     G.data.SECTS = d.SECTS || {};
     G.data.MARTIAL_ARTS = d.MARTIAL_ARTS || {};
-    G.data.LIFEPATH_EVENTS = d.LIFEPATH_EVENTS || {};
-    G.data.LIFEPATH_CHOICES = d.LIFEPATH_CHOICES || {};
     G.data.EVENTS = d.EVENTS || {};
     G.data.COMPANIONS = d.COMPANIONS || {};
   }

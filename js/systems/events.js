@@ -68,7 +68,8 @@ const EventSystem = {
       return switchSystem('ending', { id: eventId });
     }
 
-    const choices = ev.choices || [];
+    // ★ 統一使用 EVENT_CHOICES
+ const choices = ev.choices || [];
     const validChoices = choices.filter(c => {
       if (c.requireTags && c.requireTags.length > 0 && !TagUtils.hasAll(c.requireTags)) return false;
       if (c.forbidTags && c.forbidTags.length > 0 && !TagUtils.hasNone(c.forbidTags)) return false;

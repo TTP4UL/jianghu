@@ -321,6 +321,7 @@ const CharacterCreationSystem = {
     const o = G.data.ORIGINS[s.origin];
     const sect = s.sect ? G.data.SECTS[s.sect] : null;
 
+    // 1. 計算真實屬性
     const finalStats = {};
     Object.keys(s.stats).forEach(k => {
       finalStats[k] = 10 + s.stats[k];
@@ -330,19 +331,23 @@ const CharacterCreationSystem = {
     const dexMod = Math.floor((finalStats.dex - 10) / 2);
     const wisMod = Math.floor((finalStats.wis - 10) / 2);
     
-    const maxHp = (sect ? sect.baseHp : 24) + conMod * 3;
-    const maxPos = (sect ? sect.basePos : 14) + Math.max(0, dexMod) * 2;
-    const maxQi = (sect ? sect.baseQi : 5) + Math.max(0, wisMod);
+    // ★ 核心修正：這裡必須用 let，因為下面要加內功加成
+    let maxHp = (sect ? sect.baseHp : 24) + conMod * 3;
+    let maxPos = (sect ? sect.basePos : 14) + Math.max(0, dexMod) * 2;
+    let maxQi = (sect ? sect.baseQi : 5) + Math.max(0, wisMod);
 
+    // 2. 處理 Tags
     const tags = [];
     if (G.data.TAGS['origin_' + s.origin]) tags.push('origin_' + s.origin);
     if (s.sect && G.data.TAGS['sect_' + s.sect]) tags.push('sect_' + s.sect);
     tags.push(s.gender === 'male' ? 'gender_male' : 'gender_female');
     (o.initialTags || []).forEach(t => { if (G.data.TAGS[t]) tags.push(t); });
     
+    // 3. 處理武學與裝備
     const martialArts = [...(o.initialMartialArts || [])];
     if (sect) martialArts.push(...(sect.startingArts || []));
 
+    // 1. 分配初始裝備
     const loadout = { attack: [null, null], inner: [null], utility: [null] };
     martialArts.forEach(id => {
       const a = G.data.MARTIAL_ARTS[id];
@@ -351,6 +356,34 @@ const CharacterCreationSystem = {
       if (idx !== -1) loadout[a.slot][idx] = id;
     });
 
+    // ★ 核心新增：處理開局自動裝備的功法效果（Tag 與 上限加成）
+    Object.keys(loadout).forEach(slotKey => {
+      loadout[slotKey].forEach(artId => {
+        if (!artId) return;
+        const art = G.data.MARTIAL_ARTS[artId];
+        if (!art) return;
+
+        // 1. 處理 grantTags (給初始裝的功法也加上 Tag)
+        if (art.grantTags) {
+          String(art.grantTags).split('|').map(t => t.trim()).forEach(t => {
+            if (t && !tags.includes(t)) tags.push(t);
+          });
+        }
+
+        // 2. 處理 innerEffect 的上限加成 (如果你只想要內功生效，可以加 if(slotKey === 'inner'))
+        if (art.innerEffect) {
+          String(art.innerEffect).split('|').forEach(eff => {
+            const [key, val] = eff.split(':');
+            const num = Number(val);
+            if (key === 'maxHp') maxHp += num;
+            if (key === 'maxPos') maxPos += num;
+            if (key === 'maxQi') maxQi += num;
+          });
+        }
+      });
+    });
+
+    // 3. 建立玩家物件
     G.player = {
       name, gender: s.gender, origin: s.origin, sect: s.sect,
       stats: finalStats, 
@@ -358,12 +391,17 @@ const CharacterCreationSystem = {
       ac: 10 + dexMod,
       gold: o.gold,
       martialArts,
-      tags: [...new Set(tags)],
+      tags: [...new Set(tags)], // 這裡會自動去重
       companions: [],
       loadout,
-      prof: 2
+      prof: 2,
+      // 確保初始正邪、聲望、貢獻有默認值
+      morality: 0,
+      reputation: 0,
+      contribution: 0
     };
 
+    // 5. 切換畫面
     document.getElementById('screen-setup').classList.add('hidden');
     document.getElementById('screen-play').classList.remove('hidden');
     document.getElementById('restartBtn').classList.remove('hidden');
