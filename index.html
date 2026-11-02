@@ -19,39 +19,40 @@ tailwind.config = {
 </script>
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="bg-[#f2ece1] text-[#2b2118] min-h-screen flex flex-col antialiased selection:bg-[#a82d25] selection:text-white">
+<!-- 原本: class="text-gray-200 min-h-screen flex flex-col antialiased" -->
+<body class="bg-[#f2ece1] text-[#2b2118] min-h-screen flex flex-col antialiased">
 
-<header class="border-b border-[#d8ccb8] bg-[#fbf9f4]/95 backdrop-blur sticky top-0 z-40 px-4 py-2 shadow-sm">
+<header class="border-b border-[#d8ccb8] bg-[#fbf9f4]/95 backdrop-blur sticky top-0 z-40 px-4 py-2.5 shadow-sm">
   <div class="max-w-6xl mx-auto flex items-center justify-between">
     <div class="flex items-center space-x-3">
-      <div class="w-8 h-8 rounded-lg bg-[#a82d25] border border-[#7f1d1d] flex items-center justify-center text-white font-serif font-black text-base shadow-sm">俠</div>
+      <div class="w-9 h-9 rounded-lg bg-[#a82d25] border border-[#7f1d1d] flex items-center justify-center text-white font-serif font-black text-lg shadow-sm">俠</div>
       <div>
         <div class="flex items-center gap-2">
           <h1 class="font-serif font-black text-base md:text-lg tracking-wider text-[#2c1f14]">江湖行 · 武俠 DND</h1>
-          <span id="ageBadge" class="hidden text-[11px] px-2 py-0.2 rounded bg-[#1e6b4d]/15 text-[#1e6b4d] border border-[#1e6b4d]/30 font-bold">13歲</span>
+          <span id="ageBadge" class="hidden text-[11px] px-2 py-0.5 rounded bg-[#1e6b4d]/15 text-[#1e6b4d] border border-[#1e6b4d]/30 font-bold">13歲</span>
           <span id="gameVersion" class="text-[10px] text-[#8a7561] font-mono">v1.0.0</span>
         </div>
-        <p class="text-[10px] text-[#6d5541]">見招拆招 · 內力罡氣 · 快意恩仇</p>
+        <p class="text-[11px] text-[#6d5541]">見招拆招 · 內力罡氣 · 快意恩仇</p>
       </div>
     </div>
     <div class="flex items-center space-x-2 font-serif">
-      <button id="loadoutBtn" onclick="LoadoutUI.open()" class="hidden px-2.5 py-1 text-xs rounded-lg bg-[#ede5d5] hover:bg-[#e4dbca] border border-[#cfc0a9] text-[#2c1f14] flex items-center gap-1.5 transition cursor-pointer">
+      <button id="loadoutBtn" onclick="LoadoutUI.open()" class="hidden px-2.5 py-1 text-xs rounded bg-[#ede5d5] hover:bg-[#e4dbca] border border-[#cfc0a9] text-[#2c1f14] flex items-center gap-1.5 transition">
         <i class="fa-solid fa-book text-[#a82d25]"></i><span>功法</span>
       </button>
-      <button id="overviewBtn" onclick="OverviewUI.open()" class="hidden px-2.5 py-1 text-xs rounded-lg bg-[#ede5d5] hover:bg-[#e4dbca] border border-[#cfc0a9] text-[#2c1f14] flex items-center gap-1.5 transition cursor-pointer">
+      <button id="overviewBtn" onclick="OverviewUI.open()" class="hidden px-2.5 py-1 text-xs rounded bg-[#ede5d5] hover:bg-[#e4dbca] border border-[#cfc0a9] text-[#2c1f14] flex items-center gap-1.5 transition">
         <i class="fa-solid fa-scroll text-[#a82d25]"></i><span>概覽</span>
       </button>
-      <button id="restartBtn" onclick="CharacterCreationSystem.restart()" class="hidden px-2.5 py-1 text-xs rounded-lg bg-[#ede5d5] hover:bg-red-100 border border-[#cfc0a9] hover:border-red-400 text-[#2c1f14] hover:text-red-700 transition cursor-pointer">
+      <button id="restartBtn" onclick="CharacterCreationSystem.restart()" class="hidden px-2.5 py-1 text-xs rounded bg-[#ede5d5] hover:bg-red-100 border border-[#cfc0a9] hover:border-red-400 text-[#2c1f14] hover:text-red-700 transition">
         <i class="fa-solid fa-rotate-left mr-1"></i>重新立碑
       </button>
-      <button id="loadBtn" onclick="mainLoadGame()" class="hidden px-2.5 py-1 text-xs rounded-lg bg-[#1e6b4d]/20 hover:bg-[#1e6b4d]/30 border border-[#1e6b4d]/50 text-[#1e6b4d] flex items-center gap-1.5 transition cursor-pointer">
+      <button id="loadBtn" onclick="mainLoadGame()" class="hidden px-2.5 py-1 text-xs rounded bg-[#1e6b4d]/20 hover:bg-[#1e6b4d]/30 border border-[#1e6b4d]/50 text-[#1e6b4d] flex items-center gap-1.5 transition">
         <i class="fa-solid fa-download"></i><span>讀取存檔</span>
       </button>
     </div>
   </div>
 </header>
 
-<main class="flex-1 max-w-6xl w-full mx-auto p-3 sm:p-4 flex flex-col justify-center">
+<main class="flex-1 max-w-6xl w-full mx-auto p-3 sm:p-5 flex flex-col justify-center">
 
 <!-- ===== SCREEN 1: 三步創角 ===== -->
 <div id="screen-setup" class="w-full max-w-4xl mx-auto my-auto py-4 font-serif">
@@ -62,7 +63,7 @@ tailwind.config = {
       <p class="text-xs sm:text-sm text-[#78614c] mt-1.5 tracking-wider">三步定終身：名諱、起源、潛力</p>
     </div>
 
-    <!-- 步驟圓點與引線 -->
+    <!-- 步驟圓點與引線 (高對比度) -->
     <div class="flex justify-center items-center gap-3 mb-7">
       <div id="dot-1" class="step-dot active">1</div>
       <div class="w-12 h-0.5 bg-[#cfc2ae]"></div>
@@ -148,125 +149,144 @@ tailwind.config = {
 </div>
 
 <!-- ===== SCREEN 2: 冒險主視窗 ===== -->
-<div id="screen-play" class="hidden flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 max-w-6xl w-full mx-auto h-[calc(100vh-4.5rem)] min-h-[580px]">
+<div id="screen-play" class="hidden flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5 my-auto max-w-6xl w-full mx-auto">
   
-  <!-- 左側邊欄：人物狀態面板 -->
-  <aside class="lg:col-span-4 flex flex-col gap-3 h-full overflow-y-auto pr-0.5 custom-scrollbar">
-    <!-- 基礎身份與狀態條 -->
-    <div class="bg-[#fbf9f4] border border-[#d8ccb8] rounded-xl p-3.5 shadow-sm">
-      <div class="flex items-start justify-between">
-        <div>
-          <div class="flex items-center gap-1.5 flex-wrap" id="hudIdentityTags"></div>
-          <h2 id="hudName" class="font-serif text-xl font-black text-[#2c1f14] mt-1">—</h2>
-          <p id="hudAgeStage" class="text-[11px] text-[#8a7561] font-serif tracking-wider mt-0.5">—</p>
-        </div>
-        <div class="text-center bg-[#f3ecdf] border border-[#d8ccb8] px-3 py-1 rounded-lg shadow-inner">
-          <span class="text-[9px] text-[#8a7561] font-bold block">護身 (AC)</span>
-          <span id="hudAC" class="text-lg font-mono font-black text-[#a82d25]">10</span>
-        </div>
-      </div>
-
-      <div class="space-y-2 mt-2.5 pt-2.5 border-t border-[#e8decd] font-serif">
-        <div>
-          <div class="flex justify-between text-xs mb-0.5 font-bold">
-            <span class="text-[#594432]">氣血 (HP)</span>
-            <span class="font-mono text-[#2c1f14] text-[11px]"><b id="hudHpCur">0</b> / <span id="hudHpMax">0</span></span>
-          </div>
-          <div class="w-full bg-[#e8decb] rounded-full h-1.5 overflow-hidden border border-[#d8cca8]">
-            <div id="barHp" class="bg-gradient-to-r from-red-700 to-red-500 h-full rounded-full transition-all duration-300" style="width:100%"></div>
-          </div>
-        </div>
-        <div>
-          <div class="flex justify-between text-xs mb-0.5 font-bold">
-            <span class="text-[#594432]">架勢 (Posture)</span>
-            <span class="font-mono text-[#2c1f14] text-[11px]"><b id="hudPosCur">0</b> / <span id="hudPosMax">0</span></span>
-          </div>
-          <div class="w-full bg-[#e8decb] rounded-full h-1.5 overflow-hidden border border-[#d8cca8]">
-            <div id="barPos" class="bg-gradient-to-r from-amber-600 to-amber-400 h-full rounded-full transition-all duration-300" style="width:100%"></div>
-          </div>
-        </div>
-        <div>
-          <div class="flex justify-between text-xs mb-0.5 font-bold">
-            <span class="text-[#594432]">真氣 (Qi)</span>
-            <span class="font-mono text-[#2c1f14] text-[11px]"><b id="hudQiCur">0</b> / <span id="hudQiMax">0</span></span>
-          </div>
-          <div class="w-full bg-[#e8decb] rounded-full h-1.5 overflow-hidden border border-[#d8cca8]">
-            <div id="barQi" class="bg-gradient-to-r from-emerald-700 to-emerald-500 h-full rounded-full transition-all duration-300" style="width:100%"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 六維屬性與功法特性 -->
-    <div class="bg-[#fbf9f4] border border-[#d8ccb8] rounded-xl p-3.5 shadow-sm flex-1 flex flex-col justify-between">
+<!-- 左側邊欄：人物狀態面板 (純中文古風版) -->
+<aside class="lg:col-span-4 flex flex-col space-y-3.5">
+  
+  <!-- 1. 基礎身份、閃避與三維狀態條 -->
+  <div class="bg-[#fbf9f4] border border-[#d8ccb8] rounded-xl p-4 shadow-sm">
+    <div class="flex items-start justify-between">
       <div>
-        <h3 class="text-xs font-serif font-black tracking-widest text-[#594432] mb-2">【 六維根基 】</h3>
-        <div class="grid grid-cols-2 gap-1.5 text-xs" id="hudStatList"></div>
+        <div class="flex items-center gap-1.5 flex-wrap" id="hudIdentityTags"></div>
+        <h2 id="hudName" class="font-serif text-2xl font-black text-[#2c1f14] mt-1.5">—</h2>
+        <p id="hudAgeStage" class="text-xs text-[#8a7561] font-serif tracking-wider mt-0.5">—</p>
       </div>
-      <div class="mt-3 pt-2.5 border-t border-[#e8decd]">
-        <span class="text-[11px] font-serif font-black tracking-widest text-[#6d5541] block mb-1.5">【 武學 · 特性 】</span>
-        <div id="hudSkillsTags" class="flex flex-wrap gap-1 text-[11px] max-h-24 overflow-y-auto pr-0.5"></div>
+      <!-- 原 護身 (AC) 改為 純中文：身法閃避 -->
+      <div class="text-center bg-[#f3ecdf] border border-[#d8ccb8] px-3.5 py-1.5 rounded-lg shadow-inner">
+        <span class="text-[11px] text-[#78614c] font-black block tracking-wider">閃避</span>
+        <span id="hudAC" class="text-xl font-mono font-black text-[#a82d25]">10</span>
       </div>
     </div>
-  </aside>
 
-  <!-- 右側：日誌與選項主視窗 (保證 Log 有足夠伸展空間) -->
-  <section class="lg:col-span-8 flex flex-col h-full overflow-hidden">
-    <div class="wuxia-panel-box rounded-xl p-4 sm:p-5 flex-1 flex flex-col overflow-hidden shadow-md">
+    <!-- 氣血 / 架勢 / 真氣 (剔除所有 HP, Pos, Qi 英文) -->
+    <div class="space-y-2.5 mt-3 pt-3 border-t border-[#e8decd] font-serif">
+      <div>
+        <div class="flex justify-between text-xs mb-1 font-black">
+          <span class="text-[#594432] tracking-wider">氣血</span>
+          <span class="font-mono text-[#2c1f14] text-[11px]"><b id="hudHpCur">0</b> / <span id="hudHpMax">0</span></span>
+        </div>
+        <div class="w-full bg-[#e8decb] rounded-full h-2 overflow-hidden border border-[#d8cca8]">
+          <div id="barHp" class="bg-gradient-to-r from-red-700 to-red-500 h-full rounded-full transition-all duration-300" style="width:100%"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="flex justify-between text-xs mb-1 font-black">
+          <span class="text-[#594432] tracking-wider">架勢</span>
+          <span class="font-mono text-[#2c1f14] text-[11px]"><b id="hudPosCur">0</b> / <span id="hudPosMax">0</span></span>
+        </div>
+        <div class="w-full bg-[#e8decb] rounded-full h-2 overflow-hidden border border-[#d8cca8]">
+          <div id="barPos" class="bg-gradient-to-r from-amber-600 to-amber-400 h-full rounded-full transition-all duration-300" style="width:100%"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="flex justify-between text-xs mb-1 font-black">
+          <span class="text-[#594432] tracking-wider">內力</span>
+          <span class="font-mono text-[#2c1f14] text-[11px]"><b id="hudQiCur">0</b> / <span id="hudQiMax">0</span></span>
+        </div>
+        <div class="w-full bg-[#e8decb] rounded-full h-2 overflow-hidden border border-[#d8cca8]">
+          <div id="barQi" class="bg-gradient-to-r from-emerald-700 to-emerald-500 h-full rounded-full transition-all duration-300" style="width:100%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 六維資質與江湖名望 -->
+  <div class="bg-[#fbf9f4] border border-[#d8ccb8] rounded-xl p-4 shadow-sm flex-1 flex flex-col justify-between">
+    
+    <!-- 六維屬性 (簡約純粹，無修正值干擾) -->
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="text-xs font-serif font-black tracking-widest text-[#594432]">【 六維根基 】</h3>
+      </div>
+      <div class="grid grid-cols-2 gap-2 text-xs" id="hudStatList"></div>
+    </div>
+
+    <!-- 掌握武學與特性 -->
+    <div class="mt-4 pt-3 border-t border-[#e8decd]">
+      <span class="text-[11px] font-serif font-black tracking-widest text-[#6d5541] block mb-2">【 掌握武學 · 命格 】</span>
+      <div id="hudSkillsTags" class="flex flex-wrap gap-1.5 text-[11px]"></div>
+    </div>
+
+    <!-- 江湖名望與正邪印章 (加大、自帶數值) -->
+    <div class="mt-4 pt-3 border-t border-[#e8decd]">
+      <div class="flex items-center justify-between mb-2.5">
+        <span class="text-[11px] font-serif font-black tracking-widest text-[#6d5541]">【 正邪行事 】</span>
+        <!-- 加大印章容器 -->
+        <span id="hudMoralityBadge" class="seal-stamp text-xs py-1 px-3 shadow-xs font-serif font-black transition-all">
+          正邪不染 · 0
+        </span>
+      </div>
+      
+      <div class="grid grid-cols-2 gap-2">
+        <div class="bg-white border border-[#d8ccb8] p-2 rounded-lg text-center shadow-2xs">
+          <span class="text-[10px] text-[#8a7561] block font-bold">江湖威望</span>
+          <span id="hudReputation" class="font-mono text-base font-black text-[#2c1f14]">0</span>
+        </div>
+        <div class="bg-white border border-[#d8ccb8] p-2 rounded-lg text-center shadow-2xs">
+          <span class="text-[10px] text-[#8a7561] block font-bold">門派貢獻</span>
+          <span id="hudContribution" class="font-mono text-base font-black text-[#2c1f14]">0</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</aside>
+
+  <!-- 右側：日誌與選項主視窗 (圖3同款純淨古風框) -->
+  <section class="lg:col-span-8 flex flex-col h-[78vh] min-h-[520px]">
+    <div class="wuxia-panel-box rounded-xl p-5 sm:p-7 flex-1 flex flex-col overflow-hidden">
       
       <!-- 頂部標題列 -->
-      <div class="flex items-center justify-between pb-2.5 border-b border-[#d8ccb8] flex-shrink-0">
+      <div class="flex items-center justify-between pb-3 border-b border-[#d8ccb8] flex-shrink-0">
         <div class="flex items-center space-x-2">
-          <span id="sceneBadge" class="seal-stamp text-[10px] py-0.5">序幕</span>
-          <h3 id="sceneTitle" class="font-serif text-sm sm:text-base font-black text-[#2c1f14]">江湖初現</h3>
+          <span id="sceneBadge" class="seal-stamp text-[11px] py-0.5">序幕</span>
+          <h3 id="sceneTitle" class="font-serif text-base font-black text-[#2c1f14]">江湖初現</h3>
         </div>
-        <div class="text-[11px] text-[#8a7561] flex items-center gap-1 font-serif">
+        <div class="text-xs text-[#8a7561] flex items-center gap-1 font-serif">
           <i class="fa-solid fa-dice-d20 text-[#a82d25]"></i><span>D20 檢定</span>
         </div>
       </div>
       
-      <!-- 敵方 HUD (戰鬥時：更加緊緻，不搶佔 Log 空間) -->
-      <div id="enemyHud" class="hidden bg-[#fffaf8] border border-[#fca5a5] rounded-xl p-2.5 my-2 flex-shrink-0 shadow-2xs font-serif">
-        <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-1.5 min-w-0">
-            <span class="text-[9px] font-black px-1.5 py-0.2 rounded bg-[#fee2e2] text-[#991b1b] border border-[#fca5a5] shrink-0">強敵對決</span>
-            <span id="enemyName" class="font-black text-sm sm:text-base text-[#2c1f14] tracking-wider truncate"></span>
+      <!-- 敵方 HUD (戰鬥時) -->
+      <div id="enemyHud" class="hidden bg-[#fdf5f5] border border-red-300 rounded-lg p-3 my-2.5 transition flex-shrink-0">
+        <div class="flex items-center justify-between mb-1.5">
+          <div>
+            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-800 border border-red-300">強敵</span>
+            <span id="enemyName" class="font-serif font-black text-sm text-red-900 ml-1.5"></span>
+            <span id="enemyStatusTag" class="text-[10px] ml-2 text-amber-700 font-bold"></span>
           </div>
-          <div class="text-[11px] text-[#594432] font-serif bg-white px-2 py-0.5 rounded-md border border-[#e5dcce] shadow-2xs shrink-0">
-            身法 (AC): <b id="enemyAC" class="text-[#a82d25] font-mono text-xs sm:text-sm">13</b>
-          </div>
+          <div class="text-xs text-[#594432] font-serif">身法 (AC): <b id="enemyAC" class="text-[#a82d25] font-mono">13</b></div>
         </div>
-
-        <!-- 狀態標籤自動換行區 -->
-        <div id="enemyStatusTag" class="flex flex-wrap gap-1 mt-1"></div>
-
-        <div class="grid grid-cols-2 gap-2 text-xs mt-2 pt-1.5 border-t border-[#fde8e8]">
+        <div class="grid grid-cols-2 gap-3 text-xs">
           <div>
-            <div class="flex justify-between text-[10px] mb-0.5 font-bold">
-              <span class="text-[#881337]">氣血</span>
-              <span id="enemyHpText" class="font-mono text-[#991b1b]">0/0</span>
-            </div>
-            <div class="w-full bg-[#fce7e7] rounded-full h-1.5 overflow-hidden border border-[#fca5a5]/40">
-              <div id="enemyHpBar" class="bg-gradient-to-r from-red-700 to-red-500 h-full transition-all duration-300" style="width:100%"></div>
-            </div>
+            <div class="flex justify-between text-[11px] mb-1 font-bold"><span class="text-[#6d5541]">氣血</span><span id="enemyHpText" class="font-mono text-red-700">0/0</span></div>
+            <div class="w-full bg-[#ebd5d5] rounded-full h-1.5 overflow-hidden"><div id="enemyHpBar" class="bg-red-600 h-full transition-all duration-300" style="width:100%"></div></div>
           </div>
           <div>
-            <div class="flex justify-between text-[10px] mb-0.5 font-bold">
-              <span class="text-[#b45309]">護體架勢</span>
-              <span id="enemyPosText" class="font-mono text-[#b45309]">0/0</span>
-            </div>
-            <div class="w-full bg-[#fef3c7] rounded-full h-1.5 overflow-hidden border border-[#fde68a]">
-              <div id="enemyPosBar" class="bg-gradient-to-r from-amber-600 to-amber-400 h-full transition-all duration-300" style="width:100%"></div>
-            </div>
+            <div class="flex justify-between text-[11px] mb-1 font-bold"><span class="text-[#6d5541]">架勢</span><span id="enemyPosText" class="font-mono text-amber-700">0/0</span></div>
+            <div class="w-full bg-[#ebd5d5] rounded-full h-1.5 overflow-hidden"><div id="enemyPosBar" class="bg-amber-600 h-full transition-all duration-300" style="width:100%"></div></div>
           </div>
         </div>
       </div>
 
-      <!-- 劇情記錄區：以 flex-1 自動填滿剩餘高度，設置 min-h 保證字體清晰呈現 -->
-      <div id="narrativeLogs" class="flex-1 min-h-[160px] overflow-y-auto space-y-2.5 py-3 pr-1.5 font-serif text-xs sm:text-sm leading-relaxed custom-scrollbar"></div>
+      <!-- 劇情記錄區：底色乾淨、字體深刻分明 -->
+      <div id="narrativeLogs" class="flex-1 overflow-y-auto min-h-0 space-y-3 py-4 pr-2 font-serif text-sm sm:text-[15px] leading-relaxed"></div>
       
-      <!-- 選項面板 (雙列緊湊佈局，點擊舒適不佔位) -->
-      <div id="interactionPanel" class="pt-2.5 border-t border-[#d8ccb8] flex-shrink-0 z-10 max-h-[36vh] overflow-y-auto custom-scrollbar pr-0.5"></div>
+      <!-- 選項面板 (圖2、圖3純白卡片/硃砂紅按鈕) -->
+<div id="interactionPanel" class="pt-3 border-t border-[#d8ccb8] flex-shrink-0 z-10 flex flex-col gap-2.5 max-h-[40vh] overflow-y-auto custom-scrollbar pr-1"></div>
     </div>
   </section>
 </div>
@@ -280,36 +300,47 @@ tailwind.config = {
     <h3 id="diceCheckTitle" class="text-base font-black text-[#2c1f14]">檢定判定</h3>
     <p id="diceCheckFormula" class="text-xs text-[#78614c] mt-0.5 font-mono">DC: 13</p>
     
+    <!-- 骰子居中展示框 -->
     <div class="my-5 flex items-center justify-center">
       <div id="d20Visual" class="w-24 h-24 rounded-2xl bg-gradient-to-tr from-[#8a1c14] via-[#a82d25] to-[#c2410c] flex items-center justify-center text-white text-3xl font-black shadow-lg border-2 border-[#fef3c7]/60">
         <span id="d20ValueDisplay" class="font-mono">--</span>
       </div>
     </div>
 
+    <!-- 結算算式 (清晰白底黑字) -->
     <div id="diceBreakdown" class="text-xs text-[#2c1f14] bg-white p-3 rounded-xl border border-[#d8ccb8] mb-4 font-mono font-bold shadow-xs">
       擲骰中……
     </div>
 
+    <!-- 確認按鈕 (硃砂紅主按鈕) -->
     <button onclick="DiceSystem.resolve()" class="wuxia-primary-btn w-full py-2.5 rounded-xl font-bold text-sm tracking-wider cursor-pointer shadow transition">
       確定並見證結果
     </button>
   </div>
 </div>
 
-<!-- ===== ENCOUNTER MODAL ===== -->
+<!-- ===== ENCOUNTER MODAL (奇遇 / 生死重大抉擇專屬全屏彈窗) ===== -->
 <div id="encounterModal" class="hidden fixed inset-0 z-50 bg-[#1f1610]/75 backdrop-blur-xs flex items-center justify-center p-4 font-serif">
   <div class="wuxia-panel-box rounded-2xl max-w-lg w-full p-6 sm:p-8 flex flex-col border border-[#c9bbaa] shadow-2xl relative">
+    
+    <!-- 頂部印章與標題 -->
     <div class="text-center pb-3 border-b border-[#d8ccb8]/80 flex-shrink-0">
       <div id="encounterBadge" class="seal-stamp text-[10px] mb-1.5">江湖奇遇</div>
       <h2 id="encounterTitle" class="text-xl sm:text-2xl font-black text-[#2c1f14] tracking-widest">—</h2>
       <p id="encounterSubtitle" class="text-xs text-[#8a7561] mt-1 tracking-wider">機緣巧合 · 莫測凶吉</p>
     </div>
-    <div id="encounterText" class="my-5 max-h-[45vh] overflow-y-auto pr-1 text-sm sm:text-[15px] text-[#2c1f14] leading-relaxed tracking-wide space-y-3 font-serif"></div>
-    <div id="encounterOptions" class="pt-2 border-t border-[#d8ccb8]/80 flex-shrink-0 flex flex-col gap-2.5"></div>
+
+    <!-- 中間詳細敘事區 (高對比度墨字、自動捲動) -->
+    <div id="encounterText" class="my-5 max-h-[45vh] overflow-y-auto pr-1 text-sm sm:text-[15px] text-[#2c1f14] leading-relaxed tracking-wide space-y-3 font-serif">
+    </div>
+
+    <!-- 底部選項面板 (大白底卡片) -->
+    <div id="encounterOptions" class="pt-2 border-t border-[#d8ccb8]/80 flex-shrink-0 flex flex-col gap-2.5">
+    </div>
   </div>
 </div>
 
-<!-- OVERVIEW MODAL -->
+<!-- OVERVIEW MODAL (角色概覽) -->
 <div id="overviewModal" class="hidden fixed inset-0 z-50 bg-[#1f1610]/70 backdrop-blur-xs flex items-center justify-center p-4 font-serif">
   <div class="wuxia-panel-box rounded-2xl max-w-lg w-full max-h-[85vh] overflow-hidden flex flex-col border border-[#c9bbaa] shadow-2xl">
     <div class="px-5 py-3.5 border-b border-[#d8ccb8] bg-[#fbf9f4] flex justify-between items-center">
@@ -320,23 +351,27 @@ tailwind.config = {
   </div>
 </div>
 
-<!-- LOADOUT MODAL -->
-<div id="loadoutModal" class="hidden fixed inset-0 z-50 bg-[#1f1610]/70 backdrop-blur-xs flex items-center justify-center p-4 font-serif">
-  <div class="wuxia-panel-box rounded-2xl max-w-3xl w-full max-h-[88vh] overflow-hidden flex flex-col border border-[#c9bbaa] shadow-2xl">
-    <div class="px-5 py-3.5 border-b border-[#d8ccb8] bg-[#fbf9f4] flex justify-between items-center flex-shrink-0">
+<!-- LOADOUT MODAL (功法配置 · 大氣版) -->
+<div id="loadoutModal" class="hidden fixed inset-0 z-50 bg-[#1f1610]/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 font-serif">
+  <div class="wuxia-panel-box rounded-2xl max-w-4xl w-full max-h-[88vh] overflow-hidden flex flex-col border border-[#c9bbaa] shadow-2xl">
+    
+    <!-- 頂部標題列 -->
+    <div class="px-6 py-4 border-b border-[#d8ccb8] bg-[#fbf9f4] flex justify-between items-center flex-shrink-0">
       <div>
-        <h3 class="text-base font-black text-[#2c1f14]">功法配置</h3>
-        <p class="text-[11px] text-[#78614c]">裝備武學招式，臨陣見招拆招</p>
+        <h3 class="text-lg font-black text-[#2c1f14] tracking-wide">功法配置</h3>
+        <p class="text-xs text-[#78614c] mt-0.5">運轉心法招式，臨陣見招拆招</p>
       </div>
-      <button onclick="LoadoutUI.close()" class="text-[#78614c] hover:text-[#a82d25] transition cursor-pointer text-lg">
+      <button onclick="LoadoutUI.close()" class="text-[#78614c] hover:text-[#a82d25] transition cursor-pointer text-xl p-1">
         <i class="fa-solid fa-xmark"></i>
       </button>
     </div>
-    <div id="loadoutContent" class="p-5 overflow-y-auto text-sm bg-[#fcfaf5] flex-1"></div>
+
+    <!-- 內容掛載點 -->
+    <div id="loadoutContent" class="p-5 sm:p-6 overflow-y-auto text-sm bg-[#fcfaf5] flex-1"></div>
   </div>
 </div>
 
-<!-- ALLOC MODAL -->
+<!-- ALLOC MODAL (年度修煉加點) -->
 <div id="allocModal" class="hidden fixed inset-0 z-50 bg-[#1f1610]/70 backdrop-blur-xs flex items-center justify-center p-4 font-serif">
   <div class="wuxia-panel-box rounded-2xl max-w-md w-full p-6 shadow-2xl border border-[#c9bbaa]">
     <div class="text-center mb-3">
@@ -349,20 +384,42 @@ tailwind.config = {
   </div>
 </div>
 
-<!-- ADULT MODAL -->
+<!-- ADULT MODAL (十八成年 · 紅塵初涉) -->
 <div id="adultModal" class="hidden fixed inset-0 z-50 bg-[#1f1610]/75 backdrop-blur-xs flex items-center justify-center p-4 font-serif">
   <div class="wuxia-panel-box rounded-2xl max-w-md w-full p-8 shadow-2xl border border-[#c9bbaa] text-center relative overflow-hidden bg-[#faf7f0]">
+    
+    <!-- 頂部印章 -->
     <div class="mb-4">
       <span class="seal-stamp text-xs tracking-[0.2em] px-3 py-0.5">年屆十八 · 始立紅塵</span>
     </div>
-    <h2 class="text-3xl font-black text-[#2c1f14] tracking-[0.25em] mb-4">紅 塵 初 涉</h2>
+
+    <!-- 主標題 -->
+    <h2 class="text-3xl font-black text-[#2c1f14] tracking-[0.25em] mb-4">
+      紅 塵 初 涉
+    </h2>
+    
+    <!-- 典雅細分隔線 -->
     <div class="w-16 h-0.5 bg-[#d8ccb8] mx-auto mb-6"></div>
+
+    <!-- 萬用文案：任何起源（孤兒、世家、商人、門派）皆完全通順 -->
     <div class="my-6 text-sm text-[#4a3b2c] leading-loose tracking-widest text-center space-y-3 font-medium">
-      <p>寒暑五載，指顧之間。<br>少年志氣隨歲月漸長，根基初成。</p>
-      <p>天地蒼茫，江湖水深。<br>自此去，世道險惡與機緣造化皆在腳下。<br>快意恩仇，生死由天。</p>
-      <p class="font-bold text-[#a82d25] pt-2 tracking-[0.15em]">—— 屬於你的故事，今日始開新卷。</p>
+      <p>
+        寒暑五載，指顧之間。<br>
+        少年志氣隨歲月漸長，根基初成。
+      </p>
+      <p>
+        天地蒼茫，江湖水深。<br>
+        自此去，世道險惡與機緣造化皆在腳下。<br>
+        快意恩仇，生死由天。
+      </p>
+      <p class="font-bold text-[#a82d25] pt-2 tracking-[0.15em]">
+        —— 屬於你的故事，今日始開新卷。
+      </p>
     </div>
+
     <div class="w-20 h-px bg-[#e5dcce] mx-auto mb-6"></div>
+
+    <!-- 底部按鈕 -->
     <button onclick="LifepathSystem.startAdultJourney()" class="wuxia-primary-btn w-full py-3.5 rounded-xl font-bold text-sm tracking-[0.2em] shadow-md hover:shadow-lg transition cursor-pointer flex items-center justify-center gap-2">
       <i class="fa-solid fa-scroll text-xs"></i>
       <span>踏 入 江 湖</span>
@@ -370,32 +427,81 @@ tailwind.config = {
   </div>
 </div>
 
-<script>
-  const jsFiles = [
-    'js/core/sound.js',
-    'js/core/state.js',
-    'js/core/tags.js',
-    'js/core/data.js',
-    'data/fallback.js',
-    'js/core/dice.js',
-    'js/core/effects.js',
-    'js/core/save.js',
-    'js/ui/hud.js',
-    'js/ui/overview.js',
-    'js/ui/loadout.js',
-    'js/ui/devtools.js',
-    'js/systems/characterCreation.js',
-    'js/systems/lifepath.js',
-    'js/systems/exploration.js',
-    'js/systems/events.js',
-    'js/systems/combat.js',
-    'js/systems/ending.js',
-    'js/main.js'
-  ];
-  const timestamp = new Date().getTime();
-  jsFiles.forEach(file => {
-    document.write(`<script src="${file}?v=${timestamp}"><\/script>`);
-  });
-</script>
+<!-- INTRO SCROLL MODAL (開局定場古卷 · 宣紙立傳) -->
+<div id="introScrollModal" class="hidden fixed inset-0 z-50 bg-[#1a140e]/85 backdrop-blur-md flex items-center justify-center p-4 font-serif">
+  <div class="relative w-[360px] sm:w-[440px] max-h-[85vh] bg-[#dfc9a4] text-[#2c1d11] p-7 sm:p-9 shadow-2xl rounded-sm flex flex-col justify-between border-4 border-[#6b4c2a] select-none overflow-hidden">
+    
+    <!-- 四角古典包角裝飾 -->
+    <div class="absolute top-1 left-1 w-3.5 h-3.5 border-t-2 border-l-2 border-[#5c3e21]"></div>
+    <div class="absolute top-1 right-1 w-3.5 h-3.5 border-t-2 border-r-2 border-[#5c3e21]"></div>
+    <div class="absolute bottom-1 left-1 w-3.5 h-3.5 border-b-2 border-l-2 border-[#5c3e21]"></div>
+    <div class="absolute bottom-1 right-1 w-3.5 h-3.5 border-b-2 border-r-2 border-[#5c3e21]"></div>
+
+    <!-- 頂部副標 -->
+    <div class="text-xs tracking-[0.3em] text-[#6d4d2b] font-bold pb-2 border-b border-[#bca17c] w-full text-center flex-shrink-0">
+      黃皮殘卷 · 身世立傳
+    </div>
+    
+    <!-- 中間敘事區：讀取起源的 o.intro -->
+    <div class="my-auto py-5 overflow-y-auto max-h-[55vh] pr-1">
+      <div id="introScrollOriginBadge" class="text-center mb-3">
+        <span class="seal-stamp text-[11px] px-2 py-0.5">武林世家</span>
+      </div>
+      <h3 id="introScrollTitle" class="text-center text-xl sm:text-2xl font-black text-[#26170d] tracking-widest mb-4">
+        初 涉 江 湖
+      </h3>
+      <div class="w-12 h-0.5 bg-[#bca17c] mx-auto mb-4"></div>
+      <p id="introScrollText" class="text-sm sm:text-[15px] text-[#332213] leading-loose tracking-wider indent-8 text-justify font-medium">
+        <!-- 這裡會動態載入 o.intro -->
+      </p>
+    </div>
+
+    <!-- 底部俠者立傳與點擊啟程 -->
+    <div class="w-full text-center pt-3 border-t border-[#bca17c] flex-shrink-0">
+      <div id="introScrollName" class="text-xs text-[#523920] tracking-widest font-bold mb-3">
+        【俠士】— 啟程
+      </div>
+      <button onclick="CharacterCreationSystem.proceedToGame()" class="wuxia-primary-btn w-full py-3 rounded-lg font-bold text-sm tracking-[0.2em] shadow-md transition cursor-pointer flex items-center justify-center gap-2">
+        <i class="fa-solid fa-scroll text-xs"></i>
+        <span>翻 開 卷 宗 · 啟 程</span>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+  <!-- ★ 終極自動加載器：利用當前時間戳強制破解瀏覽器 Cache -->
+  <script>
+    const jsFiles = [
+      'js/core/sound.js',
+      'js/core/state.js',
+      'js/core/tags.js',
+      'js/core/data.js',
+      'data/fallback.js',
+      'js/core/dice.js',
+      'js/core/effects.js',
+      'js/core/save.js',
+      'js/ui/hud.js',
+      'js/ui/overview.js',
+      'js/ui/loadout.js',
+      'js/ui/devtools.js',
+      'js/systems/characterCreation.js',
+      'js/systems/lifepath.js',
+      'js/systems/exploration.js', // ★ 新增呢個
+      'js/systems/events.js',
+      'js/systems/combat.js',
+      'js/systems/ending.js',
+      'js/main.js'
+    ];
+
+    // 獲取當前時間戳，每次刷新都唔同
+    const timestamp = new Date().getTime();
+
+    // 按順序動態插入 <script>
+    jsFiles.forEach(file => {
+      document.write(`<script src="${file}?v=${timestamp}"><\/script>`);
+    });
+  </script>
 </body>
+</html>
 </html>

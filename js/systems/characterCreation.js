@@ -242,7 +242,10 @@ const CharacterCreationSystem = {
   adjustStat(k, delta) {
     const base = this._baseStats()[k];
     if (delta > 0) {
-      if (this.state.stats[k] >= 28) return; // ★ 改為 28 (顯示 18)
+      // ★ 將上限改為 25（UI 顯示 15，修正值 +7）
+      if (this.state.stats[k] >= 25) {
+        return alert('該屬性已達先天極限（15）！');
+      }
       const cost = this.getCostForNextPoint(this.state.stats[k]);
       if (this.state.freePoints >= cost) {
         this.state.stats[k]++; 
@@ -259,35 +262,72 @@ const CharacterCreationSystem = {
 
   randomizeStats() {
     const baseStats = this._baseStats();
-    Object.keys(STATS_INFO).forEach(k => {
-      this.state.stats[k] = baseStats[k] || 0;
-    });
-    this.state.freePoints = 10;
-
     const keys = Object.keys(STATS_INFO);
-    let attempts = 0;
+    const totalPoints = 10; // 創角總點數
 
-    while (this.state.freePoints > 0 && attempts < 200) {
-      attempts++;
-      const availableKeys = keys.filter(k => this.state.stats[k] < 28); // ★ 改為 28
-      if (availableKeys.length === 0) break;
+    let perfectSolutions = []; // 收集所有能完美用完的結果
+    let bestStats = null;
+    let minRemaining = totalPoints;
 
-      const randomKey = availableKeys[Math.floor(Math.random() * availableKeys.length)];
-      const cost = this.getCostForNextPoint(this.state.stats[randomKey]);
-      
-      if (this.state.freePoints >= cost) {
-        this.state.stats[randomKey]++;
-        this.state.freePoints -= cost;
-      } else {
-        let canAddAny = false;
-        for (const k of availableKeys) {
-          if (this.state.freePoints >= this.getCostForNextPoint(this.state.stats[k])) {
-            canAddAny = true; break;
+    // ★ 核心優化：模擬 300 次，收集所有能剛好用完點數的結果
+    for (let trial = 0; trial < 300; trial++) {
+      let tempStats = {};
+      keys.forEach(k => { tempStats[k] = baseStats[k] || 0; });
+      let tempPoints = totalPoints;
+      let attempts = 0;
+
+      while (tempPoints > 0 && attempts < 100) {
+        attempts++;
+        const availableKeys = keys.filter(k => tempStats[k] < 18);
+        if (availableKeys.length === 0) break;
+
+        const randomKey = availableKeys[Math.floor(Math.random() * availableKeys.length)];
+        const cost = this.getCostForNextPoint(tempStats[randomKey]);
+
+        if (tempPoints >= cost) {
+          tempStats[randomKey]++;
+          tempPoints -= cost;
+        } else {
+          let canAddAny = false;
+          for (const k of availableKeys) {
+            if (tempPoints >= this.getCostForNextPoint(tempStats[k])) {
+              canAddAny = true; break;
+            }
           }
+          if (!canAddAny) break;
         }
-        if (!canAddAny) break;
+      }
+
+      // 如果完美用完，收集進完美解池
+      if (tempPoints === 0) {
+        perfectSolutions.push(tempStats);
+      }
+      
+      // 記錄最優解（作備用）
+      if (tempPoints < minRemaining) {
+        minRemaining = tempPoints;
+        bestStats = tempStats;
       }
     }
+
+    let finalStats = null;
+    
+    // ★ 終極隨機：如果完美解池唔係空嘅，就從入面隨機抽一個！
+    if (perfectSolutions.length > 0) {
+      const randomIndex = Math.floor(Math.random() * perfectSolutions.length);
+      finalStats = perfectSolutions[randomIndex];
+      this.state.freePoints = 0;
+    } else if (bestStats) {
+      finalStats = bestStats;
+      this.state.freePoints = minRemaining;
+    }
+
+    if (finalStats) {
+      Object.keys(STATS_INFO).forEach(k => {
+        this.state.stats[k] = finalStats[k];
+      });
+    }
+
     this.renderStatBoard();
     this.renderSummary();
   },
@@ -311,7 +351,7 @@ const CharacterCreationSystem = {
       <div class="mt-1"><b class="text-wuxiaGold">金錢：</b>${o.gold} 兩</div>`;
   },
 
-  finish() {
+finish() {
     if (this.state.freePoints > 0) {
       return alert(`請先分配剩下的 ${this.state.freePoints} 點潛力！`);
     }
@@ -330,10 +370,10 @@ const CharacterCreationSystem = {
     const conMod = Math.floor((finalStats.con - 10) / 2);
     const dexMod = Math.floor((finalStats.dex - 10) / 2);
     const wisMod = Math.floor((finalStats.wis - 10) / 2);
+    const intMod = Math.floor((finalStats.int - 10) / 2); // ★ 新增：悟性修正
     
-    // ★ 核心修正：這裡必須用 let，因為下面要加內功加成
     let maxHp = (sect ? sect.baseHp : 24) + conMod * 3;
-    let maxPos = (sect ? sect.basePos : 14) + Math.max(0, dexMod) * 2;
+    let maxPos = (sect ? sect.basePos : 14) + Math.max(0, intMod) * 2; 
     let maxQi = (sect ? sect.baseQi : 5) + Math.max(0, wisMod);
 
     // 2. 處理 Tags
@@ -347,7 +387,6 @@ const CharacterCreationSystem = {
     const martialArts = [...(o.initialMartialArts || [])];
     if (sect) martialArts.push(...(sect.startingArts || []));
 
-    // 1. 分配初始裝備
     const loadout = { attack: [null, null], inner: [null], utility: [null] };
     martialArts.forEach(id => {
       const a = G.data.MARTIAL_ARTS[id];
@@ -356,21 +395,18 @@ const CharacterCreationSystem = {
       if (idx !== -1) loadout[a.slot][idx] = id;
     });
 
-    // ★ 核心新增：處理開局自動裝備的功法效果（Tag 與 上限加成）
     Object.keys(loadout).forEach(slotKey => {
       loadout[slotKey].forEach(artId => {
         if (!artId) return;
         const art = G.data.MARTIAL_ARTS[artId];
         if (!art) return;
 
-        // 1. 處理 grantTags (給初始裝的功法也加上 Tag)
         if (art.grantTags) {
           String(art.grantTags).split('|').map(t => t.trim()).forEach(t => {
             if (t && !tags.includes(t)) tags.push(t);
           });
         }
 
-        // 2. 處理 innerEffect 的上限加成 (如果你只想要內功生效，可以加 if(slotKey === 'inner'))
         if (art.innerEffect) {
           String(art.innerEffect).split('|').forEach(eff => {
             const [key, val] = eff.split(':');
@@ -383,7 +419,7 @@ const CharacterCreationSystem = {
       });
     });
 
-    // 3. 建立玩家物件
+    // 4. 建立玩家物件
     G.player = {
       name, gender: s.gender, origin: s.origin, sect: s.sect,
       stats: finalStats, 
@@ -391,18 +427,46 @@ const CharacterCreationSystem = {
       ac: 10 + dexMod,
       gold: o.gold,
       martialArts,
-      tags: [...new Set(tags)], // 這裡會自動去重
+      tags: [...new Set(tags)],
       companions: [],
       loadout,
       prof: 2,
-      // 確保初始正邪、聲望、貢獻有默認值
       morality: 0,
       reputation: 0,
       contribution: 0
     };
 
-    // 5. 切換畫面
+    // ★ 關鍵：直接讀取起源表原本的 o.intro
+    const originTitle = o.name + (sect ? ` · ${sect.name}` : '');
+    const introText = o.intro || `十三歲，${name} 正式邁入江湖。從此以後，一切靠自己。`;
+
+    // 寫入黃皮殘卷 DOM
+    const badgeEl = document.getElementById('introScrollOriginBadge');
+    if (badgeEl) badgeEl.innerHTML = `<span class="seal-stamp text-[11px] px-2.5 py-0.5">${originTitle}</span>`;
+    
+    const textEl = document.getElementById('introScrollText');
+    if (textEl) textEl.textContent = introText;
+
+    const scrollNameEl = document.getElementById('introScrollName');
+    if (scrollNameEl) scrollNameEl.textContent = `【${name}】十三歲 · 志在四方`;
+
+    // 隱藏創角面板，彈出黃皮殘卷
     document.getElementById('screen-setup').classList.add('hidden');
+    
+    if (typeof soundEngine !== 'undefined' && soundEngine.playGong) {
+      soundEngine.playGong();
+    }
+
+    const scrollModal = document.getElementById('introScrollModal');
+    if (scrollModal) scrollModal.classList.remove('hidden');
+  },
+
+  // ★ 玩家點擊「翻開卷宗 · 啟程」後，正式切入主畫面與 lifepath
+  proceedToGame() {
+    const scrollModal = document.getElementById('introScrollModal');
+    if (scrollModal) scrollModal.classList.add('hidden');
+
+    // 展開主畫面與按鈕
     document.getElementById('screen-play').classList.remove('hidden');
     document.getElementById('restartBtn').classList.remove('hidden');
     document.getElementById('overviewBtn').classList.remove('hidden');
@@ -413,10 +477,13 @@ const CharacterCreationSystem = {
     G.usedEvents = [];
     HUD.render();
     HUD.setScene('序幕', '江湖初現');
-    
-    const introText = o.intro || `${name}，十三歲，正式踏上江湖路。師門的庇護已經遠去，從此以後，一切靠自己。`;
+
+    // 在背景日誌也記錄這段出身旁白
+    const o = G.data.ORIGINS[G.player.origin];
+    const introText = o.intro || `十三歲，${G.player.name} 正式邁入江湖。從此以後，一切靠自己。`;
     HUD.log('narrative', introText);
-    
+
+    // 正式啟動成長期
     switchSystem('lifepath');
     SaveSystem.save();
   },

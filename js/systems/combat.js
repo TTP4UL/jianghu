@@ -27,35 +27,22 @@ const CombatSystem = {
     const e = G.enemy;
     document.getElementById('enemyName').textContent = e.name;
     document.getElementById('enemyAC').textContent = e.ac;
-    
-    // 氣血
     document.getElementById('enemyHpText').textContent = `${Math.max(0, e.hp)} / ${e.maxHp}`;
     document.getElementById('enemyHpBar').style.width = `${Math.min(100, Math.max(0, (e.hp / e.maxHp) * 100))}%`;
-    
-    // 架勢
     document.getElementById('enemyPosText').textContent = `${Math.max(0, e.pos)} / ${e.maxPos}`;
     document.getElementById('enemyPosBar').style.width = `${Math.min(100, Math.max(0, (e.pos / e.maxPos) * 100))}%`;
     
-    // ★ 狀態 Buff 標籤徽章化（分行美化，絕不爆行）
-    const statusTags = [];
-    if (e.isStunned) {
-      statusTags.push(`<span class="px-1.5 py-0.5 rounded bg-[#fef08a] text-[#854d0e] border border-[#fde047] text-[10px] font-bold animate-pulse">【眩暈】</span>`);
-    }
-    if (e.isPoisoned > 0) {
-      statusTags.push(`<span class="px-1.5 py-0.5 rounded bg-[#f3e8ff] text-[#7e22ce] border border-[#d8b4fe] text-[10px] font-bold animate-pulse">【劇毒:${e.isPoisoned}回合】</span>`);
-    }
-    if (e.innerArt) {
-      statusTags.push(`<span class="px-1.5 py-0.5 rounded bg-[#faf5ff] text-[#7e22ce] border border-[#e9d5ff] text-[10px] font-bold">心法:${e.innerArt.name}</span>`);
-    }
+    const status = [];
+    if (e.isStunned) status.push('【眩暈】');
+    if (e.isPoisoned > 0) status.push(`【劇毒:${e.isPoisoned}回合】`);
+    
+    // ★ 新增：顯示敵人內功與真氣
+    if (e.innerArt) status.push(`<span class="text-[#7e22ce] font-bold">【內功:${e.innerArt.name}】</span>`);
     if (e.maxQi !== undefined) {
-      statusTags.push(`<span class="px-1.5 py-0.5 rounded bg-[#eff6ff] text-[#1d4ed8] border border-[#bfdbfe] text-[10px] font-mono font-bold">真氣:${e.qi}/${e.maxQi}</span>`);
+        status.push(`<span class="text-[#1d4ed8] font-bold">【真氣:${e.qi}/${e.maxQi}】</span>`);
     }
     
-    const tagContainer = document.getElementById('enemyStatusTag');
-    if (tagContainer) {
-      tagContainer.className = 'flex flex-wrap gap-1 mt-1';
-      tagContainer.innerHTML = statusTags.join('');
-    }
+    document.getElementById('enemyStatusTag').innerHTML = status.join(' ');
     
     HUD.updateGauges();
   },

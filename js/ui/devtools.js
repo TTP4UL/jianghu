@@ -134,9 +134,29 @@ const DevTools = {
   
   maxStats() {
     if (this.requirePlayer()) { 
+      const oldConMod = Math.floor((G.player.stats.con - 10) / 2);
+      const oldIntMod = Math.floor((G.player.stats.int - 10) / 2);
+      
       Object.keys(G.player.stats).forEach(k => G.player.stats[k] = 20);
-      G.player.maxHp += 50; G.player.hp = G.player.maxHp;
-      HUD.render(); SaveSystem.save(); 
+      
+      const newConMod = Math.floor((20 - 10) / 2);
+      const newDexMod = Math.floor((20 - 10) / 2);
+      const newIntMod = Math.floor((20 - 10) / 2);
+
+      G.player.ac = 10 + newDexMod;
+
+      // 更新血量
+      const baseHp = G.player.maxHp - (oldConMod * 3);
+      G.player.maxHp = baseHp + (newConMod * 3);
+      G.player.hp = G.player.maxHp;
+
+      // ★ 新增：更新架勢
+      const basePos = G.player.maxPos - (Math.max(0, oldIntMod) * 2);
+      G.player.maxPos = basePos + (Math.max(0, newIntMod) * 2);
+      G.player.pos = G.player.maxPos;
+      
+      HUD.render(); 
+      SaveSystem.save(); 
     }
   },
   

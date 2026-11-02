@@ -69,7 +69,32 @@ const EffectSystem = {
       else if (k === 'posSet') p.pos = Math.max(0, Math.min(p.maxPos, num));
       else if (k === 'qi') p.qi = Math.max(0, Math.min(p.maxQi, p.qi + num));
       else if (k === 'gold') p.gold = Math.max(0, p.gold + num);
-      else if (k in p.stats) p.stats[k] = Math.max(1, p.stats[k] + num);
+      else if (k in p.stats) {
+        const oldStat = p.stats[k];
+        p.stats[k] = Math.max(1, p.stats[k] + num);
+        
+        if (k === 'dex') {
+          const dexMod = Math.floor((p.stats.dex - 10) / 2);
+          p.ac = 10 + dexMod;
+        }
+        if (k === 'con') {
+          const oldConMod = Math.floor((oldStat - 10) / 2);
+          const newConMod = Math.floor((p.stats.con - 10) / 2);
+          const hpDiff = (newConMod - oldConMod) * 3;
+          p.maxHp = Math.max(1, p.maxHp + hpDiff);
+          p.hp = Math.max(1, Math.min(p.maxHp, p.hp + hpDiff));
+        }
+        // ★ 新增：如果加減的是悟性，重新計算架勢上限
+        if (k === 'int') {
+          const oldIntMod = Math.floor((oldStat - 10) / 2);
+          const newIntMod = Math.floor((p.stats.int - 10) / 2);
+          const posDiff = (Math.max(0, newIntMod) - Math.max(0, oldIntMod)) * 2;
+          p.maxPos = Math.max(1, p.maxPos + posDiff);
+          p.pos = Math.max(0, Math.min(p.maxPos, p.pos + posDiff));
+        }
+      }
+      else if (k === 'ac') p.ac += num;
+
     });
     
     HUD.updateGauges();

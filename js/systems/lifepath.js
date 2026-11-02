@@ -23,10 +23,16 @@ const LifepathSystem = {
     }
 
     G.usedEvents.push(event.id);
+    
+    // ★ 核心修改：如果事件是 modal，直接交給 EventSystem 處理彈窗！
+    if (event.uiType === 'modal') {
+      return EventSystem.load(event.id);
+    }
+
+    // 普通事件維持原樣
     HUD.setScene(`${G.currentAge}歲 · 成長`, event.title);
     HUD.log(event.speaker ? 'dialogue' : 'narrative', event.text, event.speaker || '旁白');
     
-    // ★ 改動：從 EVENT_CHOICES 讀取選項
     const choices = event.choices || [];
     this.renderLifepathChoices(choices);
   },
@@ -220,7 +226,7 @@ const LifepathSystem = {
       const cost = this.getCostForNextPoint(rawVal);
       
       // ★ 判斷呢個屬性係咪仲可以升級，而且點數足夠
-      const isMaxed = rawVal >= 28; // 上限顯示 18
+      const isMaxed = rawVal >= 25;
       const canAfford = G.pendingPoints >= cost;
       if (!isMaxed && canAfford) canUpgradeAny = true;
 
@@ -249,24 +255,19 @@ const LifepathSystem = {
       board.appendChild(div);
     });
 
-    const savedText = G.player.savedPoints > 0 ? `<span class="text-[10px] text-jade-600 ml-1">(含儲備 ${G.player.savedPoints} 點)</span>` : '';
+    const savedText = G.player.savedPoints > 0 ? `<span class="text-[10px] text-[#047857] ml-1 font-bold">(已存 ${G.player.savedPoints} 點)</span>` : '';
     document.getElementById('allocPointsLeft').innerHTML = `${G.pendingPoints} ${savedText}`;
     
     const btn = document.getElementById('allocConfirmBtn');
     
-    // ★ 如果仲有點數，但係已經冇任何屬性可以升（或者唔夠點數升），就俾佢撳「保留點數並繼續」
+    // ★ 核心修改：永遠解鎖按鈕，讓玩家可以自由決定是否保留點數
+    btn.disabled = false;
     if (G.pendingPoints === 0) {
-      btn.disabled = false;
       btn.className = 'wuxia-primary-btn w-full py-3 rounded-xl font-black text-sm tracking-widest cursor-pointer shadow-md transition';
       btn.textContent = '完成分配，繼續前行';
-    } else if (!canUpgradeAny) {
-      btn.disabled = false;
-      btn.className = 'wuxia-primary-btn w-full py-3 rounded-xl font-black text-sm tracking-widest cursor-pointer shadow-md transition border-[#b45309] bg-[#b45309]';
-      btn.textContent = `保留 ${G.pendingPoints} 點，繼續前行`;
     } else {
-      btn.disabled = true;
-      btn.className = 'w-full py-3 rounded-xl font-bold text-sm bg-[#e8decb] text-[#78614c] border border-[#d8cca8] cursor-not-allowed tracking-widest';
-      btn.textContent = `還剩 ${G.pendingPoints} 點未分配`;
+      btn.className = 'wuxia-primary-btn w-full py-3 rounded-xl font-black text-sm tracking-widest cursor-pointer shadow-md transition border-[#b45309] bg-[#b45309]'; // 用橙色顯示保留狀態
+      btn.textContent = `保留 ${G.pendingPoints} 點，繼續前行`;
     }
   },
 
@@ -275,7 +276,7 @@ const LifepathSystem = {
     const currentVal = G.tempAllocStats[k];
 
     if (delta > 0) {
-      if (currentVal >= 28) return; // ★ 上限 28 (顯示 18)
+      if (currentVal >= 25) return; // ★ 上限 28 (顯示 18)
       const cost = this.getCostForNextPoint(currentVal);
       if (G.pendingPoints >= cost) {
         G.tempAllocStats[k]++;
@@ -290,24 +291,43 @@ const LifepathSystem = {
     this.renderAllocBoard();
   },
 
-    confirmAllocation() {
-    // 移除 if (G.pendingPoints > 0) return; 呢句阻擋！
-
-    // 1. 將未用完嘅點數存入儲備池
+  confirmAllocation() {
     G.player.savedPoints = (G.player.savedPoints || 0) + G.pendingPoints;
-    
-    // 2. 清零待分配點數
     G.pendingPoints = 0;
     
-    // 3. 應用屬性變化
+    // 記錄舊修正值
+    const oldDexMod = Math.floor((G.player.stats.dex - 10) / 2);
+    const oldConMod = Math.floor((G.player.stats.con - 10) / 2);
+    const oldIntMod = Math.floor((G.player.stats.int - 10) / 2); // ★ 新增：舊悟性修正
+
     G.player.stats = { ...G.tempAllocStats };
     
-    // 4. 關閉彈窗
+    // 計算新修正值
+    const newDexMod = Math.floor((G.player.stats.dex - 10) / 2);
+    const newConMod = Math.floor((G.player.stats.con - 10) / 2);
+    const newIntMod = Math.floor((G.player.stats.int - 10) / 2); // ★ 新增：新悟性修正
+    
+    // 更新 AC (身法)
+    G.player.ac = 10 + newDexMod; 
+    
+    // 更新氣血上限 (根骨)
+    const hpDiff = (newConMod - oldConMod) * 3; 
+    if (hpDiff !== 0) {
+      G.player.maxHp = Math.max(1, G.player.maxHp + hpDiff);
+      G.player.hp = Math.max(1, Math.min(G.player.maxHp, G.player.hp + hpDiff));
+    }
+
+    // ★ 新增：更新架勢上限 (悟性)
+    const posDiff = (Math.max(0, newIntMod) - Math.max(0, oldIntMod)) * 2;
+    if (posDiff !== 0) {
+      G.player.maxPos = Math.max(1, G.player.maxPos + posDiff);
+      G.player.pos = Math.max(0, Math.min(G.player.maxPos, G.player.pos + posDiff));
+    }
+    
     document.getElementById('allocModal').classList.add('hidden');
     HUD.render();
     SaveSystem.save();
     
-    // 5. 推進時間
     if (G.currentSystem === 'exploration' || G.currentSystem === 'events') {
       ExplorationSystem.nextSeason();
     } else {

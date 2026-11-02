@@ -21,30 +21,31 @@ const EventSystem = {
 
     // 2. 戰鬥事件
     if (ev.type === 'combat') {
-      // ★ 確保戰鬥系統存在，然後切換
-      if (typeof CombatSystem !== 'undefined') {
-        return switchSystem('combat', { event: ev });
-      } else {
-        alert('找不到戰鬥系統！');
-        return ExplorationSystem.endEvent();
-      }
+      return switchSystem('combat', { event: ev });
     }
 
-    // 3. 奇遇彈窗
+    // 3. ★ 奇遇彈窗 (uiType === 'modal')
     if (ev.uiType === 'modal') {
       document.getElementById('encounterBadge').textContent = ev.badge || '江湖奇遇';
       document.getElementById('encounterTitle').textContent = ev.title || '未知遭遇';
-      document.getElementById('encounterText').innerHTML = `<p>${ev.text || ''}</p>`;
+      document.getElementById('encounterText').innerHTML = `<p class="indent-7">${ev.text || ''}</p>`;
       
       const optsContainer = document.getElementById('encounterOptions');
       optsContainer.innerHTML = '';
+      
       (ev.choices || []).forEach(c => {
         if (c.requireTags && c.requireTags.length > 0 && !TagUtils.hasAll(c.requireTags)) return;
         if (c.forbidTags && c.forbidTags.length > 0 && !TagUtils.hasNone(c.forbidTags)) return;
 
         const btn = document.createElement('button');
-        btn.className = 'wuxia-choice-card w-full py-3 px-4 rounded-xl text-left border border-[#dcd1c2] flex flex-col justify-between mb-2';
-        btn.innerHTML = `<span class="font-bold text-[#2c1f14]">${c.text}</span><span class="text-xs text-[#8a7561] mt-1">${c.desc || ''}</span>`;
+        btn.className = 'wuxia-choice-card w-full py-3 px-4 rounded-xl text-left border border-[#dcd1c2] flex flex-col justify-between mb-2 hover:border-[#a82d25] transition';
+        btn.innerHTML = `
+          <div class="flex justify-between items-center w-full">
+             <span class="font-bold text-[#2c1f14]">${c.text}</span>
+             ${c.type === 'check' ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-[#fef2f2] text-[#b91c1c] border border-[#fca5a5]">${STATS_INFO[c.attr]?.name || c.attr} DC ${c.dc}</span>` : ''}
+          </div>
+          <span class="text-xs text-[#8a7561] mt-1">${c.desc || ''}</span>`;
+        
         btn.onclick = () => {
           document.getElementById('encounterModal').classList.add('hidden');
           this.handleChoice(c);
@@ -56,44 +57,18 @@ const EventSystem = {
       return;
     }
 
-    // 普通事件
+    // 4. 普通事件
     HUD.setScene(ev.badge || '江湖', ev.title || '遭遇');
     if (ev.text) HUD.log(ev.speaker ? 'dialogue' : 'narrative', ev.text, ev.speaker || '旁白');
 
-    if (ev.type === 'combat') {
-      return switchSystem('combat', { event: ev });
-    }
-
-    if (ev.type === 'ending') {
-      return switchSystem('ending', { id: eventId });
-    }
-
-    // ★ 統一使用 EVENT_CHOICES
- const choices = ev.choices || [];
+    const choices = ev.choices || [];
     const validChoices = choices.filter(c => {
       if (c.requireTags && c.requireTags.length > 0 && !TagUtils.hasAll(c.requireTags)) return false;
       if (c.forbidTags && c.forbidTags.length > 0 && !TagUtils.hasNone(c.forbidTags)) return false;
       return true;
     });
 
-    // ★ 核心修改：自動為酒館事件補上「離開酒館」選項
-    if (ev.badge === '酒館' || ev.uiType === 'tavern') {
-      // 檢查玩家自己填嘅選項入面，有冇已經寫咗「離開」或者「走」
-      const hasLeaveOption = validChoices.some(c => c.text.includes('離開') || c.text.includes('走'));
-      
-      if (!hasLeaveOption) {
-        validChoices.push({
-          text: '離開酒館',
-          desc: '不再逗留，轉身離去。',
-          type: 'direct',
-          directNarrative: '你放下酒杯，離開了喧囂的酒館。', // 呢度可以直接填對白
-          directEffects: null,
-          directNext: null
-        });
-      }
-    }
-
-    // ★ 防呆：如果真係一個選項都冇，自動結束
+    // ★ 自動補位：如果沒有選項，自動結束
     if (validChoices.length === 0) {
       HUD.log('narrative', '（這件事就此告一段落）');
       setTimeout(() => ExplorationSystem.endEvent(), 1000);
