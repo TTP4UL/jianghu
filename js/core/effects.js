@@ -71,7 +71,7 @@ const EffectSystem = {
       else if (k === 'gold') p.gold = Math.max(0, p.gold + num);
       else if (k in p.stats) {
         const oldStat = p.stats[k];
-        p.stats[k] = Math.max(1, p.stats[k] + num);
+        p.stats[k] = Math.max(5, p.stats[k] + num);
         
         if (k === 'dex') {
           const dexMod = Math.floor((p.stats.dex - 10) / 2);

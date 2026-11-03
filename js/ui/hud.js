@@ -1,5 +1,4 @@
 const HUD = {
-  // ★ 武學與標籤等級分色體系
   getTagStyle(tag) {
     const grade = (tag.grade || 'E').toUpperCase();
     switch (grade) {
@@ -16,22 +15,102 @@ const HUD = {
   },
 
   getStatusBadgeHtml(type, countOrVal, extra) {
-    if (type === 'poison') {
-      return `<span class="wuxia-status-badge status-poison shadow-xs"><span>☠️ 劇毒</span><span class="status-badge-count">${countOrVal}回</span></span>`;
-    }
-    if (type === 'stun') {
-      return `<span class="wuxia-status-badge status-stun shadow-xs"><span>⚡ 點穴眩暈</span></span>`;
-    }
-    if (type === 'shield') {
-      return `<span class="wuxia-status-badge status-shield shadow-xs"><span>🛡️ 減傷 ${countOrVal}</span><span class="status-badge-count">${extra}回</span></span>`;
-    }
-    if (type === 'shieldPct') {
-      return `<span class="wuxia-status-badge status-shield shadow-xs"><span>🛡️ 護體 ${countOrVal}%</span><span class="status-badge-count">${extra}回</span></span>`;
-    }
-    if (type === 'reflect') {
-      return `<span class="wuxia-status-badge status-stun shadow-xs !bg-[#7f1d1d] !text-[#fca5a5] !border-[#dc2626]"><span>🩸 反傷 ${countOrVal}%</span><span class="status-badge-count">${extra}回</span></span>`;
+    if (type === 'poison') return `<span class="wuxia-status-badge status-poison shadow-xs"><span>☠️ 劇毒</span><span class="status-badge-count">${countOrVal}回</span></span>`;
+    if (type === 'stun') return `<span class="wuxia-status-badge status-stun shadow-xs"><span>⚡ 點穴眩暈</span></span>`;
+    if (type === 'shield') return `<span class="wuxia-status-badge status-shield shadow-xs"><span>🛡️ 減傷 ${countOrVal}</span><span class="status-badge-count">${extra}回</span></span>`;
+    if (type === 'shieldPct') return `<span class="wuxia-status-badge status-shield shadow-xs"><span>🛡️ 護體 ${countOrVal}%</span><span class="status-badge-count">${extra}回</span></span>`;
+    if (type === 'reflect') return `<span class="wuxia-status-badge status-stun shadow-xs !bg-[#7f1d1d] !text-[#fca5a5] !border-[#dc2626]"><span>🩸 反傷 ${countOrVal}%</span><span class="status-badge-count">${extra}回</span></span>`;
+    if (type === 'acMod') {
+      const sign = countOrVal > 0 ? '+' : '';
+      const color = countOrVal > 0 ? 'status-shield' : 'status-stun';
+      return `<span class="wuxia-status-badge ${color} shadow-xs"><span>🌀 閃避 ${sign}${countOrVal}</span><span class="status-badge-count">${extra}回</span></span>`;
     }
     return '';
+  },
+
+  _positionTooltip(e, tt) {
+    tt.classList.remove('hidden');
+    let x = e.clientX + 15;
+    let y = e.clientY + 15;
+    if (x + 260 > window.innerWidth) x = e.clientX - 270;
+    if (y + 150 > window.innerHeight) y = e.clientY - 160;
+    tt.style.left = `${x}px`;
+    tt.style.top = `${y}px`;
+    setTimeout(() => tt.classList.remove('opacity-0'), 10);
+  },
+
+  hideTagTooltip() {
+    const tt = document.getElementById('tagTooltip');
+    if (!tt) return;
+    tt.classList.add('opacity-0');
+    setTimeout(() => tt.classList.add('hidden'), 200);
+  },
+
+  showTagTooltip(e, tag) {
+    const tt = document.getElementById('tagTooltip');
+    if (!tt) return;
+    document.getElementById('ttTagGrade').textContent = `[${tag.grade || 'E'}]`;
+    document.getElementById('ttTagGrade').className = `text-[10px] px-1.5 py-0.5 rounded border font-black ${this.getTagStyle(tag)}`;
+    document.getElementById('ttTagName').textContent = tag.name;
+    document.getElementById('ttTagDesc').textContent = tag.desc || '暫無詳細描述。';
+
+    const bonusText = String(tag.bonus || '0');
+    let effectStr = '無特殊加成';
+    if (!isNaN(bonusText) && Number(bonusText) !== 0) {
+      effectStr = `所有檢定 ${Number(bonusText) > 0 ? '+' : ''}${bonusText}`;
+    } else if (bonusText.includes(':')) {
+      effectStr = bonusText.split('|').map(part => {
+        const [attr, val] = part.split(':');
+        const num = Number(val);
+        const attrName = { str: '臂力', dex: '身法', con: '根骨', int: '悟性', wis: '心法', cha: '魅力' }[attr] || attr;
+        return `${attrName}檢定 ${num > 0 ? '+' : ''}${num}`;
+      }).join('，');
+    }
+    document.getElementById('ttTagBonus').textContent = `效果：${effectStr}`;
+    this._positionTooltip(e, tt);
+  },
+
+  showArtTooltip(e, art) {
+    const tt = document.getElementById('tagTooltip');
+    if (!tt) return;
+    document.getElementById('ttTagGrade').textContent = `[${art.grade || 'E'}]`;
+    document.getElementById('ttTagGrade').className = `text-[10px] px-1.5 py-0.5 rounded border font-black ${this.getTagStyle(art)}`;
+    document.getElementById('ttTagName').textContent = art.name;
+    document.getElementById('ttTagDesc').innerHTML = art.desc || '暫無詳細描述。';
+
+    let effectParts = [];
+    if (art.slot === 'attack') {
+      effectParts.push(`消耗 ${art.qiCost || 2} 真氣`);
+      if (art.fixedDamage) effectParts.push(`固定傷害 ${art.fixedDamage}`);
+      else if (art.basePower) effectParts.push(`威力 ${Math.max(1, Math.floor(art.basePower / 10))}d${art.diceType || 8}`);
+      if (art.hits && Number(art.hits) > 1) effectParts.push(`${art.hits} 連擊`);
+      
+      if (art.specialEffect) {
+        String(art.specialEffect).split('|').forEach(eff => {
+          if (eff.includes('pierce')) effectParts.push('無視架勢');
+          if (eff.includes('stun')) effectParts.push('附帶眩暈');
+          if (eff.includes('poison')) effectParts.push('附帶劇毒');
+          if (eff.includes('heal')) effectParts.push('攻擊吸血');
+          if (eff.includes('self_ac:')) effectParts.push('自身閃避提升');
+          if (eff.includes('enemy_ac:')) effectParts.push('降低敵方閃避');
+        });
+      }
+    } else if (art.slot === 'inner' && art.innerEffect) {
+      String(art.innerEffect).split('|').forEach(eff => {
+        const [key, val] = eff.split(':');
+        const k = key.trim().toLowerCase();
+        const num = Number(val);
+        const sign = num > 0 ? `+${num}` : `${num}`;
+        if (k === 'regen' || k === 'hp_regen') effectParts.push(`每回合回血 ${sign}`);
+        if (k === 'qi_regen') effectParts.push(`每回合回氣 ${sign}`);
+        if (k === 'pos_regen') effectParts.push(`每回合回架勢 ${sign}`);
+        if (k === 'maxhp') effectParts.push(`氣血上限 ${sign}`);
+        if (k === 'maxqi') effectParts.push(`真氣上限 ${sign}`);
+        if (k === 'maxpos') effectParts.push(`架勢上限 ${sign}`);
+      });
+    }
+    document.getElementById('ttTagBonus').innerHTML = `<span class="text-[#047857]">效果：</span>${effectParts.join('，') || '無特殊效果'}`;
+    this._positionTooltip(e, tt);
   },
 
   render() {
@@ -55,7 +134,17 @@ const HUD = {
 
     document.getElementById('hudName').textContent = p.name;
     this.updateAgeDisplay();
-    document.getElementById('hudAC').textContent = p.ac;
+    
+    // ★ 核心修改：顯示真實 AC 與 Buff 加值
+    let baseAC = p.ac;
+    let finalAC = typeof CombatSystem !== 'undefined' ? CombatSystem.getEffectiveAC(p) : p.ac;
+    let diff = finalAC - baseAC;
+    
+    let acHtml = `<span>${finalAC}</span>`;
+    if (diff > 0) acHtml += `<span class="text-[10px] text-[#047857] ml-0.5">(+${diff})</span>`;
+    if (diff < 0) acHtml += `<span class="text-[10px] text-[#b91c1c] ml-0.5">(${diff})</span>`;
+    document.getElementById('hudAC').innerHTML = acHtml;
+    
     this.updateGauges();
 
     const list = document.getElementById('hudStatList'); 
@@ -70,7 +159,59 @@ const HUD = {
       });
     }
 
-    // ★ 修改：這裡只顯示「命格特性」，完全刪除了武學顯示！
+    const loadoutContainer = document.getElementById('hudLoadoutTags');
+    if (loadoutContainer) {
+      loadoutContainer.innerHTML = '';
+      if (!p.loadout) p.loadout = { attack: [null, null], inner: [null], utility: [null] };
+
+      // 內功
+      if (p.loadout.inner && p.loadout.inner[0]) {
+        const art = G.data.MARTIAL_ARTS[p.loadout.inner[0]];
+        if (art) {
+          const span = document.createElement('span');
+          span.className = 'px-2 py-0.5 rounded border text-[11px] bg-[#f0fdf4] border-[#bbf7d0] text-[#166534] shadow-2xs cursor-help transition-transform hover:scale-105';
+          span.innerHTML = `🧘 運轉【${art.name}】`;
+          span.onmouseenter = (e) => this.showArtTooltip(e, art);
+          span.onmousemove = (e) => this.showArtTooltip(e, art);
+          span.onmouseleave = () => this.hideTagTooltip();
+          span.onclick = (e) => { e.stopPropagation(); this.showArtTooltip(e, art); const hide = () => { this.hideTagTooltip(); document.removeEventListener('click', hide); }; setTimeout(() => document.addEventListener('click', hide), 10); };
+          loadoutContainer.appendChild(span);
+        }
+      }
+      
+      // 招式
+      if (p.loadout.attack) {
+        p.loadout.attack.forEach(id => {
+          if (!id) return;
+          const art = G.data.MARTIAL_ARTS[id];
+          if (!art) return;
+          const span = document.createElement('span');
+          span.className = 'px-2 py-0.5 rounded border text-[11px] bg-[#fef2f2] border-[#fecdd3] text-[#991b1b] shadow-2xs cursor-help transition-transform hover:scale-105';
+          span.innerHTML = `⚔️ 裝備【${art.name}】`;
+          span.onmouseenter = (e) => this.showArtTooltip(e, art);
+          span.onmousemove = (e) => this.showArtTooltip(e, art);
+          span.onmouseleave = () => this.hideTagTooltip();
+          span.onclick = (e) => { e.stopPropagation(); this.showArtTooltip(e, art); const hide = () => { this.hideTagTooltip(); document.removeEventListener('click', hide); }; setTimeout(() => document.addEventListener('click', hide), 10); };
+          loadoutContainer.appendChild(span);
+        });
+      }
+
+      // ★ 新增：身法 (紫色標籤)
+      if (p.loadout.utility && p.loadout.utility[0]) {
+        const art = G.data.MARTIAL_ARTS[p.loadout.utility[0]];
+        if (art) {
+          const span = document.createElement('span');
+          span.className = 'px-2 py-0.5 rounded border text-[11px] bg-[#faf5ff] border-[#d8b4fe] text-[#7e22ce] shadow-2xs cursor-help transition-transform hover:scale-105';
+          span.innerHTML = `💨 身法【${art.name}】`;
+          span.onmouseenter = (e) => this.showArtTooltip(e, art);
+          span.onmousemove = (e) => this.showArtTooltip(e, art);
+          span.onmouseleave = () => this.hideTagTooltip();
+          span.onclick = (e) => { e.stopPropagation(); this.showArtTooltip(e, art); const hide = () => { this.hideTagTooltip(); document.removeEventListener('click', hide); }; setTimeout(() => document.addEventListener('click', hide), 10); };
+          loadoutContainer.appendChild(span);
+        }
+      }
+    }
+
     const container = document.getElementById('hudSkillsTags'); 
     if (container) {
       container.innerHTML = '';
@@ -82,8 +223,14 @@ const HUD = {
         
         const colorClass = this.getTagStyle(tag);
         const span = document.createElement('span');
-        span.className = `px-2 py-0.5 rounded border text-[11px] ${colorClass} shadow-2xs`;
+        span.className = `px-2 py-0.5 rounded border text-[11px] ${colorClass} shadow-2xs cursor-help transition-transform hover:scale-105`;
         span.textContent = `【${tag.name}】`;
+        
+        span.onmouseenter = (e) => this.showTagTooltip(e, tag);
+        span.onmousemove = (e) => this.showTagTooltip(e, tag);
+        span.onmouseleave = () => this.hideTagTooltip();
+        span.onclick = (e) => { e.stopPropagation(); this.showTagTooltip(e, tag); const hide = () => { this.hideTagTooltip(); document.removeEventListener('click', hide); }; setTimeout(() => document.addEventListener('click', hide), 10); };
+        
         container.appendChild(span);
       });
     }
@@ -109,6 +256,16 @@ const HUD = {
 
   updateGauges() {
     const p = G.player; if (!p) return;
+
+    // ★ 新增：實時更新玩家 AC 與加減值
+    let baseAC = p.ac;
+    let finalAC = typeof CombatSystem !== 'undefined' ? CombatSystem.getEffectiveAC(p) : p.ac;
+    let diff = finalAC - baseAC;
+    
+    let acHtml = `<span>${finalAC}</span>`;
+    if (diff > 0) acHtml += `<span class="text-[11px] text-[#047857] ml-0.5">(+${diff})</span>`;
+    if (diff < 0) acHtml += `<span class="text-[11px] text-[#b91c1c] ml-0.5">(${diff})</span>`;
+    document.getElementById('hudAC').innerHTML = acHtml;
 
     document.getElementById('hudHpCur').textContent = Math.max(0, p.hp);
     document.getElementById('hudHpMax').textContent = p.maxHp;

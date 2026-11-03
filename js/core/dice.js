@@ -4,7 +4,7 @@ const DiceSystem = {
     soundEngine.playDiceRoll();
     const eff = getEffectiveStats();
     const mod = Math.floor((eff[attr] - 10) / 2);
-    const tagResult = TagUtils.bonus(tags);
+    const tagResult = TagUtils.bonus(tags, attr);
 
     const modal = document.getElementById('diceModal');
     const visual = document.getElementById('d20Visual');
