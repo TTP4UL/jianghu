@@ -73,29 +73,67 @@ const HUD = {
   showArtTooltip(e, art) {
     const tt = document.getElementById('tagTooltip');
     if (!tt) return;
+
     document.getElementById('ttTagGrade').textContent = `[${art.grade || 'E'}]`;
     document.getElementById('ttTagGrade').className = `text-[10px] px-1.5 py-0.5 rounded border font-black ${this.getTagStyle(art)}`;
     document.getElementById('ttTagName').textContent = art.name;
     document.getElementById('ttTagDesc').innerHTML = art.desc || '暫無詳細描述。';
 
     let effectParts = [];
-    if (art.slot === 'attack') {
-      effectParts.push(`消耗 ${art.qiCost || 2} 真氣`);
-      if (art.fixedDamage) effectParts.push(`固定傷害 ${art.fixedDamage}`);
-      else if (art.basePower) effectParts.push(`威力 ${Math.max(1, Math.floor(art.basePower / 10))}d${art.diceType || 8}`);
-      if (art.hits && Number(art.hits) > 1) effectParts.push(`${art.hits} 連擊`);
+    
+    // 如果是攻擊或身法，處理 specialEffect
+    if (art.slot === 'attack' || art.slot === 'utility') {
+      if (art.qiCost) effectParts.push(`消耗 ${art.qiCost} 真氣`);
       
+      if (art.slot === 'attack') {
+        if (art.fixedDamage) effectParts.push(`固定傷害 ${art.fixedDamage}`);
+        else if (art.basePower) effectParts.push(`威力 ${Math.max(1, Math.floor(art.basePower / 10))}d${art.diceType || 8}`);
+        
+        if (art.hits && Number(art.hits) > 1) effectParts.push(`${art.hits} 連擊`);
+      }
+
       if (art.specialEffect) {
         String(art.specialEffect).split('|').forEach(eff => {
-          if (eff.includes('pierce')) effectParts.push('無視架勢');
-          if (eff.includes('stun')) effectParts.push('附帶眩暈');
-          if (eff.includes('poison')) effectParts.push('附帶劇毒');
-          if (eff.includes('heal')) effectParts.push('攻擊吸血');
-          if (eff.includes('self_ac:')) effectParts.push('自身閃避提升');
-          if (eff.includes('enemy_ac:')) effectParts.push('降低敵方閃避');
+          const e = eff.trim();
+          
+          if (e.includes('pierce')) effectParts.push('無視架勢');
+          if (e.includes('stun')) effectParts.push('附帶眩暈');
+          if (e.includes('heal')) effectParts.push('攻擊吸血');
+          
+          if (e.includes('poison:')) {
+            const m = e.match(/poison:(\d+):(\d+)/);
+            if (m) effectParts.push(`劇毒 (每回合扣${m[2]}血, ${m[1]}回合)`);
+            else effectParts.push('附帶劇毒');
+          }
+
+          // 解析閃避加減
+          if (e.includes('self_ac:')) {
+            const m = e.match(/self_ac:(-?\d+):(\d+)/);
+            if (m) effectParts.push(`自身閃避 ${m[1] > 0 ? '+' : ''}${m[1]} (${m[2]}回合)`);
+          }
+          if (e.includes('enemy_ac:')) {
+            const m = e.match(/enemy_ac:(-?\d+):(\d+)/);
+            if (m) effectParts.push(`敵方閃避 ${m[1] > 0 ? '+' : ''}${m[1]} (${m[2]}回合)`);
+          }
+          
+          // 解析減傷與反傷
+          if (e.includes('shield:')) {
+            const m = e.match(/shield:(\d+):(\d+)/);
+            if (m) effectParts.push(`固定減傷 ${m[1]} (${m[2]}回合)`);
+          }
+          if (e.includes('shield_pct:')) {
+            const m = e.match(/shield_pct:([\d.]+):(\d+)/);
+            if (m) effectParts.push(`百分比減傷 ${parseFloat(m[1]) * 100}% (${m[2]}回合)`);
+          }
+          if (e.includes('reflect:')) {
+            const m = e.match(/reflect:([\d.]+):(\d+)/);
+            if (m) effectParts.push(`反彈傷害 ${parseFloat(m[1]) * 100}% (${m[2]}回合)`);
+          }
         });
       }
-    } else if (art.slot === 'inner' && art.innerEffect) {
+    } 
+    // 如果是內功，處理 innerEffect
+    else if (art.slot === 'inner' && art.innerEffect) {
       String(art.innerEffect).split('|').forEach(eff => {
         const [key, val] = eff.split(':');
         const k = key.trim().toLowerCase();
@@ -109,6 +147,7 @@ const HUD = {
         if (k === 'maxpos') effectParts.push(`架勢上限 ${sign}`);
       });
     }
+
     document.getElementById('ttTagBonus').innerHTML = `<span class="text-[#047857]">效果：</span>${effectParts.join('，') || '無特殊效果'}`;
     this._positionTooltip(e, tt);
   },
@@ -414,20 +453,38 @@ const HUD = {
     container.innerHTML = '';
     if (!choices || !choices.length) return;
     
+    // ★ 核心修改：改成兩欄網格 (手機端單欄，電腦端兩欄)
     const grid = document.createElement('div');
-    grid.className = 'grid grid-cols-1 gap-2 w-full'; 
+    grid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-2 w-full'; 
     
     choices.forEach(ch => {
       const btn = document.createElement('button');
       
       if (ch.disabled) {
-        btn.className = `px-3.5 py-2.5 rounded-lg border text-left flex flex-col justify-between opacity-70 cursor-not-allowed bg-[#f5f5f4] border-[#e5dcce]`;
-        btn.innerHTML = `<div class="flex items-center justify-between w-full mb-0.5"><span class="font-bold text-[13px] tracking-wide text-[#a8a29e]">${ch.label}</span>${ch.checkText ? `<span class="text-[10px] px-1.5 py-0.5 rounded font-mono font-bold bg-[#e5e5e5] text-[#a8a29e]">${ch.checkText}</span>` : ''}</div><span class="text-[11px] font-normal text-[#a8a29e]">${ch.desc || ''}</span>`;
-        btn.onclick = () => HUD.log('combat', '真氣不足，無法施展絕學！', 'neutral');
+        btn.className = `px-3 py-2 rounded-lg border text-left flex flex-col justify-center opacity-70 cursor-not-allowed bg-[#f5f5f4] border-[#e5dcce] h-full`;
+        btn.innerHTML = `
+          <div class="flex items-center justify-between w-full mb-0.5">
+            <span class="font-bold text-[13px] tracking-wide text-[#a8a29e]">${ch.label}</span>
+            ${ch.checkText ? `<span class="text-[9px] px-1.5 py-0.5 rounded font-mono font-bold bg-[#e5e5e5] text-[#a8a29e]">${ch.checkText}</span>` : ''}
+          </div>`;
+        btn.onclick = () => HUD.log('combat', '真氣不足，無法施展！', 'neutral');
       } else {
-        btn.className = `px-3.5 py-2.5 rounded-lg border text-left flex flex-col justify-between transition-all ${ch.primary ? 'wuxia-primary-btn text-white border-[#851e18] shadow-sm' : 'wuxia-choice-card text-[#2c1f14] border-[#dcd1c2] shadow-xs'}`;
-        const badgeClass = ch.primary ? 'bg-black/20 text-[#fef3c7]' : 'bg-[#f5ede0] text-[#a82d25]';
-        btn.innerHTML = `<div class="flex items-center justify-between w-full mb-0.5"><span class="font-bold text-[13px] sm:text-[14px] tracking-wide">${ch.label}</span>${ch.checkText ? `<span class="text-[10px] px-1.5 py-0.5 rounded font-mono font-bold ${badgeClass}">${ch.checkText}</span>` : ''}</div><span class="text-[11px] font-normal ${ch.primary ? 'text-white/90' : 'text-[#78614c]'} line-clamp-2">${ch.desc || ''}</span>`;
+        btn.className = `px-3 py-2 rounded-lg border text-left flex flex-col justify-center transition-all ${
+          ch.primary 
+            ? 'wuxia-primary-btn text-white border-[#851e18] shadow-sm' 
+            : 'wuxia-choice-card text-[#2c1f14] border-[#dcd1c2] shadow-xs hover:border-[#a82d25]'
+        } h-full`;
+        
+        const badgeClass = ch.primary 
+          ? 'bg-black/20 text-[#fef3c7]'
+          : 'bg-[#f5ede0] text-[#a82d25]';
+
+        btn.innerHTML = `
+          <div class="flex items-center justify-between w-full">
+            <span class="font-bold text-[13px] tracking-wide truncate pr-1">${ch.label}</span>
+            ${ch.checkText ? `<span class="text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${badgeClass} whitespace-nowrap shrink-0">${ch.checkText}</span>` : ''}
+          </div>`;
+        
         btn.onclick = () => {
           container.querySelectorAll('button').forEach(b => { b.disabled = true; b.classList.add('opacity-50', 'cursor-not-allowed'); });
           ch.action();
@@ -435,6 +492,7 @@ const HUD = {
       }
       grid.appendChild(btn);
     });
+    
     container.appendChild(grid);
   },
 

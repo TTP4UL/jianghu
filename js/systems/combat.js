@@ -4,7 +4,6 @@ const CombatSystem = {
     if (target.buffs && target.buffs.acMods) {
       target.buffs.acMods.forEach(mod => { baseAC += mod.val; });
     }
-    // 已移除格擋+4，改為精準格擋反擊機制
     return baseAC;
   },
 
@@ -37,7 +36,6 @@ const CombatSystem = {
 
     document.getElementById('enemyName').textContent = e.name;
     
-    // 敵人 AC 顯示加減值
     let baseAC = e.ac;
     let finalAC = this.getEffectiveAC(e);
     let diff = finalAC - baseAC;
@@ -107,10 +105,10 @@ const CombatSystem = {
   startPlayerTurn() {
     const p = G.player, e = G.enemy;
     G.utilityUsedThisTurn = false; 
-    this.tickBuffs(e); // 結算敵人身上的 Buff
+    
+    // ★ 核心修正 1：玩家回合開始，扣除【玩家自己】身上的 Buff 回合數
+    this.tickBuffs(p); 
 
-    if (p.qi < p.maxQi) p.qi = Math.min(p.maxQi, p.qi + 1);
-    if (e.qi < e.maxQi) e.qi = Math.min(e.maxQi, e.qi + 1);
     this.triggerInnerEffect();
     this.updateHUD();
     this.renderActions();
@@ -122,7 +120,6 @@ const CombatSystem = {
 
     const p = G.player;
     
-    // 渲染身法絕技 (不消耗回合)
     const utilPanel = document.getElementById('utilityPanel');
     if (utilPanel) {
       utilPanel.innerHTML = '';
@@ -167,12 +164,10 @@ const CombatSystem = {
       }
     }
 
-    // 渲染主行動 (消耗回合)
     const actions = [];
     actions.push({
       label: '⚔️ 普通攻擊',
-      checkText: `命中 vs 閃避 ${this.getEffectiveAC(G.enemy)}`,
-      desc: '1d8 + 屬性調整，不消耗真氣。',
+      checkText: `vs 閃避 ${this.getEffectiveAC(G.enemy)}`,
       primary: true,
       action: () => this.attack()
     });
@@ -205,9 +200,15 @@ const CombatSystem = {
     actions.push({
       label: '🛡️ 凝神格擋',
       checkText: '回復架勢',
-      desc: '本回合回復 5 點架勢。若攻擊被你的架勢完全抵擋，將順勢反擊。',
       primary: false,
       action: () => this.parry()
+    });
+
+    actions.push({
+      label: '🧘 運功調息',
+      checkText: '回復 3 真氣',
+      primary: false,
+      action: () => this.meditate()
     });
 
     if (p.companions && p.companions.length > 0 && !G.companionAttackUsed) {
@@ -260,45 +261,42 @@ const CombatSystem = {
       if (match) { attacker.buffs.reflect = { val: parseFloat(match[1]), turns: parseInt(match[2]) }; HUD.log('combat', `【${sourceName}】周身氣勁鼓盪，獲得 ${match[1] * 100}% 反傷，持續 ${match[2]} 回合。`, stance); }
     }
 
+    // ★ 移除隱藏加時，現在靠正確的 tick 時機來保證公平
     const selfAcMatch = effectsStr.match(/self_ac:(-?\d+):(\d+)/);
     if (selfAcMatch) {
       const val = parseInt(selfAcMatch[1]);
-      let turns = parseInt(selfAcMatch[2]);
-      if (val < 0) turns += 1;
+      const turns = parseInt(selfAcMatch[2]);
       
       if (!attacker.buffs.acMods) attacker.buffs.acMods = [];
       attacker.buffs.acMods = attacker.buffs.acMods.filter(m => m.source !== sourceName);
       attacker.buffs.acMods.push({ source: sourceName, val, turns });
       const sign = val > 0 ? '+' : '';
-      HUD.log('combat', `【${sourceName}】使${attacker === G.player ? '你' : '敵方'}的閃避 ${sign}${val}，持續 ${turns - (val < 0 ? 1 : 0)} 回合。`, stance);
+      HUD.log('combat', `【${sourceName}】使${attacker === G.player ? '你' : '敵方'}的閃避 ${sign}${val}，持續 ${turns} 回合。`, stance);
     }
 
     const enemyAcMatch = effectsStr.match(/enemy_ac:(-?\d+):(\d+)/);
     if (enemyAcMatch) {
       const val = parseInt(enemyAcMatch[1]);
-      let turns = parseInt(enemyAcMatch[2]);
-      if (val < 0) turns += 1;
+      const turns = parseInt(enemyAcMatch[2]);
       
       if (!target.buffs.acMods) target.buffs.acMods = [];
       target.buffs.acMods = target.buffs.acMods.filter(m => m.source !== sourceName);
       target.buffs.acMods.push({ source: sourceName, val, turns });
       const sign = val > 0 ? '+' : '';
-      HUD.log('combat', `【${sourceName}】使${target === G.player ? '你' : '敵方'}的閃避 ${sign}${val}，持續 ${turns - (val < 0 ? 1 : 0)} 回合。`, stance);
+      HUD.log('combat', `【${sourceName}】使${target === G.player ? '你' : '敵方'}的閃避 ${sign}${val}，持續 ${turns} 回合。`, stance);
     }
 
-    // 兼容舊的 ac 寫法
     const legacyAcMatch = effectsStr.match(/(?<!_|self_|enemy_)ac:(-?\d+):(\d+)/);
     if (legacyAcMatch && !selfAcMatch && !enemyAcMatch) {
       const val = parseInt(legacyAcMatch[1]);
-      let turns = parseInt(legacyAcMatch[2]);
-      if (val < 0) turns += 1;
+      const turns = parseInt(legacyAcMatch[2]);
       
       const receiver = val > 0 ? attacker : target;
       if (!receiver.buffs.acMods) receiver.buffs.acMods = [];
       receiver.buffs.acMods = receiver.buffs.acMods.filter(m => m.source !== sourceName);
       receiver.buffs.acMods.push({ source: sourceName, val, turns });
       const sign = val > 0 ? '+' : '';
-      HUD.log('combat', `【${sourceName}】使${receiver === G.player ? '你' : '敵方'}的閃避 ${sign}${val}，持續 ${turns - (val < 0 ? 1 : 0)} 回合。`, stance);
+      HUD.log('combat', `【${sourceName}】使${receiver === G.player ? '你' : '敵方'}的閃避 ${sign}${val}，持續 ${turns} 回合。`, stance);
     }
     
     return { isPierce };
@@ -507,7 +505,8 @@ const CombatSystem = {
     const p = G.player, e = G.enemy;
     if (e.hp <= 0) return this.end(true);
 
-    this.tickBuffs(p); // 敵人回合開始，結算玩家身上的 Buff
+    // ★ 核心修正 2：敵人回合開始，扣除【敵人自己】身上的 Buff 回合數
+    this.tickBuffs(e); 
 
     if (p.isPoisoned > 0) {
       const pDmg = p.poisonDamage || 5;
@@ -637,6 +636,18 @@ const CombatSystem = {
     this.updateHUD(); 
     if (p.hp <= 0) { this.end(false); }
     else { this.startPlayerTurn(); }
+  },
+
+  meditate() {
+    const p = G.player;
+    p.qi = Math.min(p.maxQi, p.qi + 3);
+    p.pos = Math.min(p.maxPos, p.pos + 2); 
+    
+    soundEngine.playQiSurge();
+    HUD.log('combat', '你退後半步，雙目微閉，運轉真氣。回復 3 點真氣與 2 點架勢。', 'player');
+    HUD.updateGauges();
+    
+    setTimeout(() => this.enemyTurn(), 1000);
   },
 
   tickBuffs(target) {

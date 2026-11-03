@@ -1,5 +1,5 @@
 const TagUtils = {
-  // ★ 新增：將傳入的數據統一轉成陣列
+  // ★ 終極防禦：不管傳入什麼鬼東西，都轉成陣列
   _parseTags(tagIds) {
     if (!tagIds) return [];
     if (Array.isArray(tagIds)) return tagIds;
@@ -26,37 +26,39 @@ const TagUtils = {
     return !arr.some(t => this.has(t));
   },
 
+  // ★ 核心修復：使用 _parseTags 進行防呆
   bonus(tagIds, checkAttr) {
+    const arr = this._parseTags(tagIds);
     let total = 0;
     let detail = [];
     
-    (tagIds || []).forEach(t => {
-      if (!this.has(t) || !G.data.TAGS[t]) return;
-      const tag = G.data.TAGS[t];
-      const bonusStr = String(tag.bonus || '0');
-      
-      // 1. 舊版相容：如果直接填數字
-      if (!isNaN(bonusStr) && !bonusStr.includes(':')) {
-        const val = Number(bonusStr);
-        if (val !== 0) {
-          total += val;
-          detail.push(`${tag.name}${val > 0 ? '+' : ''}${val}`);
-        }
-        return;
-      }
-      
-      // 2. 新版定向加成：解析 str:2|dex:-1 格式
-      bonusStr.split('|').forEach(part => {
-        const [attr, valStr] = part.split(':');
-        const val = Number(valStr) || 0;
-        const a = attr.trim().toLowerCase();
+    arr.forEach(t => {
+      if (this.has(t) && G.data.TAGS[t]) {
+        const tag = G.data.TAGS[t];
+        const bonusStr = String(tag.bonus || '0');
         
-        // 如果填了 all 就是全屬性，或者匹配當前檢定屬性
-        if (a === 'all' || a === checkAttr) {
-          total += val;
-          detail.push(`${tag.name}${val > 0 ? '+' : ''}${val}`);
+        // 1. 舊版相容：如果直接填數字
+        if (!isNaN(bonusStr) && !bonusStr.includes(':')) {
+          const val = Number(bonusStr);
+          if (val !== 0) {
+            total += val;
+            detail.push(`${tag.name}${val > 0 ? '+' : ''}${val}`);
+          }
+          return;
         }
-      });
+        
+        // 2. 新版定向加成：解析 str:2|dex:-1 格式
+        bonusStr.split('|').forEach(part => {
+          const [attr, valStr] = part.split(':');
+          const val = Number(valStr) || 0;
+          const a = attr.trim().toLowerCase();
+          
+          if (a === 'all' || a === checkAttr) {
+            total += val;
+            detail.push(`${tag.name}${val > 0 ? '+' : ''}${val}`);
+          }
+        });
+      }
     });
     
     return { total, detail };
