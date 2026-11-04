@@ -49,24 +49,42 @@ const HUD = {
   showTagTooltip(e, tag) {
     const tt = document.getElementById('tagTooltip');
     if (!tt) return;
+
     document.getElementById('ttTagGrade').textContent = `[${tag.grade || 'E'}]`;
     document.getElementById('ttTagGrade').className = `text-[10px] px-1.5 py-0.5 rounded border font-black ${this.getTagStyle(tag)}`;
     document.getElementById('ttTagName').textContent = tag.name;
     document.getElementById('ttTagDesc').textContent = tag.desc || '暫無詳細描述。';
 
-    const bonusText = String(tag.bonus || '0');
-    let effectStr = '無特殊加成';
+    const bonusText = String(tag.bonus || '0').trim();
+    const bonusEl = document.getElementById('ttTagBonus');
+    let effectStr = '';
+
+    // 判斷有冇實質加成
     if (!isNaN(bonusText) && Number(bonusText) !== 0) {
       effectStr = `所有檢定 ${Number(bonusText) > 0 ? '+' : ''}${bonusText}`;
     } else if (bonusText.includes(':')) {
       effectStr = bonusText.split('|').map(part => {
         const [attr, val] = part.split(':');
         const num = Number(val);
+        if (num === 0) return ''; // 如果是 0 就不顯示
         const attrName = { str: '臂力', dex: '身法', con: '根骨', int: '悟性', wis: '心法', cha: '魅力' }[attr] || attr;
         return `${attrName}檢定 ${num > 0 ? '+' : ''}${num}`;
-      }).join('，');
+      }).filter(Boolean).join('，');
     }
-    document.getElementById('ttTagBonus').textContent = `效果：${effectStr}`;
+
+    // ★ 核心修改：如果有效果字串，才顯示；否則直接隱藏整個效果行
+    if (effectStr) {
+      bonusEl.classList.remove('hidden');
+      const isGlobal = String(tag.global).toLowerCase() === 'true';
+      const scopeTag = isGlobal 
+        ? `<span class="text-[9px] bg-[#fef08a] text-[#854d0e] px-1 rounded ml-1 border border-[#fde047]">全局生效</span>`
+        : `<span class="text-[9px] bg-[#e0f2fe] text-[#0369a1] px-1 rounded ml-1 border border-[#bae6fd]">特定觸發</span>`;
+      
+      bonusEl.innerHTML = `效果：${effectStr} ${scopeTag}`;
+    } else {
+      bonusEl.classList.add('hidden'); // 冇加成，直接隱藏
+    }
+
     this._positionTooltip(e, tt);
   },
 
@@ -453,37 +471,43 @@ const HUD = {
     container.innerHTML = '';
     if (!choices || !choices.length) return;
     
-    // ★ 核心修改：改成兩欄網格 (手機端單欄，電腦端兩欄)
+    const isCompact = choices.length > 4; // ★ 超過 4 個選項才啟用緊湊模式
     const grid = document.createElement('div');
-    grid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-2 w-full'; 
+    // 緊湊模式用兩欄，普通模式用單欄
+    grid.className = `grid ${isCompact ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'} gap-2.5 w-full`; 
     
     choices.forEach(ch => {
       const btn = document.createElement('button');
       
       if (ch.disabled) {
-        btn.className = `px-3 py-2 rounded-lg border text-left flex flex-col justify-center opacity-70 cursor-not-allowed bg-[#f5f5f4] border-[#e5dcce] h-full`;
+        btn.className = `px-3.5 py-2.5 rounded-lg border text-left flex flex-col justify-center opacity-70 cursor-not-allowed bg-[#f5f5f4] border-[#e5dcce]`;
         btn.innerHTML = `
-          <div class="flex items-center justify-between w-full mb-0.5">
-            <span class="font-bold text-[13px] tracking-wide text-[#a8a29e]">${ch.label}</span>
-            ${ch.checkText ? `<span class="text-[9px] px-1.5 py-0.5 rounded font-mono font-bold bg-[#e5e5e5] text-[#a8a29e]">${ch.checkText}</span>` : ''}
-          </div>`;
+          <div class="flex items-center justify-between w-full">
+            <span class="font-bold text-sm text-[#a8a29e]">${ch.label}</span>
+            ${ch.checkText ? `<span class="text-[10px] px-1.5 py-0.5 rounded font-mono font-bold bg-[#e5e5e5] text-[#a8a29e]">${ch.checkText}</span>` : ''}
+          </div>
+          ${!isCompact && ch.desc ? `<span class="text-xs text-[#a8a29e] mt-1">${ch.desc}</span>` : ''}
+        `;
         btn.onclick = () => HUD.log('combat', '真氣不足，無法施展！', 'neutral');
       } else {
-        btn.className = `px-3 py-2 rounded-lg border text-left flex flex-col justify-center transition-all ${
+        // 恢復原本的大氣按鈕樣式
+        btn.className = `px-4 py-3 rounded-xl border text-left flex flex-col justify-between transition-all ${
           ch.primary 
-            ? 'wuxia-primary-btn text-white border-[#851e18] shadow-sm' 
-            : 'wuxia-choice-card text-[#2c1f14] border-[#dcd1c2] shadow-xs hover:border-[#a82d25]'
-        } h-full`;
+            ? 'wuxia-primary-btn text-white border-[#851e18] shadow-md' 
+            : 'wuxia-choice-card text-[#2c1f14] border-[#dcd1c2] shadow-sm hover:border-[#a82d25]'
+        }`;
         
         const badgeClass = ch.primary 
           ? 'bg-black/20 text-[#fef3c7]'
           : 'bg-[#f5ede0] text-[#a82d25]';
 
         btn.innerHTML = `
-          <div class="flex items-center justify-between w-full">
-            <span class="font-bold text-[13px] tracking-wide truncate pr-1">${ch.label}</span>
-            ${ch.checkText ? `<span class="text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${badgeClass} whitespace-nowrap shrink-0">${ch.checkText}</span>` : ''}
-          </div>`;
+          <div class="flex items-center justify-between w-full ${!isCompact && ch.desc ? 'mb-1' : ''}">
+            <span class="font-bold text-sm tracking-wide">${ch.label}</span>
+            ${ch.checkText ? `<span class="text-xs px-2 py-0.5 rounded font-mono font-bold ${badgeClass}">${ch.checkText}</span>` : ''}
+          </div>
+          ${!isCompact && ch.desc ? `<span class="text-xs text-[#78614c] line-clamp-2">${ch.desc}</span>` : ''}
+        `;
         
         btn.onclick = () => {
           container.querySelectorAll('button').forEach(b => { b.disabled = true; b.classList.add('opacity-50', 'cursor-not-allowed'); });
@@ -537,11 +561,16 @@ const HUD = {
       } else if (ch.desc) {
         innerHTML += `<span class="text-[11px] text-[#78716c] mt-0.5 tracking-wider">${ch.desc}</span>`;
       }
-      btn.innerHTML = innerHTML;
-      btn.onclick = () => {
-        optContainer.querySelectorAll('button').forEach(b => { b.disabled = true; b.classList.add('opacity-40', 'cursor-not-allowed'); });
-        ch.action();
-      };
+        const titleColor = ch.primary ? 'text-white' : 'text-[#2c1f14]';
+        const descColor = ch.primary ? 'text-white/80' : 'text-[#78614c]';
+
+        btn.innerHTML = `
+          <div class="flex items-center justify-between w-full ${!isCompact && ch.desc ? 'mb-1.5' : ''}">
+            <span class="font-bold text-[14px] tracking-wide ${titleColor}">${ch.label}</span>
+            ${ch.checkText ? `<span class="text-[11px] px-2 py-0.5 rounded font-mono font-bold ${badgeClass}">${ch.checkText}</span>` : ''}
+          </div>
+          ${!isCompact && ch.desc ? `<span class="text-xs leading-relaxed ${descColor} line-clamp-2">${ch.desc}</span>` : ''}
+        `;
       optContainer.appendChild(btn);
     });
     modal.classList.remove('hidden');

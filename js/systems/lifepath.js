@@ -52,19 +52,16 @@ const LifepathSystem = {
       action: () => this.handleChoice(c)
     }));
 
-    renderList.push({
-      label: '🧘 閉關修煉 (跳過事件)',
-      desc: '專心修煉，回滿氣血與架勢，並額外獲得 1 點潛力。',
-      primary: false,
-      action: () => {
-        HUD.log('narrative', '你選擇避開世俗，閉關修煉。');
-        EffectSystem.apply({ hp: 999, pos: 999, qi: 999 });
-        this.endYear(1); 
-      }
-    });
-
     if (renderList.length > 0) {
       HUD.renderChoices(renderList);
+    } else {
+      // 如果 Excel 忘記填選項，系統會給個安全退出，避免卡死
+      HUD.renderChoices([{
+        label: '度過這一年',
+        desc: '這一年平淡無奇地過去了。',
+        primary: true,
+        action: () => { G.currentAge++; setTimeout(() => this.runYear(), 300); }
+      }]);
     }
   },
 
@@ -135,6 +132,7 @@ const LifepathSystem = {
       
       EffectSystem.apply(choice.effects);
       
+      // ★ 核心修正：如果有下一個節點，直接交給 EventSystem 播；如果沒有，直接跳下一年
       if (choice.next && G.data.EVENTS[choice.next]) {
         EventSystem.load(choice.next);
       } else {
@@ -145,26 +143,39 @@ const LifepathSystem = {
 
     if (choice.type === 'check') {
       DiceSystem.check({
-        title: choice.checkName, 
-        attr: choice.attr, 
-        dc: choice.dc, 
-        tags: choice.tags,
+        title: choice.checkName, attr: choice.attr, dc: choice.dc, tags: choice.tags,
         successEffects: choice.success?.effects, 
         failEffects: choice.fail?.effects,
         critSuccessEffects: choice.critSuccess?.effects,
         critFailEffects: choice.critFail?.effects,
         onComplete: (res) => {
-          let branch = res.success ? choice.success : choice.fail;
-          if (res.nat20 && choice.critSuccess) branch = choice.critSuccess;
-          if (res.nat1 && choice.critFail) branch = choice.critFail;
-          if (!branch) branch = {};
+          let branch = res.success ? (choice.success || {}) : (choice.fail || {});
+          
+          if (res.nat20 && choice.critSuccess) {
+            branch = {
+              narrative: choice.critSuccess.narrative || branch.narrative,
+              effects: choice.critSuccess.effects || branch.effects,
+              next: choice.critSuccess.next || branch.next,
+              failGameOver: choice.critSuccess.failGameOver || branch.failGameOver
+            };
+          }
+          if (res.nat1 && choice.critFail) {
+            branch = {
+              narrative: choice.critFail.narrative || branch.narrative,
+              effects: choice.critFail.effects || branch.effects,
+              next: choice.critFail.next || branch.next,
+              failGameOver: choice.critFail.failGameOver || branch.failGameOver
+            };
+          }
           
           if (branch.narrative) HUD.log('narrative', branch.narrative);
-          
           EffectSystem.apply(branch.effects);
           
-          if (!res.success && branch.failGameOver) return this.gameOver();
+          if (!res.success && branch.failGameOver) {
+            return switchSystem('ending', { id: 'lifepath_death' });
+          }
           
+          // ★ 核心修正：如果有下一個節點，去 EventSystem 播；如果沒有，直接跳下一年
           if (branch.next && G.data.EVENTS[branch.next]) {
             EventSystem.load(branch.next);
           } else {

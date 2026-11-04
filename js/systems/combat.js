@@ -225,6 +225,17 @@ const CombatSystem = {
     HUD.renderChoices(actions);
   },
 
+    isImmune(target, debuffType) {
+    if (target !== G.player) return false; // 目前設定為只有玩家的內功有免疫，敵人之後可擴充
+    const innerId = G.player.loadout?.inner[0];
+    if (!innerId) return false;
+    const art = G.data.MARTIAL_ARTS[innerId];
+    if (!art || !art.immune) return false;
+    
+    const immunities = String(art.immune).split('|').map(s => s.trim().toLowerCase());
+    return immunities.includes(debuffType.toLowerCase());
+  },
+
   applySpecialEffect(sourceName, effectsStr, attacker, target) {
     if (!effectsStr) return { isPierce: false };
     
@@ -235,17 +246,67 @@ const CombatSystem = {
     if (!target.buffs) target.buffs = {};
     if (!attacker.buffs) attacker.buffs = {};
 
+    // ★ 新增：吸取真氣 (drain_qi)
+    const drainQiMatch = effectsStr.match(/drain_qi:(\d+)/);
+    if (drainQiMatch) {
+      const val = parseInt(drainQiMatch[1]);
+      if (target.qi > 0) {
+        const actualDrain = Math.min(target.qi, val);
+        target.qi -= actualDrain;
+        // 注意：不能超過自己真氣上限
+        attacker.qi = Math.min(attacker.maxQi || 10, attacker.qi + actualDrain);
+        HUD.log('combat', `【${sourceName}】吸取了${targetName} ${actualDrain} 點真氣！`, stance);
+        this.updateHUD();
+      } else {
+        HUD.log('combat', `${targetName}已經真氣枯竭，無法吸取。`, 'neutral');
+      }
+    }
+
+    // ★ 新增：直接扣除敵方真氣 (enemy_qi)
+    const enemyQiMatch = effectsStr.match(/enemy_qi:(-?\d+)/);
+    if (enemyQiMatch) {
+      const val = parseInt(enemyQiMatch[1]);
+      if (val < 0) {
+        const actualDmg = Math.min(target.qi || 0, Math.abs(val));
+        target.qi = Math.max(0, (target.qi || 0) - actualDmg);
+        HUD.log('combat', `【${sourceName}】散去${targetName} ${actualDmg} 點真氣！`, stance);
+        this.updateHUD();
+      }
+    }
+
+    // ★ 新增：自己即時回復真氣 (self_qi)
+    const selfQiMatch = effectsStr.match(/self_qi:(\d+)/);
+    if (selfQiMatch) {
+      const val = parseInt(selfQiMatch[1]);
+      const actualHeal = Math.min(val, (attacker.maxQi || 10) - attacker.qi);
+      if (actualHeal > 0) {
+        attacker.qi += actualHeal;
+        HUD.log('combat', `【${sourceName}】使你回復了 ${actualHeal} 點真氣！`, stance);
+        this.updateHUD();
+      }
+    }
+
     if (effectsStr.includes('pierce')) { isPierce = true; HUD.log('combat', `【${sourceName}】無視護體，直擊經脈！`, stance); }
-    if (effectsStr.includes('stun')) { target.isStunned = true; HUD.log('combat', `【${sourceName}】使${targetName}陷入眩暈！`, stance); }
-    if (effectsStr.includes('heal')) { attacker.hp = Math.min(attacker.maxHp, attacker.hp + 15); HUD.log('combat', `【${sourceName}】真氣流轉，回復 15 點氣血！`, stance); }
+    if (effectsStr.includes('stun')) {
+      if (this.isImmune(target, 'stun')) {
+        HUD.log('combat', `【${sourceName}】試圖擊暈${targetName}，但被護體神功化解！`, 'neutral');
+      } else {
+        target.isStunned = true;
+        HUD.log('combat', `【${sourceName}】使${targetName}陷入眩暈！`, stance); 
+      }
+    }    if (effectsStr.includes('heal')) { attacker.hp = Math.min(attacker.maxHp, attacker.hp + 15); HUD.log('combat', `【${sourceName}】真氣流轉，回復 15 點氣血！`, stance); }
     
     if (effectsStr.includes('poison')) {
-      let turns = 3, dmgPerTurn = 5;
-      const match = effectsStr.match(/poison:(\d+):(\d+)/);
-      if (match) { turns = parseInt(match[1]); dmgPerTurn = parseInt(match[2]); }
-      target.isPoisoned = (target.isPoisoned || 0) + turns;
-      target.poisonDamage = dmgPerTurn;
-      HUD.log('combat', `【${sourceName}】使${targetName}中毒了！(無視架勢，每回合扣 ${dmgPerTurn} 血，持續 ${turns} 回合)`, stance);
+      if (this.isImmune(target, 'poison')) {
+        HUD.log('combat', `【${sourceName}】的劇毒被${targetName === '你' ? '你的' : '敵方的'}內功逼出體外！`, 'neutral');
+      } else {
+        let turns = 3, dmgPerTurn = 5;
+        const match = effectsStr.match(/poison:(\d+):(\d+)/);
+        if (match) { turns = parseInt(match[1]); dmgPerTurn = parseInt(match[2]); }
+        target.isPoisoned = (target.isPoisoned || 0) + turns;
+        target.poisonDamage = dmgPerTurn;
+        HUD.log('combat', `【${sourceName}】使${targetName}中毒了！(無視架勢，每回合扣 ${dmgPerTurn} 血，持續 ${turns} 回合)`, stance);
+      }
     }
 
     if (effectsStr.includes('shield')) {
@@ -277,13 +338,18 @@ const CombatSystem = {
     const enemyAcMatch = effectsStr.match(/enemy_ac:(-?\d+):(\d+)/);
     if (enemyAcMatch) {
       const val = parseInt(enemyAcMatch[1]);
-      const turns = parseInt(enemyAcMatch[2]);
+      let turns = parseInt(enemyAcMatch[2]);
+      if (val < 0) turns += 1;
       
-      if (!target.buffs.acMods) target.buffs.acMods = [];
-      target.buffs.acMods = target.buffs.acMods.filter(m => m.source !== sourceName);
-      target.buffs.acMods.push({ source: sourceName, val, turns });
-      const sign = val > 0 ? '+' : '';
-      HUD.log('combat', `【${sourceName}】使${target === G.player ? '你' : '敵方'}的閃避 ${sign}${val}，持續 ${turns} 回合。`, stance);
+      if (val < 0 && this.isImmune(target, 'ac_down')) {
+        HUD.log('combat', `【${sourceName}】試圖壓制${targetName}的閃避，但毫無效果！`, 'neutral');
+      } else {
+        if (!target.buffs.acMods) target.buffs.acMods = [];
+        target.buffs.acMods = target.buffs.acMods.filter(m => m.source !== sourceName);
+        target.buffs.acMods.push({ source: sourceName, val, turns });
+        const sign = val > 0 ? '+' : '';
+        HUD.log('combat', `【${sourceName}】使${target === G.player ? '你' : '敵方'}的閃避 ${sign}${val}，持續 ${turns - (val < 0 ? 1 : 0)} 回合。`, stance);
+      }
     }
 
     const legacyAcMatch = effectsStr.match(/(?<!_|self_|enemy_)ac:(-?\d+):(\d+)/);
@@ -666,6 +732,8 @@ const CombatSystem = {
   end(win) {
     document.getElementById('enemyHud').classList.add('hidden');
     document.getElementById('loadoutBtn').classList.remove('hidden'); 
+    HUD.clearChoices(); // ★ 新增：立刻清空下方的按鈕，防止死後還能點
+    
     const ev = G.currentCombatEvent;
     
     if (win) {

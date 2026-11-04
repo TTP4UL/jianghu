@@ -30,11 +30,11 @@ const DiceSystem = {
     setTimeout(() => {
       // 1. 先擲出隨機點數 (用 let)
       let d20 = Math.floor(Math.random() * 20) + 1;
-      
-      // 2. 開發者強制干預
+      // ★ 開發者強制干預
       if (G.forceDiceMode === 'crit') d20 = 20;
+      if (G.forceDiceMode === 'nineteen') d20 = 19;
+      if (G.forceDiceMode === 'two') d20 = 2;
       if (G.forceDiceMode === 'fail') d20 = 1;
-
       // 3. 計算總分
       const total = d20 + mod + tagResult.total;
       visual.classList.remove('dice-rolling');

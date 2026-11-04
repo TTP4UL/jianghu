@@ -27,18 +27,25 @@ const EffectSystem = {
       
       if (k === 'addTag') {
         const arr = Array.isArray(v) ? v : [v];
-        arr.forEach(t => { if (TagUtils.add(t)) HUD.log('dice', `領悟【${G.data.TAGS[t]?.name || t}】`); });
-      }
-      else if (k === 'removeTag') {
-        const arr = Array.isArray(v) ? v : [v];
-        arr.forEach(t => TagUtils.remove(t));
-      }
-      else if (k === 'addMartialArt') {
-        const arr = Array.isArray(v) ? v : [v];
-        arr.forEach(a => {
-          if (!p.martialArts.includes(a) && G.data.MARTIAL_ARTS[a]) {
-            p.martialArts.push(a);
-            HUD.log('dice', `習得【${G.data.MARTIAL_ARTS[a].name}】`);
+        arr.forEach(t => {
+          if (TagUtils.add(t)) {
+            const tag = G.data.TAGS[t];
+            const tagName = tag?.name || t;
+            const grade = (tag?.grade || 'E').toUpperCase();
+            const bonus = String(tag?.bonus || '0');
+            
+            // 1. 判斷是否為負面
+            const isNegative = grade === 'F' || bonus.includes('-');
+            // 2. 判斷是否為武學/技能
+            const isSkill = tag?.category === 'skill' || tag?.category === 'martial';
+
+            if (isNegative) {
+              HUD.log('combat', `身中【${tagName}】`, 'enemy');
+            } else if (isSkill) {
+              HUD.log('dice', `領悟【${tagName}】`);
+            } else {
+              HUD.log('lifepath', `獲得【${tagName}】`);
+            }
           }
         });
       }

@@ -109,11 +109,25 @@ const EventSystem = {
         critSuccessEffects: choice.critSuccess?.effects,
         critFailEffects: choice.critFail?.effects,
         onComplete: (res) => {
-          let branch = res.success ? choice.success : choice.fail;
-          if (res.nat20 && choice.critSuccess) branch = choice.critSuccess;
-          if (res.nat1 && choice.critFail) branch = choice.critFail;
-          if (!branch) branch = {};
-
+          let branch = res.success ? (choice.success || {}) : (choice.fail || {});
+          
+          if (res.nat20 && choice.critSuccess) {
+            branch = {
+              narrative: choice.critSuccess.narrative || branch.narrative,
+              effects: choice.critSuccess.effects || branch.effects,
+              next: choice.critSuccess.next || branch.next,
+              failGameOver: choice.critSuccess.failGameOver || branch.failGameOver
+            };
+          }
+          if (res.nat1 && choice.critFail) {
+            branch = {
+              narrative: choice.critFail.narrative || branch.narrative,
+              effects: choice.critFail.effects || branch.effects,
+              next: choice.critFail.next || branch.next,
+              failGameOver: choice.critFail.failGameOver || branch.failGameOver
+            };
+          }
+          
           if (branch.narrative) HUD.log('narrative', branch.narrative);
           EffectSystem.apply(branch.effects);
           
@@ -127,23 +141,22 @@ const EventSystem = {
     }
   },
 
-  // ★ 判定下一個節點：如果有 next 就繼續，冇 next 就返回歷練系統結算
   resolveNext(nextTarget) {
     if (nextTarget) {
       const targets = String(nextTarget).split(',').map(s => s.trim()).filter(Boolean);
       const chosenId = targets[Math.floor(Math.random() * targets.length)];
-      return this.load(chosenId); 
+      if (G.data.EVENTS[chosenId]) {
+        return this.load(chosenId); 
+      }
     }
     
-    // ★ 核心修正：判斷當前年齡
     HUD.closeEncounterModal();
     
+    // ★ 核心判斷：13-17歲回歸 Lifepath 結算，18歲後回歸 Exploration 結算
     if (G.currentAge < 18) {
-      // 如果玩家仲未夠 18 歲，跑完呢個 Event 節點後，返回 Lifepath 繼續成長
       LifepathSystem.nextYear();
     } else {
-      // 如果 18 歲後，照舊返回四季歷練結算
-      ExplorationSystem.endEvent(); 
+      ExplorationSystem.endEvent();
     }
   }
 };
