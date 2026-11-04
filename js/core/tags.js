@@ -28,36 +28,64 @@ const TagUtils = {
 
   // ★ 核心修復：使用 _parseTags 進行防呆
   bonus(tagIds, checkAttr) {
-    const arr = this._parseTags(tagIds);
     let total = 0;
     let detail = [];
     
-    arr.forEach(t => {
-      if (this.has(t) && G.data.TAGS[t]) {
-        const tag = G.data.TAGS[t];
+    // 1. 處理「全局發動」的 Tag (不需要在選項中填寫)
+    (G.player.tags || []).forEach(tId => {
+      const tag = G.data.TAGS[tId];
+      // 如果 Tag 存在，且 global 為 true
+      if (tag && String(tag.global).toLowerCase() === 'true') {
         const bonusStr = String(tag.bonus || '0');
         
-        // 1. 舊版相容：如果直接填數字
+        // 舊版相容：如果是純數字，代表全屬性加成
         if (!isNaN(bonusStr) && !bonusStr.includes(':')) {
           const val = Number(bonusStr);
           if (val !== 0) {
             total += val;
             detail.push(`${tag.name}${val > 0 ? '+' : ''}${val}`);
           }
-          return;
+        } else {
+          // 新版定向加成：str:2|int:-1
+          bonusStr.split('|').forEach(part => {
+            const [attr, valStr] = part.split(':');
+            const val = Number(valStr) || 0;
+            const a = attr.trim().toLowerCase();
+            // 如果填了 all 或者匹配當前檢定屬性
+            if (a === 'all' || a === checkAttr) {
+              total += val;
+              detail.push(`${tag.name}${val > 0 ? '+' : ''}${val}`);
+            }
+          });
         }
-        
-        // 2. 新版定向加成：解析 str:2|dex:-1 格式
-        bonusStr.split('|').forEach(part => {
-          const [attr, valStr] = part.split(':');
-          const val = Number(valStr) || 0;
-          const a = attr.trim().toLowerCase();
-          
-          if (a === 'all' || a === checkAttr) {
+      }
+    });
+
+    // 2. 處理「選項指定」的 Tag (條件觸發)
+    (tagIds || []).forEach(t => {
+      // 避免重複計算：如果這個 Tag 已經是全局 Tag，上面算過了，這裡就跳過
+      const tag = G.data.TAGS[t];
+      if (!tag || String(tag.global).toLowerCase() === 'true') return;
+      
+      if (this.has(t)) {
+        const bonusStr = String(tag.bonus || '0');
+        if (!isNaN(bonusStr) && !bonusStr.includes(':')) {
+          const val = Number(bonusStr);
+          if (val !== 0) {
             total += val;
             detail.push(`${tag.name}${val > 0 ? '+' : ''}${val}`);
           }
-        });
+        } else {
+          bonusStr.split('|').forEach(part => {
+            const [attr, valStr] = part.split(':');
+            const val = Number(valStr) || 0;
+            const a = attr.trim().toLowerCase();
+            if (a === 'all' || a === checkAttr) {
+              total += val;
+              detail.push(`${tag.name}${val > 0 ? '+' : ''}${val}`);
+            }
+          });
+        }
       }
     });
     
