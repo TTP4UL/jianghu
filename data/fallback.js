@@ -326,8 +326,8 @@ const FALLBACK_DATA = {
       "cha": 5,
       "initialMorality": 50,
       "initialMartialArts": [
-        "ex_test",
-        "ex_test2",
+        "test_attack",
+        "test_inner",
         "ma_bone_erosion_full",
         "ma_mountain_river"
       ],
@@ -592,8 +592,8 @@ const FALLBACK_DATA = {
     }
   },
   "MARTIAL_ARTS": {
-    "ex_test": {
-      "id": "ex_test",
+    "test_attack": {
+      "id": "test_attack",
       "name": "測試武學",
       "grade": "EX",
       "type": "拳法",
@@ -612,8 +612,8 @@ const FALLBACK_DATA = {
       "fixedDamage": 15,
       "immune": ""
     },
-    "ex_test2": {
-      "id": "ex_test2",
+    "test_inner": {
+      "id": "test_inner",
       "name": "測試內功",
       "grade": "EX",
       "type": "內功",
@@ -2888,5 +2888,5 @@ const FALLBACK_DATA = {
       ]
     }
   },
-  "VERSION": 1793837490541
+  "VERSION": 1793839560532
 };

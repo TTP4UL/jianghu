@@ -24,18 +24,24 @@ const EventSystem = {
       return switchSystem('combat', { event: ev });
     }
 
-    // 3. ★ 奇遇彈窗 (uiType === 'modal')
+// 3. ★ 奇遇彈窗 (uiType === 'modal')
     if (ev.uiType === 'modal') {
-      // ★ 核心修正：先寫入右側主日誌，留下歷史紀錄
+      // 1. 先寫入右側主日誌，留下歷史紀錄
       HUD.setScene(ev.badge || '江湖奇遇', ev.title || '未知遭遇');
       if (ev.text) {
         HUD.log(ev.speaker ? 'dialogue' : 'narrative', ev.text, ev.speaker || '旁白');
       }
 
-      // 然後再把內容填進彈窗
+      // 2. 填入彈窗內容與副標
       document.getElementById('encounterBadge').textContent = ev.badge || '江湖奇遇';
       document.getElementById('encounterTitle').textContent = ev.title || '未知遭遇';
-      document.getElementById('encounterText').innerHTML = `<p class="indent-7">${ev.text || ''}</p>`;
+      
+      const subtitleEl = document.getElementById('encounterSubtitle');
+      if (subtitleEl) {
+        subtitleEl.textContent = ev.subtitle || '機緣巧合 · 莫測凶吉';
+      }
+
+      document.getElementById('encounterText').innerHTML = `<p class="indent-8 text-justify font-medium leading-relaxed">${ev.text || ''}</p>`;
       
       const optsContainer = document.getElementById('encounterOptions');
       optsContainer.innerHTML = '';
@@ -45,20 +51,59 @@ const EventSystem = {
         if (c.forbidTags && c.forbidTags.length > 0 && !TagUtils.hasNone(c.forbidTags)) return;
 
         const btn = document.createElement('button');
-        btn.className = 'wuxia-choice-card w-full py-3 px-4 rounded-xl text-left border border-[#dcd1c2] flex flex-col justify-between mb-2 hover:border-[#a82d25] transition';
+        const hasCheck = c.type === 'check';
+        const checkAttr = c.attr ? (STATS_INFO[c.attr]?.name || c.attr) : '';
+
+        // 檢定選項：暖金宣紙微漸層底；普通選項：素雅白紙底
+        const cardBgClass = hasCheck 
+          ? 'bg-gradient-to-r from-[#fdf6e9] via-[#fcf9f2] to-white border-2 border-[#d4a373] shadow-xs' 
+          : 'bg-white border border-[#d8ccb8] shadow-2xs';
+
+        btn.className = `relative w-full p-3.5 rounded-lg text-left flex flex-col justify-between mb-2.5 transition-all duration-200 cursor-pointer ${cardBgClass} hover:border-[#a82d25] hover:shadow-md hover:-translate-y-0.5 group font-serif`;
+
+        // 判定先行：深赭底金字印章直接前置在標題前
+        let checkPrefixHtml = '';
+        if (hasCheck) {
+          checkPrefixHtml = `
+            <span class="seal-stamp text-[11px] px-2 py-0.5 rounded-sm bg-[#92400e] text-[#fef3c7] border border-[#78350f] font-mono font-bold tracking-wider mr-2 shadow-2xs">
+              🎲 ${checkAttr} DC ${c.dc}
+            </span>
+          `;
+        }
+
         btn.innerHTML = `
-          <div class="flex justify-between items-center w-full">
-             <span class="font-bold text-[#2c1f14]">${c.text}</span>
-             ${c.type === 'check' ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-[#fef2f2] text-[#b91c1c] border border-[#fca5a5]">${STATS_INFO[c.attr]?.name || c.attr} DC ${c.dc}</span>` : ''}
+          <!-- 左側竹簡刻紋飾線 -->
+          <div class="absolute top-2 bottom-2 left-1.5 w-1 ${hasCheck ? 'bg-[#b45309]' : 'bg-[#cfc0a9]'} rounded-full opacity-70 group-hover:bg-[#a82d25] transition-colors"></div>
+
+          <div class="pl-2.5 w-full">
+            <div class="flex items-center justify-between w-full mb-1">
+              <div class="flex items-center flex-wrap gap-1">
+                ${checkPrefixHtml}
+                <span class="font-black text-sm sm:text-base tracking-wide text-[#2c1f14] group-hover:text-[#a82d25] transition-colors">
+                  ${c.text}
+                </span>
+              </div>
+              <!-- 右側古風引導箭頭 -->
+              <span class="text-xs text-[#b3a490] group-hover:text-[#a82d25] group-hover:translate-x-1 transition-all">
+                <i class="fa-solid fa-chevron-right"></i>
+              </span>
+            </div>
+            ${c.desc ? `<p class="text-xs text-[#594432] font-medium leading-relaxed mt-0.5">${c.desc}</p>` : ''}
           </div>
-          <span class="text-xs text-[#8a7561] mt-1">${c.desc || ''}</span>`;
+        `;
         
         btn.onclick = () => {
+          // 防重複點擊
+          optsContainer.querySelectorAll('button').forEach(b => {
+            b.disabled = true;
+            b.classList.add('opacity-40', 'cursor-not-allowed');
+          });
+
           document.getElementById('encounterModal').classList.add('hidden');
-          // 選擇後，在日誌留下選擇的紀錄
           HUD.log('narrative', `你選擇了：${c.text}`);
           this.handleChoice(c);
         };
+
         optsContainer.appendChild(btn);
       });
 

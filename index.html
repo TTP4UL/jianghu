@@ -252,7 +252,7 @@ tailwind.config = {
 </aside>
 
   <!-- 右側：日誌與選項主視窗 (圖3同款純淨古風框) -->
-  <section class="lg:col-span-8 flex flex-col lg:h-[82dvh] lg:min-h-[600px] w-full">
+  <section class="lg:col-span-8 flex flex-col h-[80dvh] lg:h-[82dvh] lg:min-h-[600px] w-full">
     <div class="wuxia-panel-box rounded-xl p-4 sm:p-6 flex-1 flex flex-col overflow-hidden">
       
       <!-- 頂部標題列 -->
@@ -295,15 +295,10 @@ tailwind.config = {
         </div>
       </div>
 
-      <!-- 劇情記錄區：底色乾淨、字體深刻分明 -->
-      <div id="narrativeLogs" class="flex-1 overflow-y-auto min-h-0 space-y-3 py-4 pr-2 font-serif text-sm sm:text-[15px] leading-relaxed custom-scrollbar"></div>
+      <!-- ★ 核心修改：劇情記錄區加上 min-h-0 和 overflow-y-auto，強制其在剩餘空間內滾動 -->
+      <div id="narrativeLogs" class="flex-1 overflow-y-auto min-h-0 space-y-3 py-3 pr-2 font-serif text-sm sm:text-[15px] leading-relaxed custom-scrollbar"></div>
       
-      <!-- ★ 新增：身法絕技獨立快捷欄 (不消耗回合) -->
-      <div id="utilityPanel" class="hidden pt-2 pb-2 border-t border-[#e5dcce] flex-shrink-0">
-        <!-- 這裡會由 JS 動態插入按鈕 -->
-      </div>
-      
-      <!-- 選項面板 (消耗回合的主行動) -->
+      <!-- 選項面板 (圖2、圖3純白卡片/硃砂紅按鈕) -->
       <div id="interactionPanel" class="pt-3 border-t border-[#d8ccb8] flex-shrink-0 z-10 flex flex-col gap-2.5 max-h-[35dvh] lg:max-h-[45vh] overflow-y-auto custom-scrollbar pr-1"></div>
       
     </div>
@@ -338,24 +333,41 @@ tailwind.config = {
   </div>
 </div>
 
-<!-- ===== ENCOUNTER MODAL (奇遇 / 生死重大抉擇專屬全屏彈窗) ===== -->
-<div id="encounterModal" class="hidden fixed inset-0 z-50 bg-[#1f1610]/75 backdrop-blur-xs flex items-center justify-center p-4 font-serif">
-  <div class="wuxia-panel-box rounded-2xl max-w-lg w-full p-6 sm:p-8 flex flex-col border border-[#c9bbaa] shadow-2xl relative">
+<!-- ENCOUNTER MODAL (奇遇機緣古卷彈窗) -->
+<div id="encounterModal" class="hidden fixed inset-0 z-50 bg-[#1a140e]/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 font-serif">
+  <div class="relative w-full max-w-lg bg-[#fbf8f1] border-2 border-[#bfa888] rounded-xl shadow-2xl p-6 sm:p-8 flex flex-col justify-between max-h-[90vh] overflow-hidden">
     
-    <!-- 頂部印章與標題 -->
-    <div class="text-center pb-3 border-b border-[#d8ccb8]/80 flex-shrink-0">
-      <div id="encounterBadge" class="seal-stamp text-[10px] mb-1.5">江湖奇遇</div>
-      <h2 id="encounterTitle" class="text-xl sm:text-2xl font-black text-[#2c1f14] tracking-widest">—</h2>
-      <p id="encounterSubtitle" class="text-xs text-[#8a7561] mt-1 tracking-wider">機緣巧合 · 莫測凶吉</p>
+    <!-- 四角古風線條裝飾 -->
+    <div class="absolute top-1.5 left-1.5 w-3 h-3 border-t-2 border-l-2 border-[#8c6d46]"></div>
+    <div class="absolute top-1.5 right-1.5 w-3 h-3 border-t-2 border-r-2 border-[#8c6d46]"></div>
+    <div class="absolute bottom-1.5 left-1.5 w-3 h-3 border-b-2 border-l-2 border-[#8c6d46]"></div>
+    <div class="absolute bottom-1.5 right-1.5 w-3 h-3 border-b-2 border-r-2 border-[#8c6d46]"></div>
+
+    <!-- 頂部標題區 -->
+    <div class="text-center pb-3 border-b border-[#e5dcce] flex-shrink-0">
+      <div class="mb-2">
+        <span id="encounterBadge" class="seal-stamp text-xs px-2.5 py-0.5 bg-[#fff1f2] text-[#991b1b] border-[#ef4444] font-bold">
+          家族風雲
+        </span>
+      </div>
+      <h2 id="encounterTitle" class="text-xl sm:text-2xl font-black text-[#2c1f14] tracking-widest">
+        礦脈劫案
+      </h2>
+      <p id="encounterSubtitle" class="text-xs text-[#8a7561] tracking-wider mt-1 font-medium">
+        機緣巧合 · 莫測凶吉
+      </p>
     </div>
 
-    <!-- 中間詳細敘事區 (高對比度墨字、自動捲動) -->
-    <div id="encounterText" class="my-5 max-h-[45vh] overflow-y-auto pr-1 text-sm sm:text-[15px] text-[#2c1f14] leading-relaxed tracking-wide space-y-3 font-serif">
+    <!-- 中間敘事長文 (加入柔和滾動條) -->
+    <div id="encounterText" class="my-4 overflow-y-auto max-h-[42vh] pr-1.5 text-sm sm:text-[14.5px] text-[#332213] leading-relaxed tracking-wide font-medium custom-scrollbar">
+      <!-- 內文將由 JS 注入 -->
     </div>
 
-    <!-- 底部選項面板 (大白底卡片) -->
-    <div id="encounterOptions" class="pt-2 border-t border-[#d8ccb8]/80 flex-shrink-0 flex flex-col gap-2.5">
+    <!-- 底部選項區 -->
+    <div id="encounterOptions" class="space-y-2.5 pt-3 border-t border-[#e5dcce] flex-shrink-0">
+      <!-- 選項將由 JS 注入 -->
     </div>
+
   </div>
 </div>
 

@@ -465,55 +465,130 @@ const HUD = {
     setTimeout(() => c.scrollTo({ top: c.scrollHeight, behavior: 'smooth' }), 50);
   },
 
-  renderChoices(choices) {
+renderChoices(choices) {
     const container = document.getElementById('interactionPanel');
     if (!container) return;
+
     container.innerHTML = '';
     if (!choices || !choices.length) return;
     
-    const isCompact = choices.length > 4; // ★ 超過 4 個選項才啟用緊湊模式
+    // 判斷當前是否處於戰鬥系統
+    const isCombat = (typeof G !== 'undefined' && G.currentSystem === 'combat');
     const grid = document.createElement('div');
-    // 緊湊模式用兩欄，普通模式用單欄
-    grid.className = `grid ${isCompact ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'} gap-2.5 w-full`; 
+    grid.className = 'grid grid-cols-1 gap-2.5 w-full font-serif'; 
     
     choices.forEach(ch => {
       const btn = document.createElement('button');
       
+      // 1. 真氣不足或禁用狀態
       if (ch.disabled) {
-        btn.className = `px-3.5 py-2.5 rounded-lg border text-left flex flex-col justify-center opacity-70 cursor-not-allowed bg-[#f5f5f4] border-[#e5dcce]`;
+        btn.className = 'relative p-3.5 rounded-lg border border-[#e5dcce] bg-[#f5f3ee] text-left flex flex-col justify-between opacity-50 cursor-not-allowed select-none';
         btn.innerHTML = `
-          <div class="flex items-center justify-between w-full">
-            <span class="font-bold text-sm text-[#a8a29e]">${ch.label}</span>
-            ${ch.checkText ? `<span class="text-[10px] px-1.5 py-0.5 rounded font-mono font-bold bg-[#e5e5e5] text-[#a8a29e]">${ch.checkText}</span>` : ''}
+          <div class="flex items-center justify-between w-full mb-1">
+            <span class="font-black text-sm tracking-wide text-[#8a7561]">${ch.label}</span>
+            ${ch.checkText ? `<span class="text-[11px] px-2 py-0.5 rounded font-mono font-bold bg-[#e8decb] text-[#78614c] border border-[#d8ccb8]">${ch.checkText}</span>` : ''}
           </div>
-          ${!isCompact && ch.desc ? `<span class="text-xs text-[#a8a29e] mt-1">${ch.desc}</span>` : ''}
-        `;
-        btn.onclick = () => HUD.log('combat', '真氣不足，無法施展！', 'neutral');
-      } else {
-        // 恢復原本的大氣按鈕樣式
-        btn.className = `px-4 py-3 rounded-xl border text-left flex flex-col justify-between transition-all ${
-          ch.primary 
-            ? 'wuxia-primary-btn text-white border-[#851e18] shadow-md' 
-            : 'wuxia-choice-card text-[#2c1f14] border-[#dcd1c2] shadow-sm hover:border-[#a82d25]'
-        }`;
-        
-        const badgeClass = ch.primary 
-          ? 'bg-black/20 text-[#fef3c7]'
-          : 'bg-[#f5ede0] text-[#a82d25]';
+          <span class="text-xs text-[#a89a88]">${ch.desc || ''}</span>`;
+          
+        btn.onclick = () => {
+          HUD.log('combat', '真氣不足，無法施展！', 'neutral');
+        };
+        grid.appendChild(btn);
+        return;
+      }
+
+      // 2. ★ 戰鬥指令專屬佈局 (清晰招式名 + 右側消耗/命中徽章)
+      if (isCombat) {
+        const isAttack = ch.primary;
+        const cardBgClass = isAttack 
+          ? 'bg-gradient-to-r from-[#fff9f8] via-white to-white border border-[#e2a8a4] hover:border-[#a82d25]' 
+          : 'bg-white border border-[#d8ccb8] hover:border-[#a82d25]';
+
+        btn.className = `relative p-3 rounded-lg text-left flex flex-col justify-between transition-all duration-200 cursor-pointer shadow-2xs hover:shadow-md hover:-translate-y-0.5 group ${cardBgClass}`;
+
+        // 格式化右側標籤 (區分：命中判定 / 真氣消耗 / 狀態回復)
+        let rightBadgeHtml = '';
+        if (ch.checkText) {
+          if (ch.checkText.includes('閃避') || ch.checkText.includes('DC')) {
+            rightBadgeHtml = `<span class="text-[11px] px-2.5 py-0.5 rounded font-mono font-bold bg-[#fef3c7] text-[#92400e] border border-[#f59e0b] shadow-2xs">🎲 ${ch.checkText}</span>`;
+          } else if (ch.checkText.includes('真氣')) {
+            rightBadgeHtml = `<span class="text-[11px] px-2.5 py-0.5 rounded font-bold bg-[#ecfdf5] text-[#047857] border border-[#a7f3d0] shadow-2xs">${ch.checkText}</span>`;
+          } else {
+            rightBadgeHtml = `<span class="text-[11px] px-2.5 py-0.5 rounded font-bold bg-[#eff6ff] text-[#1d4ed8] border border-[#bfdbfe] shadow-2xs">${ch.checkText}</span>`;
+          }
+        }
 
         btn.innerHTML = `
-          <div class="flex items-center justify-between w-full ${!isCompact && ch.desc ? 'mb-1' : ''}">
-            <span class="font-bold text-sm tracking-wide">${ch.label}</span>
-            ${ch.checkText ? `<span class="text-xs px-2 py-0.5 rounded font-mono font-bold ${badgeClass}">${ch.checkText}</span>` : ''}
+          <!-- 左側色線：攻擊招式為硃砂紅，輔助招式為青木色 -->
+          <div class="absolute top-2 bottom-2 left-1.5 w-1 ${isAttack ? 'bg-[#a82d25]' : 'bg-[#78614c]'} rounded-full opacity-80 group-hover:bg-[#a82d25] transition-colors"></div>
+
+          <div class="pl-2.5 w-full">
+            <div class="flex items-center justify-between w-full mb-0.5">
+              <span class="font-black text-sm sm:text-base tracking-wide text-[#2c1f14] group-hover:text-[#a82d25] transition-colors">
+                ${ch.label}
+              </span>
+              ${rightBadgeHtml}
+            </div>
+            ${ch.desc ? `<p class="text-xs text-[#78614c] font-medium leading-relaxed">${ch.desc}</p>` : ''}
           </div>
-          ${!isCompact && ch.desc ? `<span class="text-xs text-[#78614c] line-clamp-2">${ch.desc}</span>` : ''}
         `;
-        
+
         btn.onclick = () => {
-          container.querySelectorAll('button').forEach(b => { b.disabled = true; b.classList.add('opacity-50', 'cursor-not-allowed'); });
+          container.querySelectorAll('button').forEach(b => {
+            b.disabled = true;
+            b.classList.add('opacity-40', 'cursor-not-allowed');
+          });
           ch.action();
         };
+
+        grid.appendChild(btn);
+        return;
       }
+
+      // 3. 劇情奇遇選項佈局 (保持判定前置印章)
+      const hasCheck = !!ch.checkText;
+      const cardBgClass = hasCheck 
+        ? 'bg-gradient-to-r from-[#fdf6e9] via-[#fcf9f2] to-white border-2 border-[#d4a373] shadow-xs' 
+        : 'bg-white border border-[#d8ccb8] shadow-2xs';
+
+      btn.className = `relative p-3.5 rounded-lg text-left flex flex-col justify-between transition-all duration-200 cursor-pointer ${cardBgClass} hover:border-[#a82d25] hover:shadow-md hover:-translate-y-0.5 group`;
+      
+      let checkPrefixHtml = '';
+      if (hasCheck) {
+        checkPrefixHtml = `
+          <span class="seal-stamp text-[11px] px-2 py-0.5 rounded-sm bg-[#92400e] text-[#fef3c7] border border-[#78350f] font-mono font-bold tracking-wider mr-2 shadow-2xs">
+            🎲 ${ch.checkText}
+          </span>
+        `;
+      }
+
+      btn.innerHTML = `
+        <div class="absolute top-2 bottom-2 left-1.5 w-1 ${hasCheck ? 'bg-[#b45309]' : 'bg-[#cfc0a9]'} rounded-full opacity-70 group-hover:bg-[#a82d25] transition-colors"></div>
+
+        <div class="pl-2.5 w-full">
+          <div class="flex items-center justify-between w-full mb-1">
+            <div class="flex items-center flex-wrap gap-1">
+              ${checkPrefixHtml}
+              <span class="font-black text-sm sm:text-base tracking-wide text-[#2c1f14] group-hover:text-[#a82d25] transition-colors">
+                ${ch.label}
+              </span>
+            </div>
+            <span class="text-xs text-[#b3a490] group-hover:text-[#a82d25] group-hover:translate-x-1 transition-all">
+              <i class="fa-solid fa-chevron-right"></i>
+            </span>
+          </div>
+          ${ch.desc ? `<p class="text-xs text-[#594432] font-medium leading-relaxed mt-0.5">${ch.desc}</p>` : ''}
+        </div>
+      `;
+      
+      btn.onclick = () => {
+        container.querySelectorAll('button').forEach(b => {
+          b.disabled = true;
+          b.classList.add('opacity-40', 'cursor-not-allowed');
+        });
+        ch.action();
+      };
+      
       grid.appendChild(btn);
     });
     
@@ -540,39 +615,74 @@ const HUD = {
     if (ageBadge) ageBadge.textContent = `${G.currentAge}歲 · ${seasonName}`;
   },
 
-  showEncounterModal({ badge, title, subtitle, text, choices }) {
+showEncounterModal({ badge, title, subtitle, text, choices }) {
     const modal = document.getElementById('encounterModal');
     if (!modal) return;
+
     document.getElementById('encounterBadge').textContent = badge || '江湖奇遇';
     document.getElementById('encounterTitle').textContent = title || '未知機緣';
     document.getElementById('encounterSubtitle').textContent = subtitle || `${G.currentAge}歲 · ${this.SEASONS[G.currentSeason || 0]}季`;
-    document.getElementById('encounterText').innerHTML = `<p class="indent-7">${text}</p>`;
     
+    // 內文排版：首行縮進與適度留白
+    const textContainer = document.getElementById('encounterText');
+    textContainer.innerHTML = `<p class="indent-8 text-justify">${text}</p>`;
+
     const optContainer = document.getElementById('encounterOptions');
     optContainer.innerHTML = '';
+
     (choices || []).forEach(ch => {
       const btn = document.createElement('button');
-      btn.className = 'wuxia-choice-card w-full py-3.5 px-4 rounded-xl text-center flex flex-col items-center justify-center cursor-pointer group';
-      
-      let innerHTML = `<span class="text-sm sm:text-base font-black text-[#2c1f14] tracking-wider group-hover:text-[#a82d25] transition-colors">${ch.label}</span>`;
-      if (ch.checkText) {
-        if (ch.desc) innerHTML += `<span class="text-[11px] text-[#78716c] mt-0.5 tracking-wider">${ch.desc}</span>`;
-        innerHTML += `<span class="mt-1 text-[11px] font-bold text-[#b91c1c] bg-[#fef2f2] border border-[#fca5a5] px-2 py-0.5 rounded tracking-widest font-mono">[${ch.checkText}]</span>`;
-      } else if (ch.desc) {
-        innerHTML += `<span class="text-[11px] text-[#78716c] mt-0.5 tracking-wider">${ch.desc}</span>`;
-      }
-        const titleColor = ch.primary ? 'text-white' : 'text-[#2c1f14]';
-        const descColor = ch.primary ? 'text-white/80' : 'text-[#78614c]';
+      const hasCheck = !!ch.checkText;
 
-        btn.innerHTML = `
-          <div class="flex items-center justify-between w-full ${!isCompact && ch.desc ? 'mb-1.5' : ''}">
-            <span class="font-bold text-[14px] tracking-wide ${titleColor}">${ch.label}</span>
-            ${ch.checkText ? `<span class="text-[11px] px-2 py-0.5 rounded font-mono font-bold ${badgeClass}">${ch.checkText}</span>` : ''}
-          </div>
-          ${!isCompact && ch.desc ? `<span class="text-xs leading-relaxed ${descColor} line-clamp-2">${ch.desc}</span>` : ''}
+      // 檢定選項：淡暖金宣紙底；普通選項：素雅白宣紙底
+      const cardBgClass = hasCheck 
+        ? 'bg-gradient-to-r from-[#fdf6e9] via-[#fcf9f2] to-white border-2 border-[#d4a373] shadow-xs' 
+        : 'bg-white border border-[#d8ccb8] shadow-2xs';
+
+      btn.className = `relative w-full p-3.5 rounded-lg text-left flex flex-col justify-between transition-all duration-200 cursor-pointer ${cardBgClass} hover:border-[#a82d25] hover:shadow-md hover:-translate-y-0.5 group`;
+
+      // 判定前置印章
+      let checkPrefixHtml = '';
+      if (hasCheck) {
+        checkPrefixHtml = `
+          <span class="seal-stamp text-[11px] px-2 py-0.5 rounded-sm bg-[#92400e] text-[#fef3c7] border border-[#78350f] font-mono font-bold tracking-wider mr-2 shadow-2xs">
+            🎲 ${ch.checkText}
+          </span>
         `;
+      }
+
+      btn.innerHTML = `
+        <!-- 左側竹簡刻紋飾線 -->
+        <div class="absolute top-2 bottom-2 left-1.5 w-1 ${hasCheck ? 'bg-[#b45309]' : 'bg-[#cfc0a9]'} rounded-full opacity-70 group-hover:bg-[#a82d25] transition-colors"></div>
+
+        <div class="pl-2.5">
+          <div class="flex items-center justify-between w-full mb-1">
+            <div class="flex items-center flex-wrap gap-1">
+              ${checkPrefixHtml}
+              <span class="font-black text-sm sm:text-base tracking-wide text-[#2c1f14] group-hover:text-[#a82d25] transition-colors">
+                ${ch.label}
+              </span>
+            </div>
+            <!-- 右側導引箭頭 -->
+            <span class="text-xs text-[#b3a490] group-hover:text-[#a82d25] group-hover:translate-x-1 transition-all">
+              <i class="fa-solid fa-chevron-right"></i>
+            </span>
+          </div>
+          ${ch.desc ? `<p class="text-xs text-[#594432] font-medium leading-relaxed mt-0.5">${ch.desc}</p>` : ''}
+        </div>
+      `;
+
+      btn.onclick = () => {
+        optContainer.querySelectorAll('button').forEach(b => {
+          b.disabled = true;
+          b.classList.add('opacity-40', 'cursor-not-allowed');
+        });
+        ch.action();
+      };
+
       optContainer.appendChild(btn);
     });
+
     modal.classList.remove('hidden');
   },
 
