@@ -1,35 +1,5 @@
 const FALLBACK_DATA = {
   "TAGS": {
-    "test_origin_tag": {
-      "id": "test_origin_tag",
-      "name": "測試起源",
-      "bonus": "str:1|int:-1",
-      "category": "origin",
-      "visible": true,
-      "grade": "EX",
-      "desc": "測試",
-      "global": ""
-    },
-    "test_skill_tag": {
-      "id": "test_skill_tag",
-      "name": "測試武學",
-      "bonus": 0,
-      "category": "skill",
-      "visible": true,
-      "grade": "EX",
-      "desc": "",
-      "global": ""
-    },
-    "test_inner_tag": {
-      "id": "test_inner_tag",
-      "name": "測試內功",
-      "bonus": 0,
-      "category": "skill",
-      "visible": true,
-      "grade": "EX",
-      "desc": "",
-      "global": ""
-    },
     "origin_martial_family": {
       "id": "origin_martial_family",
       "name": "武學世家",
@@ -312,38 +282,6 @@ const FALLBACK_DATA = {
     }
   },
   "ORIGINS": {
-    "test_origin": {
-      "id": "test_origin",
-      "name": "測試出身",
-      "desc": "測試中...",
-      "intro": "測試中...",
-      "gold": 9999,
-      "str": 5,
-      "dex": 5,
-      "con": 5,
-      "int": 5,
-      "wis": 5,
-      "cha": 5,
-      "initialMorality": 50,
-      "initialMartialArts": [
-        "test_attack",
-        "test_inner",
-        "ma_bone_erosion_full",
-        "ma_mountain_river"
-      ],
-      "initialTags": [
-        "test_origin_tag"
-      ],
-      "special": null,
-      "baseStats": {
-        "str": 5,
-        "dex": 5,
-        "con": 5,
-        "int": 5,
-        "wis": 5,
-        "cha": 5
-      }
-    },
     "origin_martial_family": {
       "id": "origin_martial_family",
       "name": "武學世家",
@@ -592,46 +530,6 @@ const FALLBACK_DATA = {
     }
   },
   "MARTIAL_ARTS": {
-    "test_attack": {
-      "id": "test_attack",
-      "name": "測試武學",
-      "grade": "EX",
-      "type": "拳法",
-      "slot": "attack",
-      "basePower": 50,
-      "diceType": 6,
-      "hits": "",
-      "qiCost": 1,
-      "learnDC": 30,
-      "growthRate": 5,
-      "desc": "測試武學",
-      "useAttr": "",
-      "specialEffect": "",
-      "innerEffect": "",
-      "grantTags": "test_skill_tag",
-      "fixedDamage": 15,
-      "immune": ""
-    },
-    "test_inner": {
-      "id": "test_inner",
-      "name": "測試內功",
-      "grade": "EX",
-      "type": "內功",
-      "slot": "inner",
-      "basePower": 100,
-      "diceType": "",
-      "hits": "",
-      "qiCost": "",
-      "learnDC": 30,
-      "growthRate": 5,
-      "desc": "測試內功",
-      "useAttr": "",
-      "specialEffect": "",
-      "innerEffect": "maxHp:-10|maxPos:30|regen:3",
-      "grantTags": "test_inner_tag",
-      "fixedDamage": "",
-      "immune": ""
-    },
     "ex_jiuyang": {
       "id": "ex_jiuyang",
       "name": "九陽神功",
@@ -2888,5 +2786,5 @@ const FALLBACK_DATA = {
       ]
     }
   },
-  "VERSION": 1793839708588
+  "VERSION": 1793840586504
 };
