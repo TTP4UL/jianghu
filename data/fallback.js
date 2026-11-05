@@ -3,10 +3,12 @@ const FALLBACK_DATA = {
     "test_origin_tag": {
       "id": "test_origin_tag",
       "name": "測試起源",
-      "bonus": 0,
+      "bonus": "str:1|int:-1",
       "category": "origin",
       "visible": true,
-      "grade": "EX"
+      "grade": "EX",
+      "desc": "測試",
+      "global": ""
     },
     "test_skill_tag": {
       "id": "test_skill_tag",
@@ -14,7 +16,9 @@ const FALLBACK_DATA = {
       "bonus": 0,
       "category": "skill",
       "visible": true,
-      "grade": "EX"
+      "grade": "EX",
+      "desc": "",
+      "global": ""
     },
     "test_inner_tag": {
       "id": "test_inner_tag",
@@ -22,7 +26,9 @@ const FALLBACK_DATA = {
       "bonus": 0,
       "category": "skill",
       "visible": true,
-      "grade": "EX"
+      "grade": "EX",
+      "desc": "",
+      "global": ""
     },
     "origin_martial_family": {
       "id": "origin_martial_family",
@@ -30,7 +36,9 @@ const FALLBACK_DATA = {
       "bonus": 0,
       "category": "origin",
       "visible": true,
-      "grade": "D"
+      "grade": "D",
+      "desc": "生於武林名門，自幼錦衣玉食",
+      "global": ""
     },
     "origin_merchant": {
       "id": "origin_merchant",
@@ -38,7 +46,9 @@ const FALLBACK_DATA = {
       "bonus": 0,
       "category": "origin",
       "visible": true,
-      "grade": "D"
+      "grade": "D",
+      "desc": "",
+      "global": ""
     },
     "origin_orphan": {
       "id": "origin_orphan",
@@ -46,7 +56,9 @@ const FALLBACK_DATA = {
       "bonus": 0,
       "category": "origin",
       "visible": true,
-      "grade": "D"
+      "grade": "D",
+      "desc": "",
+      "global": ""
     },
     "origin_mediocre": {
       "id": "origin_mediocre",
@@ -54,7 +66,9 @@ const FALLBACK_DATA = {
       "bonus": 0,
       "category": "origin",
       "visible": true,
-      "grade": "D"
+      "grade": "D",
+      "desc": "",
+      "global": ""
     },
     "origin_entered_sect": {
       "id": "origin_entered_sect",
@@ -62,7 +76,9 @@ const FALLBACK_DATA = {
       "bonus": 0,
       "category": "origin",
       "visible": true,
-      "grade": "D"
+      "grade": "D",
+      "desc": "",
+      "global": ""
     },
     "origin_unmarried": {
       "id": "origin_unmarried",
@@ -70,7 +86,9 @@ const FALLBACK_DATA = {
       "bonus": 0,
       "category": "origin",
       "visible": true,
-      "grade": "D"
+      "grade": "D",
+      "desc": "",
+      "global": ""
     },
     "sect_shaolin": {
       "id": "sect_shaolin",
@@ -78,7 +96,9 @@ const FALLBACK_DATA = {
       "bonus": 0,
       "category": "sect",
       "visible": true,
-      "grade": "D"
+      "grade": "D",
+      "desc": "",
+      "global": ""
     },
     "sect_wudang": {
       "id": "sect_wudang",
@@ -86,7 +106,9 @@ const FALLBACK_DATA = {
       "bonus": 0,
       "category": "sect",
       "visible": true,
-      "grade": "D"
+      "grade": "D",
+      "desc": "",
+      "global": ""
     },
     "sect_emei": {
       "id": "sect_emei",
@@ -94,7 +116,9 @@ const FALLBACK_DATA = {
       "bonus": 0,
       "category": "sect",
       "visible": true,
-      "grade": "D"
+      "grade": "D",
+      "desc": "",
+      "global": ""
     },
     "gender_male": {
       "id": "gender_male",
@@ -102,7 +126,9 @@ const FALLBACK_DATA = {
       "bonus": 0,
       "category": "gender",
       "visible": false,
-      "grade": ""
+      "grade": "",
+      "desc": "",
+      "global": ""
     },
     "gender_female": {
       "id": "gender_female",
@@ -110,95 +136,179 @@ const FALLBACK_DATA = {
       "bonus": 0,
       "category": "gender",
       "visible": false,
-      "grade": ""
+      "grade": "",
+      "desc": "",
+      "global": ""
     },
     "sword_master": {
       "id": "sword_master",
       "name": "劍法精通",
-      "bonus": 3,
+      "bonus": 0,
       "category": "skill",
       "visible": true,
-      "grade": "C"
+      "grade": "C",
+      "desc": "",
+      "global": ""
     },
     "inner_power": {
       "id": "inner_power",
       "name": "內功深厚",
-      "bonus": 3,
+      "bonus": 0,
       "category": "skill",
       "visible": true,
-      "grade": "D"
+      "grade": "D",
+      "desc": "",
+      "global": ""
     },
     "iron_body": {
       "id": "iron_body",
       "name": "鐵骨銅身",
-      "bonus": 2,
+      "bonus": 0,
       "category": "skill",
       "visible": true,
-      "grade": "D"
+      "grade": "D",
+      "desc": "",
+      "global": ""
     },
     "sharp_eye": {
       "id": "sharp_eye",
       "name": "洞若觀火",
-      "bonus": 2,
+      "bonus": 0,
       "category": "skill",
       "visible": true,
-      "grade": "D"
+      "grade": "D",
+      "desc": "",
+      "global": ""
     },
     "righteous": {
       "id": "righteous",
       "name": "名門正派",
-      "bonus": 2,
+      "bonus": 0,
       "category": "alignment",
       "visible": true,
-      "grade": "D"
+      "grade": "D",
+      "desc": "",
+      "global": ""
     },
     "evil": {
       "id": "evil",
-      "name": "邪派",
-      "bonus": 2,
-      "category": "alignment",
-      "visible": true,
-      "grade": "D"
-    },
-    "lucky": {
-      "id": "lucky",
-      "name": "福星高照",
-      "bonus": 2,
-      "category": "alignment",
-      "visible": true,
-      "grade": "D"
-    },
-    "vengeful": {
-      "id": "vengeful",
-      "name": "復仇心切",
-      "bonus": 2,
-      "category": "alignment",
-      "visible": true,
-      "grade": "D"
-    },
-    "tag_martial_bloodline": {
-      "id": "tag_martial_bloodline",
-      "name": "世家血脈",
+      "name": "邪功",
       "bonus": 0,
-      "category": "origin",
+      "category": "status",
       "visible": true,
-      "grade": "D"
+      "grade": "F",
+      "desc": "修練了邪功",
+      "global": ""
     },
-    "tag_heirloom_secret": {
-      "id": "tag_heirloom_secret",
-      "name": "祠堂秘辛",
-      "bonus": 0,
-      "category": "hidden",
+    "tag_pulse_damage": {
+      "id": "tag_pulse_damage",
+      "name": "氣脈暗損",
+      "bonus": "con:-1",
+      "category": "status",
+      "visible": true,
+      "grade": "D",
+      "desc": "演武受創，經脈暗傷，行功多費三分力。",
+      "global": ""
+    },
+    "tag_meridian_sting": {
+      "id": "tag_meridian_sting",
+      "name": "經絡刺痛",
+      "bonus": "con:-1|wis:-1",
+      "category": "status",
+      "visible": true,
+      "grade": "D",
+      "desc": "強練蝕骨勁走岔經絡，右臂痠麻刺痛。",
+      "global": ""
+    },
+    "tag_dantian_depression": {
+      "id": "tag_dantian_depression",
+      "name": "丹田鬱結",
+      "bonus": "wis:-1",
+      "category": "status",
+      "visible": true,
+      "grade": "D",
+      "desc": "誤服化功散，丹田氣血運行不暢。",
+      "global": ""
+    },
+    "tag_guard_against_trick": {
+      "id": "tag_guard_against_trick",
+      "name": "防備暗算",
+      "bonus": 1,
+      "category": "status",
       "visible": false,
-      "grade": "C"
+      "grade": "C",
+      "desc": "曾識破化功散，對暗算與毒計多一分警覺。",
+      "global": ""
     },
-    "tag_ex_jiuyang": {
-      "id": "tag_ex_jiuyang",
-      "name": "九陽神功",
-      "bonus": 0,
-      "category": "skill",
+    "tag_demonic_heart_growing": {
+      "id": "tag_demonic_heart_growing",
+      "name": "魔心漸長",
+      "bonus": 1,
+      "category": "status",
       "visible": true,
-      "grade": "EX"
+      "grade": "B",
+      "desc": "初試蝕骨勁吸人內力，殺伐之心漸長。",
+      "global": ""
+    },
+    "tag_rebellion_evidence": {
+      "id": "tag_rebellion_evidence",
+      "name": "謀逆鐵證",
+      "bonus": 1,
+      "category": "status",
+      "visible": false,
+      "grade": "B",
+      "desc": "三長老通匪、購毒、密謀發難的書信證據。",
+      "global": ""
+    },
+    "tag_elder_killing_intent": {
+      "id": "tag_elder_killing_intent",
+      "name": "三長老殺機",
+      "bonus": 0,
+      "category": "status",
+      "visible": false,
+      "grade": "B",
+      "desc": "三長老已決意在事成前除掉你。",
+      "global": ""
+    },
+    "tag_martial_son": {
+      "id": "tag_martial_son",
+      "name": "世家執劍人",
+      "bonus": 0,
+      "category": "status",
+      "visible": true,
+      "grade": "A",
+      "desc": "打破陰謀，成家族天驕",
+      "global": ""
+    },
+    "tag_hidden_qilin": {
+      "id": "tag_hidden_qilin",
+      "name": "隱麟行客",
+      "bonus": 0,
+      "category": "status",
+      "visible": true,
+      "grade": "A",
+      "desc": "寡不敵眾，掩護幼弟突圍，正氣長存。",
+      "global": ""
+    },
+    "tag_bone_devourer": {
+      "id": "tag_bone_devourer",
+      "name": "噬骨魔種",
+      "bonus": 0,
+      "category": "status",
+      "visible": true,
+      "grade": "A",
+      "desc": "反戈背刺，吸盡功力，奪寶焚宅。",
+      "global": ""
+    },
+    "tag_ashura_disciple": {
+      "id": "tag_ashura_disciple",
+      "name": "修羅棄徒",
+      "bonus": 0,
+      "category": "status",
+      "visible": true,
+      "grade": "A",
+      "desc": "政變失敗遭構陷，背鍋逃亡，淪為武林公敵。",
+      "global": ""
     }
   },
   "ORIGINS": {
@@ -218,7 +328,8 @@ const FALLBACK_DATA = {
       "initialMartialArts": [
         "ex_test",
         "ex_test2",
-        "c_basic_sword"
+        "ma_bone_erosion_full",
+        "ma_mountain_river"
       ],
       "initialTags": [
         "test_origin_tag"
@@ -233,32 +344,30 @@ const FALLBACK_DATA = {
         "cha": 5
       }
     },
-    "martial_family": {
-      "id": "martial_family",
+    "origin_martial_family": {
+      "id": "origin_martial_family",
       "name": "武學世家",
-      "desc": "祖上曾出過一位宗師，家中藏有幾本殘缺秘籍。",
-      "intro": "你生於青磚綠瓦的武林名門，自幼伴隨晨鐘劍鳴而醒。長輩以嚴苛規訓雕琢你的根骨，兵器架上的冷鐵是你最初的玩伴。族中藏經閣深鎖著歷代先輩以命相搏的殘卷秘籍，門楣的榮耀與重擔，從你落地啼哭那一刻起便已刻入骨血。",
-      "gold": 500,
-      "str": 2,
-      "dex": 1,
-      "con": 2,
+      "desc": "生於武林名門，自幼錦衣玉食，卻也早早嗅到族中暗潮。",
+      "intro": "家族以鐵礦與拳腳立族，你自小在演武場邊長大，看慣長輩們的笑臉與冷眼。十三歲這年，開刃比武將至，三長老的目光已在你身上停留太久。江湖很遠，家門內的刀光卻近在眼前。",
+      "gold": 200,
+      "str": 3,
+      "dex": 0,
+      "con": 1,
       "int": 0,
-      "wis": 0,
+      "wis": 1,
       "cha": 0,
       "initialMorality": "",
-      "initialMartialArts": [
-        "c_basic_sword"
-      ],
+      "initialMartialArts": [],
       "initialTags": [
-        "tag_martial_bloodline"
+        "origin_martial_family"
       ],
       "special": null,
       "baseStats": {
-        "str": 2,
-        "dex": 1,
-        "con": 2,
+        "str": 3,
+        "dex": 0,
+        "con": 1,
         "int": 0,
-        "wis": 0,
+        "wis": 1,
         "cha": 0
       }
     },
@@ -492,15 +601,16 @@ const FALLBACK_DATA = {
       "basePower": 50,
       "diceType": 6,
       "hits": "",
+      "qiCost": 1,
       "learnDC": 30,
       "growthRate": 5,
       "desc": "測試武學",
-      "specialEffect": "poison:2:5",
-      "fixedDamage": 15,
-      "grantTags": "test_skill_tag",
-      "innerEffect": "",
       "useAttr": "",
-      "qiCost": 1
+      "specialEffect": "",
+      "innerEffect": "",
+      "grantTags": "test_skill_tag",
+      "fixedDamage": 15,
+      "immune": ""
     },
     "ex_test2": {
       "id": "ex_test2",
@@ -511,15 +621,16 @@ const FALLBACK_DATA = {
       "basePower": 100,
       "diceType": "",
       "hits": "",
+      "qiCost": "",
       "learnDC": 30,
       "growthRate": 5,
       "desc": "測試內功",
-      "specialEffect": "",
-      "fixedDamage": "",
-      "grantTags": "test_inner_tag",
-      "innerEffect": "maxHp:-10|maxPos:30|regen:3",
       "useAttr": "",
-      "qiCost": ""
+      "specialEffect": "",
+      "innerEffect": "maxHp:-10|maxPos:30|regen:3",
+      "grantTags": "test_inner_tag",
+      "fixedDamage": "",
+      "immune": ""
     },
     "ex_jiuyang": {
       "id": "ex_jiuyang",
@@ -530,15 +641,16 @@ const FALLBACK_DATA = {
       "basePower": 100,
       "diceType": "",
       "hits": "",
+      "qiCost": "",
       "learnDC": 30,
       "growthRate": 5,
       "desc": "至陽至剛，天下無敵",
-      "specialEffect": "",
-      "fixedDamage": "",
-      "grantTags": "tag_ex_jiuyang",
-      "innerEffect": "regen:5|qi_regen:1",
       "useAttr": "",
-      "qiCost": ""
+      "specialEffect": "",
+      "innerEffect": "",
+      "grantTags": "tag_ex_jiuyang",
+      "fixedDamage": "",
+      "immune": ""
     },
     "s_dugu": {
       "id": "s_dugu",
@@ -549,15 +661,16 @@ const FALLBACK_DATA = {
       "basePower": 30,
       "diceType": 6,
       "hits": 3,
+      "qiCost": "",
       "learnDC": 25,
       "growthRate": 4,
       "desc": "以無招勝有招",
-      "specialEffect": "",
-      "fixedDamage": "",
-      "grantTags": "",
-      "innerEffect": "",
       "useAttr": "str",
-      "qiCost": ""
+      "specialEffect": "",
+      "innerEffect": "",
+      "grantTags": "",
+      "fixedDamage": "",
+      "immune": ""
     },
     "a_taiji": {
       "id": "a_taiji",
@@ -568,15 +681,16 @@ const FALLBACK_DATA = {
       "basePower": 70,
       "diceType": "",
       "hits": "",
+      "qiCost": "",
       "learnDC": 20,
       "growthRate": 3,
       "desc": "以柔克剛，四兩撥千斤",
-      "specialEffect": "",
-      "fixedDamage": "",
-      "grantTags": "",
-      "innerEffect": "",
       "useAttr": "",
-      "qiCost": ""
+      "specialEffect": "",
+      "innerEffect": "",
+      "grantTags": "",
+      "fixedDamage": "",
+      "immune": ""
     },
     "b_emei_sword": {
       "id": "b_emei_sword",
@@ -587,15 +701,16 @@ const FALLBACK_DATA = {
       "basePower": 55,
       "diceType": "",
       "hits": "",
+      "qiCost": "",
       "learnDC": 15,
       "growthRate": 2,
       "desc": "峨嵋入門劍法，重意不重招",
-      "specialEffect": "",
-      "fixedDamage": "",
-      "grantTags": "",
-      "innerEffect": "",
       "useAttr": "",
-      "qiCost": ""
+      "specialEffect": "",
+      "innerEffect": "",
+      "grantTags": "",
+      "fixedDamage": "",
+      "immune": ""
     },
     "c_basic_sword": {
       "id": "c_basic_sword",
@@ -606,15 +721,16 @@ const FALLBACK_DATA = {
       "basePower": "",
       "diceType": "",
       "hits": "",
+      "qiCost": "",
       "learnDC": 10,
       "growthRate": 1,
       "desc": "江湖人人會使的入門劍法",
-      "specialEffect": "poison:2:5",
-      "fixedDamage": 15,
-      "grantTags": "",
-      "innerEffect": "",
       "useAttr": "",
-      "qiCost": ""
+      "specialEffect": "poison:2:5",
+      "innerEffect": "",
+      "grantTags": "",
+      "fixedDamage": 15,
+      "immune": ""
     },
     "c_wudang_sword": {
       "id": "c_wudang_sword",
@@ -625,15 +741,16 @@ const FALLBACK_DATA = {
       "basePower": 32,
       "diceType": "",
       "hits": "",
+      "qiCost": "",
       "learnDC": 11,
       "growthRate": 1.2,
       "desc": "武當入門劍法，以柔馭剛",
-      "specialEffect": "",
-      "fixedDamage": "",
-      "grantTags": "",
-      "innerEffect": "",
       "useAttr": "",
-      "qiCost": ""
+      "specialEffect": "",
+      "innerEffect": "",
+      "grantTags": "",
+      "fixedDamage": "",
+      "immune": ""
     },
     "c_emei_palm": {
       "id": "c_emei_palm",
@@ -644,15 +761,16 @@ const FALLBACK_DATA = {
       "basePower": 28,
       "diceType": "",
       "hits": "",
+      "qiCost": "",
       "learnDC": 10,
       "growthRate": 1,
       "desc": "峨嵋入門掌法，輕靈飄逸",
-      "specialEffect": "",
-      "fixedDamage": "",
-      "grantTags": "",
-      "innerEffect": "",
       "useAttr": "",
-      "qiCost": ""
+      "specialEffect": "",
+      "innerEffect": "",
+      "grantTags": "",
+      "fixedDamage": "",
+      "immune": ""
     },
     "d_shaolin_fist": {
       "id": "d_shaolin_fist",
@@ -663,15 +781,16 @@ const FALLBACK_DATA = {
       "basePower": 20,
       "diceType": "",
       "hits": "",
+      "qiCost": "",
       "learnDC": 8,
       "growthRate": 1,
       "desc": "少林入門拳法，剛猛紮實",
-      "specialEffect": "",
-      "fixedDamage": "",
-      "grantTags": "",
-      "innerEffect": "",
       "useAttr": "",
-      "qiCost": ""
+      "specialEffect": "",
+      "innerEffect": "",
+      "grantTags": "",
+      "fixedDamage": "",
+      "immune": ""
     },
     "d_luohan": {
       "id": "d_luohan",
@@ -682,15 +801,16 @@ const FALLBACK_DATA = {
       "basePower": 22,
       "diceType": "",
       "hits": "",
+      "qiCost": "",
       "learnDC": 8,
       "growthRate": 1,
       "desc": "少林進階拳法",
-      "specialEffect": "",
-      "fixedDamage": "",
-      "grantTags": "",
-      "innerEffect": "",
       "useAttr": "",
-      "qiCost": ""
+      "specialEffect": "",
+      "innerEffect": "",
+      "grantTags": "",
+      "fixedDamage": "",
+      "immune": ""
     },
     "e_money_talk": {
       "id": "e_money_talk",
@@ -701,15 +821,16 @@ const FALLBACK_DATA = {
       "basePower": 10,
       "diceType": "",
       "hits": "",
+      "qiCost": "",
       "learnDC": 5,
       "growthRate": 0.5,
       "desc": "討價還價的江湖技藝",
-      "specialEffect": "",
-      "fixedDamage": "",
-      "grantTags": "",
-      "innerEffect": "",
       "useAttr": "",
-      "qiCost": ""
+      "specialEffect": "",
+      "innerEffect": "",
+      "grantTags": "",
+      "fixedDamage": "",
+      "immune": ""
     },
     "e_street_fist": {
       "id": "e_street_fist",
@@ -720,15 +841,16 @@ const FALLBACK_DATA = {
       "basePower": 10,
       "diceType": "",
       "hits": "",
+      "qiCost": "",
       "learnDC": 5,
       "growthRate": 0.5,
       "desc": "打架用的下三濫招",
-      "specialEffect": "",
-      "fixedDamage": "",
-      "grantTags": "",
-      "innerEffect": "",
       "useAttr": "",
-      "qiCost": ""
+      "specialEffect": "",
+      "innerEffect": "",
+      "grantTags": "",
+      "fixedDamage": "",
+      "immune": ""
     },
     "b_canyang_sword": {
       "id": "b_canyang_sword",
@@ -739,15 +861,96 @@ const FALLBACK_DATA = {
       "basePower": 45,
       "diceType": 6,
       "hits": 2,
+      "qiCost": "",
       "learnDC": 14,
       "growthRate": 1.8,
       "desc": "祖上流傳下來的殘缺劍法，劍勢如泣如訴，狠辣異常。",
-      "specialEffect": "",
-      "fixedDamage": "",
-      "grantTags": "",
-      "innerEffect": "",
       "useAttr": "",
-      "qiCost": ""
+      "specialEffect": "",
+      "innerEffect": "",
+      "grantTags": "",
+      "fixedDamage": "",
+      "immune": ""
+    },
+    "ma_breaking_wave": {
+      "id": "ma_breaking_wave",
+      "name": "破浪開山勁",
+      "grade": "C",
+      "type": "拳法",
+      "slot": "attack",
+      "basePower": 35,
+      "diceType": 8,
+      "hits": 1,
+      "qiCost": 2,
+      "learnDC": "",
+      "growthRate": "",
+      "desc": "沈家中正平和的家傳勁法，走丹田—氣海—帶脈，勁力如浪疊湧。",
+      "useAttr": "",
+      "specialEffect": "",
+      "innerEffect": "",
+      "grantTags": "",
+      "fixedDamage": "",
+      "immune": ""
+    },
+    "ma_bone_erosion_fragment": {
+      "id": "ma_bone_erosion_fragment",
+      "name": "蝕骨勁殘篇",
+      "grade": "B",
+      "type": "拳法",
+      "slot": "attack",
+      "basePower": 40,
+      "diceType": 8,
+      "hits": 1,
+      "qiCost": 3,
+      "learnDC": "",
+      "growthRate": "",
+      "desc": "魔門旁門殘篇，不循丹田正脈，專走骨縫筋膜，陰寒噬心。",
+      "useAttr": "",
+      "specialEffect": "enemy_qi:-2",
+      "innerEffect": "",
+      "grantTags": "",
+      "fixedDamage": "",
+      "immune": ""
+    },
+    "ma_bone_erosion_full": {
+      "id": "ma_bone_erosion_full",
+      "name": "蝕骨勁",
+      "grade": "A",
+      "type": "拳法",
+      "slot": "attack",
+      "basePower": 55,
+      "diceType": 10,
+      "hits": 1,
+      "qiCost": 4,
+      "learnDC": "",
+      "growthRate": "",
+      "desc": "三長老所藏邪功全本，可吸人內力為己用，殺伐凌厲。",
+      "useAttr": "",
+      "specialEffect": "self_qi:1|enemy_qi:-2",
+      "innerEffect": "",
+      "grantTags": "",
+      "fixedDamage": "",
+      "immune": ""
+    },
+    "ma_mountain_river": {
+      "id": "ma_mountain_river",
+      "name": "山河訣",
+      "grade": "A",
+      "type": "內功",
+      "slot": "inner",
+      "basePower": 60,
+      "diceType": "",
+      "hits": "",
+      "qiCost": "",
+      "learnDC": "",
+      "growthRate": "",
+      "desc": "沈家鎮族頂級心法，中正渾厚，百毒不侵，掌心可凝淡青山紋。",
+      "useAttr": "",
+      "specialEffect": "",
+      "innerEffect": "qi_regen:2",
+      "grantTags": "",
+      "fixedDamage": "",
+      "immune": "poison"
     }
   },
   "COMPANIONS": {
@@ -879,10 +1082,10 @@ const FALLBACK_DATA = {
       "enemyName": "小人",
       "enemyHp": 999,
       "enemyPos": 999,
-      "enemyQi": 999,
       "enemyAc": 5,
-      "enemyArts": "c_basic_sword",
+      "enemyQi": 999,
       "enemyInner": "ex_jiuyang",
+      "enemyArts": "c_basic_sword",
       "onVictory": "",
       "onDefeat": "",
       "endingVariant": "",
@@ -913,10 +1116,10 @@ const FALLBACK_DATA = {
       "enemyName": "",
       "enemyHp": "",
       "enemyPos": "",
-      "enemyQi": "",
       "enemyAc": "",
-      "enemyArts": "",
+      "enemyQi": "",
       "enemyInner": "",
+      "enemyArts": "",
       "onVictory": "defeat",
       "onDefeat": "",
       "endingVariant": "",
@@ -1047,10 +1250,10 @@ const FALLBACK_DATA = {
       "enemyName": "",
       "enemyHp": "",
       "enemyPos": "",
-      "enemyQi": "",
       "enemyAc": "",
-      "enemyArts": "",
+      "enemyQi": "",
       "enemyInner": "",
+      "enemyArts": "",
       "onVictory": "defeat",
       "onDefeat": "",
       "endingVariant": "",
@@ -1182,10 +1385,10 @@ const FALLBACK_DATA = {
       "enemyName": "「狂刀」厲煞",
       "enemyHp": 48,
       "enemyPos": 24,
-      "enemyQi": "",
       "enemyAc": 13,
-      "enemyArts": "c_basic_sword",
+      "enemyQi": "",
       "enemyInner": "",
+      "enemyArts": "c_basic_sword",
       "onVictory": "",
       "onDefeat": "",
       "endingVariant": "",
@@ -1216,10 +1419,10 @@ const FALLBACK_DATA = {
       "enemyName": "",
       "enemyHp": "",
       "enemyPos": "",
-      "enemyQi": "",
       "enemyAc": "",
-      "enemyArts": "",
+      "enemyQi": "",
       "enemyInner": "",
+      "enemyArts": "",
       "onVictory": "victory",
       "onDefeat": "",
       "endingVariant": ""
@@ -1240,10 +1443,10 @@ const FALLBACK_DATA = {
       "enemyName": "",
       "enemyHp": "",
       "enemyPos": "",
-      "enemyQi": "",
       "enemyAc": "",
-      "enemyArts": "",
+      "enemyQi": "",
       "enemyInner": "",
+      "enemyArts": "",
       "onVictory": "defeat",
       "onDefeat": "",
       "endingVariant": ""
@@ -1264,10 +1467,10 @@ const FALLBACK_DATA = {
       "enemyName": "",
       "enemyHp": "",
       "enemyPos": "",
-      "enemyQi": "",
       "enemyAc": "",
-      "enemyArts": "",
+      "enemyQi": "",
       "enemyInner": "",
+      "enemyArts": "",
       "onVictory": "defeat",
       "onDefeat": "",
       "endingVariant": ""
@@ -1288,10 +1491,10 @@ const FALLBACK_DATA = {
       "enemyName": "",
       "enemyHp": "",
       "enemyPos": "",
-      "enemyQi": "",
       "enemyAc": "",
-      "enemyArts": "",
+      "enemyQi": "",
       "enemyInner": "",
+      "enemyArts": "",
       "onVictory": "",
       "onDefeat": "",
       "endingVariant": ""
@@ -1312,10 +1515,10 @@ const FALLBACK_DATA = {
       "enemyName": "",
       "enemyHp": "",
       "enemyPos": "",
-      "enemyQi": "",
       "enemyAc": "",
-      "enemyArts": "",
+      "enemyQi": "",
       "enemyInner": "",
+      "enemyArts": "",
       "onVictory": "",
       "onDefeat": "",
       "endingVariant": "",
@@ -1389,14 +1592,136 @@ const FALLBACK_DATA = {
         }
       ]
     },
-    "lp13_martial": {
-      "id": "lp13_martial",
+    "evt_martial_13_start": {
+      "id": "evt_martial_13_start",
       "type": "normal",
       "uiType": "modal",
-      "badge": "世家歲月",
-      "title": "祠堂受罰",
-      "text": "你因練功偷懶，被父親罰跪祖祠。深夜，你發現膝下的青磚似乎有些鬆動，裡面隱隱透出一股寒氣...",
-      "speaker": "旁白",
+      "badge": "家族風雲",
+      "title": "演武試鋒",
+      "text": "歲末冬寒，青磚鋪就的演武場上結著薄霜。你站在族中子弟隊列末端，呼出的白氣在晨光中散開。今日是三年一度的「開刃比武」，老家主端坐高台，三長老垂手立於身側，目光如蛇信般掃過場中少年。規矩簡單：抽籤對陣，勝者入藏經閣翻閱典籍三日，敗者去馬廄劈三個月柴。你摸到簽筒底，抽出一根——上頭用朱砂寫著「七」，對面那位堂兄的名字墨跡未乾，他比你高半頭，臂上已練出腱子肉，正朝你齜牙一笑：「小不點兒，待會別哭。」",
+      "speaker": "",
+      "age": 13,
+      "requireTags": "origin_martial_family",
+      "forbidTags": "",
+      "priority": 10,
+      "weight": 10,
+      "enemyName": "",
+      "enemyHp": "",
+      "enemyPos": "",
+      "enemyAc": "",
+      "enemyQi": "",
+      "enemyInner": "",
+      "enemyArts": "",
+      "onVictory": "",
+      "onDefeat": "",
+      "endingVariant": "",
+      "choices": [
+        {
+          "eventId": "evt_martial_13_start",
+          "order": 1,
+          "text": "不閃不避，正面強攻",
+          "desc": "正面強破堂兄。",
+          "type": "check",
+          "requireTags": [],
+          "forbidTags": [],
+          "checkName": "臂力檢定",
+          "attr": "str",
+          "dc": 12,
+          "tags": "",
+          "successNarrative": "你沉腰坐馬，一拳砸在堂兄肩窩。他整條手臂軟了下去，老家主在臺上微微頷首，眼中閃過讚許。當晚你被記名入藏經閣，獲准翻閱三日典籍。",
+          "successEffects": "str:1|con:1|reputation:5|morality:2",
+          "successNext": "evt_forbidden_131",
+          "failNarrative": "你一拳遞出，卻被堂兄一肘砸在胸口。你退了三步，嘴角滲血，經脈裡像有根針在遊走。老家主擺了擺手：「下去養著吧。」當夜你躺在偏房，胸口悶痛，這傷怕是要留下暗疾了。",
+          "failEffects": "con:-1|reputation:-3|morality:1|addTag:tag_pulse_damage",
+          "failNext": "evt_sickbed_13_2",
+          "failGameOver": "",
+          "directNarrative": "",
+          "directEffects": "",
+          "directNext": "",
+          "critSuccessNarrative": "",
+          "critSuccessEffects": "",
+          "critSuccessNext": "",
+          "critFailNarrative": "",
+          "critFailEffects": "",
+          "critFailNext": "",
+          "success": {
+            "narrative": "你沉腰坐馬，一拳砸在堂兄肩窩。他整條手臂軟了下去，老家主在臺上微微頷首，眼中閃過讚許。當晚你被記名入藏經閣，獲准翻閱三日典籍。",
+            "effects": {
+              "str": 1,
+              "con": 1,
+              "reputation": 5,
+              "morality": 2
+            },
+            "next": "evt_forbidden_131"
+          },
+          "fail": {
+            "narrative": "你一拳遞出，卻被堂兄一肘砸在胸口。你退了三步，嘴角滲血，經脈裡像有根針在遊走。老家主擺了擺手：「下去養著吧。」當夜你躺在偏房，胸口悶痛，這傷怕是要留下暗疾了。",
+            "effects": {
+              "con": -1,
+              "reputation": -3,
+              "morality": 1,
+              "addTag": "tag_pulse_damage"
+            },
+            "next": "evt_sickbed_13_2",
+            "failGameOver": false
+          },
+          "critSuccess": {
+            "narrative": "",
+            "effects": null,
+            "next": null
+          },
+          "critFail": {
+            "narrative": "",
+            "effects": null,
+            "next": null
+          }
+        },
+        {
+          "eventId": "evt_martial_13_start",
+          "order": 2,
+          "text": "穩紮穩打，先拆招再尋破綻",
+          "desc": "保守拆招，不求有功但求無過。",
+          "type": "direct",
+          "requireTags": [],
+          "forbidTags": [],
+          "checkName": "",
+          "attr": "",
+          "dc": "",
+          "tags": "",
+          "successNarrative": "",
+          "successEffects": "",
+          "successNext": "",
+          "failNarrative": "",
+          "failEffects": "",
+          "failNext": "",
+          "failGameOver": "",
+          "directNarrative": "你雙臂交叉護住面門，硬扛了十數招。最終以「點到為止」判平手。老家主微微頷首，特許你去馬廄挑一匹半歲小馬駒。老卒悄悄塞給你一塊碎銀：「小少爺，今兒場上，您沒出風頭，是福氣。」接下來的日子，你安穩度過。",
+          "directEffects": "con:1|dex:1|reputation:3",
+          "directNext": "",
+          "critSuccessNarrative": "",
+          "critSuccessEffects": "",
+          "critSuccessNext": "",
+          "critFailNarrative": "",
+          "critFailEffects": "",
+          "critFailNext": "",
+          "narrative": "你雙臂交叉護住面門，硬扛了十數招。最終以「點到為止」判平手。老家主微微頷首，特許你去馬廄挑一匹半歲小馬駒。老卒悄悄塞給你一塊碎銀：「小少爺，今兒場上，您沒出風頭，是福氣。」接下來的日子，你安穩度過。",
+          "effects": {
+            "con": 1,
+            "dex": 1,
+            "reputation": 3
+          },
+          "next": null
+        }
+      ]
+    },
+    "evt_forbidden_131": {
+      "id": "evt_forbidden_131",
+      "type": "normal",
+      "uiType": "",
+      "badge": "家族風雲",
+      "title": "禁閣秘影",
+      "text": "藏經閣三層，夜裡只點一盞油燈。你被安排在閣中夜宿三日，白天翻典籍，夜裡睡在角落的竹榻上。第二夜三更，你被一陣輕微的腳步聲驚醒——從竹榻縫隙望出去，三長老提著一盞蒙了黑布的燈籠，推開閣後暗門，閃身進了禁地。禁地與藏經閣只隔一道薄牆，牆上有個通氣孔，你看見他蹲在一口枯井邊，從懷裡掏出一個油紙包，塞進井壁暗格，又用青苔抹平縫隙。他起身時往你這邊掃了一眼，你趕緊縮回竹榻裝睡，心跳如鼓。",
+      "speaker": "",
       "age": 13,
       "requireTags": "origin_martial_family",
       "forbidTags": "",
@@ -1405,31 +1730,31 @@ const FALLBACK_DATA = {
       "enemyName": "",
       "enemyHp": "",
       "enemyPos": "",
-      "enemyQi": "",
       "enemyAc": "",
-      "enemyArts": "",
+      "enemyQi": "",
       "enemyInner": "",
+      "enemyArts": "",
       "onVictory": "",
       "onDefeat": "",
       "endingVariant": "",
       "choices": [
         {
-          "eventId": "lp13_martial",
+          "eventId": "evt_forbidden_131",
           "order": 1,
-          "text": "撬開青磚",
-          "desc": "好奇心驅使你一探究竟。",
+          "text": "隱匿跟蹤三長老。",
+          "desc": "隱匿跟蹤三長老。",
           "type": "check",
           "requireTags": [],
           "forbidTags": [],
-          "checkName": "悟性檢定",
-          "attr": "int",
-          "dc": 11,
-          "tags": "tag_martial_bloodline",
-          "successNarrative": "你在暗格中發現了沾著黑血的布帛，記錄了幾式殘缺劍法！",
-          "successEffects": "addTag:tag_heirloom_secret|int:1",
-          "successNext": "",
-          "failNarrative": "你不慎觸發了暗格裡的毒針，頭暈目眩，一無所獲。",
-          "failEffects": "hp:-5|con:-1",
+          "checkName": "身法檢定",
+          "attr": "dex",
+          "dc": 13,
+          "tags": "",
+          "successNarrative": "你赤腳踩在青磚上，連呼吸都壓到最淺。一路跟到後山竹林，趴在窗外聽見三長老與鐵煞幫密談：「二月初二，礦上動手，那小子一起埋了。」你手心冒汗，悄悄退回。",
+          "successEffects": "dex:1|int:1|morality:3",
+          "successNext": "evt_well_scroll_131A",
+          "failNarrative": "你剛摸到後門，一腳踩碎了凍瓦。「喀啦」一聲脆響在夜裡如同驚雷，三長老猛然回頭。你嚇得魂飛魄散，連滾帶爬逃回竹榻。許久後外頭傳來腳步聲，在窗外停了三息才離去。線索斷了，你整夜驚懼，再無心思查探。",
+          "failEffects": "dex:-1|wis:1|reputation:-2",
           "failNext": "",
           "failGameOver": "",
           "directNarrative": "",
@@ -1442,18 +1767,20 @@ const FALLBACK_DATA = {
           "critFailEffects": "",
           "critFailNext": "",
           "success": {
-            "narrative": "你在暗格中發現了沾著黑血的布帛，記錄了幾式殘缺劍法！",
+            "narrative": "你赤腳踩在青磚上，連呼吸都壓到最淺。一路跟到後山竹林，趴在窗外聽見三長老與鐵煞幫密談：「二月初二，礦上動手，那小子一起埋了。」你手心冒汗，悄悄退回。",
             "effects": {
-              "addTag": "tag_heirloom_secret",
-              "int": 1
+              "dex": 1,
+              "int": 1,
+              "morality": 3
             },
-            "next": null
+            "next": "evt_well_scroll_131A"
           },
           "fail": {
-            "narrative": "你不慎觸發了暗格裡的毒針，頭暈目眩，一無所獲。",
+            "narrative": "你剛摸到後門，一腳踩碎了凍瓦。「喀啦」一聲脆響在夜裡如同驚雷，三長老猛然回頭。你嚇得魂飛魄散，連滾帶爬逃回竹榻。許久後外頭傳來腳步聲，在窗外停了三息才離去。線索斷了，你整夜驚懼，再無心思查探。",
             "effects": {
-              "hp": -5,
-              "con": -1
+              "dex": -1,
+              "wis": 1,
+              "reputation": -2
             },
             "next": null,
             "failGameOver": false
@@ -1470,10 +1797,10 @@ const FALLBACK_DATA = {
           }
         },
         {
-          "eventId": "lp13_martial",
+          "eventId": "evt_forbidden_131",
           "order": 2,
-          "text": "叩首思過",
-          "desc": "專心認錯，穩固心境。",
+          "text": "裝作沒看見，繼續睡",
+          "desc": "不理會三長老，專心翻閱普通武籍。",
           "type": "direct",
           "requireTags": [],
           "forbidTags": [],
@@ -1488,8 +1815,8 @@ const FALLBACK_DATA = {
           "failEffects": "",
           "failNext": "",
           "failGameOver": "",
-          "directNarrative": "你閉目養神，氣血漸趨平穩，心境澄明。",
-          "directEffects": "con:1|wis:1",
+          "directNarrative": "你裝作什麼都沒看見，縮回被窩。接下來三天，你專心翻閱閣內的基礎拳譜與輕功入門。雖然錯過了揭開暗流的機會，但家傳底子打得更扎實了，也沒惹上殺身之禍。",
+          "directEffects": "str:2|dex:2",
           "directNext": "",
           "critSuccessNarrative": "",
           "critSuccessEffects": "",
@@ -1497,24 +1824,24 @@ const FALLBACK_DATA = {
           "critFailNarrative": "",
           "critFailEffects": "",
           "critFailNext": "",
-          "narrative": "你閉目養神，氣血漸趨平穩，心境澄明。",
+          "narrative": "你裝作什麼都沒看見，縮回被窩。接下來三天，你專心翻閱閣內的基礎拳譜與輕功入門。雖然錯過了揭開暗流的機會，但家傳底子打得更扎實了，也沒惹上殺身之禍。",
           "effects": {
-            "con": 1,
-            "wis": 1
+            "str": 2,
+            "dex": 2
           },
           "next": null
         }
       ]
     },
-    "lp14_martial": {
-      "id": "lp14_martial",
+    "evt_well_scroll_131A": {
+      "id": "evt_well_scroll_131A",
       "type": "normal",
       "uiType": "",
-      "badge": "世家歲月",
-      "title": "家族大考",
-      "text": "一年一度的族會大考上，平素跋扈的堂兄在擂台上公然挑釁你：「廢物，今天就讓你知道什麼叫真正的家傳武學！」",
-      "speaker": "堂兄",
-      "age": 14,
+      "badge": "家族風雲",
+      "title": "井底殘卷",
+      "text": "第二日白天，你趁藏經閣無人，摸到那口枯井邊。井口只有三尺寬，往下望黑漆漆的，井壁青苔滑膩。你順著繩索溜下去，約兩丈深處果然有塊鬆動的磚，抽出來是個暗格，裡頭用油布裹著一本冊子——封皮無字，角上以朱砂點了三點。翻開一看，字跡歪斜，圖譜上經脈走向扭曲如蛇，開篇第一句便是：「蝕骨者，不循丹田正脈，專走骨縫筋膜。初修者慎之，一有不慎，陰氣噬心。」冊子只有前七頁有字，後半部全是空白。",
+      "speaker": "",
+      "age": 13,
       "requireTags": "origin_martial_family",
       "forbidTags": "",
       "priority": 10,
@@ -1522,31 +1849,31 @@ const FALLBACK_DATA = {
       "enemyName": "",
       "enemyHp": "",
       "enemyPos": "",
-      "enemyQi": "",
       "enemyAc": "",
-      "enemyArts": "",
+      "enemyQi": "",
       "enemyInner": "",
+      "enemyArts": "",
       "onVictory": "",
       "onDefeat": "",
       "endingVariant": "",
       "choices": [
         {
-          "eventId": "lp14_martial",
+          "eventId": "evt_well_scroll_131A",
           "order": 1,
-          "text": "正面迎戰",
-          "desc": "以家傳武學硬碰硬。",
+          "text": "盤坐井底，強記口訣心法",
+          "desc": "冒險強記蝕骨勁殘篇。",
           "type": "check",
           "requireTags": [],
           "forbidTags": [],
-          "checkName": "臂力檢定",
-          "attr": "str",
-          "dc": 12,
-          "tags": "tag_martial_bloodline",
-          "successNarrative": "雙拳相交，你成功將堂兄震退三步，驚艷四座！",
-          "successEffects": "str:1|cha:1",
+          "checkName": "悟性檢定",
+          "attr": "int",
+          "dc": 14,
+          "tags": "",
+          "successNarrative": "你福至心靈，照著殘篇行了一周天，指尖竟滲出一縷灰白氣息，井壁青苔瞬間枯黃。你飛快記下七成口訣，爬出枯井。此後你總覺得骨縫裡透著一股揮之不去的陰寒。",
+          "successEffects": "str:1|wis:1|reputation:3|morality:3|addMartialArt:ma_bone_erosion_fragment|addTag:evil",
           "successNext": "",
-          "failNarrative": "你力不如人，被堂兄一拳打得吐血，淪為笑柄。",
-          "failEffects": "hp:-5|cha:-1",
+          "failNarrative": "你剛照圖行氣，一股陰寒之力便竄入右臂，經絡刺痛如針扎。你大驚收功，狼狽爬出枯井。接下來半個月，你右臂都抬不起來，吃飯只能用左手，但那兩句口訣卻印在了腦子裡。",
+          "failEffects": "con:-1|wis:-1|morality:-2|addTag:tag_meridian_sting",
           "failNext": "",
           "failGameOver": "",
           "directNarrative": "",
@@ -1559,159 +1886,24 @@ const FALLBACK_DATA = {
           "critFailEffects": "",
           "critFailNext": "",
           "success": {
-            "narrative": "雙拳相交，你成功將堂兄震退三步，驚艷四座！",
+            "narrative": "你福至心靈，照著殘篇行了一周天，指尖竟滲出一縷灰白氣息，井壁青苔瞬間枯黃。你飛快記下七成口訣，爬出枯井。此後你總覺得骨縫裡透著一股揮之不去的陰寒。",
             "effects": {
               "str": 1,
-              "cha": 1
+              "wis": 1,
+              "reputation": 3,
+              "morality": 3,
+              "addMartialArt": "ma_bone_erosion_fragment",
+              "addTag": "evil"
             },
             "next": null
           },
           "fail": {
-            "narrative": "你力不如人，被堂兄一拳打得吐血，淪為笑柄。",
-            "effects": {
-              "hp": -5,
-              "cha": -1
-            },
-            "next": null,
-            "failGameOver": false
-          },
-          "critSuccess": {
-            "narrative": "",
-            "effects": null,
-            "next": null
-          },
-          "critFail": {
-            "narrative": "",
-            "effects": null,
-            "next": null
-          }
-        },
-        {
-          "eventId": "lp14_martial",
-          "order": 2,
-          "text": "暗施秘辛",
-          "desc": "運用祠堂領悟的殘招反擊。",
-          "type": "check",
-          "requireTags": [
-            "tag_heirloom_secret"
-          ],
-          "forbidTags": [],
-          "checkName": "悟性檢定",
-          "attr": "int",
-          "dc": 10,
-          "tags": "",
-          "successNarrative": "你身形一變，一招便點中堂兄死穴，全場鴉雀無聲！",
-          "successEffects": "int:1|cha:2",
-          "successNext": "",
-          "failNarrative": "你火候未到，招式變形，反而破綻百出。",
-          "failEffects": "hp:-3|dex:-1",
-          "failNext": "",
-          "failGameOver": "",
-          "directNarrative": "",
-          "directEffects": "",
-          "directNext": "",
-          "critSuccessNarrative": "",
-          "critSuccessEffects": "",
-          "critSuccessNext": "",
-          "critFailNarrative": "",
-          "critFailEffects": "",
-          "critFailNext": "",
-          "success": {
-            "narrative": "你身形一變，一招便點中堂兄死穴，全場鴉雀無聲！",
-            "effects": {
-              "int": 1,
-              "cha": 2
-            },
-            "next": null
-          },
-          "fail": {
-            "narrative": "你火候未到，招式變形，反而破綻百出。",
-            "effects": {
-              "hp": -3,
-              "dex": -1
-            },
-            "next": null,
-            "failGameOver": false
-          },
-          "critSuccess": {
-            "narrative": "",
-            "effects": null,
-            "next": null
-          },
-          "critFail": {
-            "narrative": "",
-            "effects": null,
-            "next": null
-          }
-        }
-      ]
-    },
-    "lp15_martial": {
-      "id": "lp15_martial",
-      "type": "normal",
-      "uiType": "",
-      "badge": "滅門之禍",
-      "title": "世仇叩門",
-      "text": "狂風呼嘯，大門被轟然撞碎！昔日仇家「斷魂刀」一脈殺上門來，一名蒙面刀客提著滴血的長刀，直撲你而來！",
-      "speaker": "旁白",
-      "age": 15,
-      "requireTags": "origin_martial_family",
-      "forbidTags": "",
-      "priority": 10,
-      "weight": 0,
-      "enemyName": "",
-      "enemyHp": "",
-      "enemyPos": "",
-      "enemyQi": "",
-      "enemyAc": "",
-      "enemyArts": "",
-      "enemyInner": "",
-      "onVictory": "",
-      "onDefeat": "",
-      "endingVariant": "",
-      "choices": [
-        {
-          "eventId": "lp15_martial",
-          "order": 1,
-          "text": "護衛家主",
-          "desc": "拼死擋住刀客，保護父親。",
-          "type": "check",
-          "requireTags": [],
-          "forbidTags": [],
-          "checkName": "根骨檢定",
-          "attr": "con",
-          "dc": 14,
-          "tags": "tag_martial_bloodline",
-          "successNarrative": "你身中兩刀，硬撐著一口氣將刀客逼退，救下父親！",
-          "successEffects": "con:2|hp:-10|cha:2",
-          "successNext": "",
-          "failNarrative": "你被刀客一腳踹飛，重傷嘔血，家族損失慘重。",
-          "failEffects": "con:-1|hp:-15",
-          "failNext": "",
-          "failGameOver": "",
-          "directNarrative": "",
-          "directEffects": "",
-          "directNext": "",
-          "critSuccessNarrative": "",
-          "critSuccessEffects": "",
-          "critSuccessNext": "",
-          "critFailNarrative": "",
-          "critFailEffects": "",
-          "critFailNext": "",
-          "success": {
-            "narrative": "你身中兩刀，硬撐著一口氣將刀客逼退，救下父親！",
-            "effects": {
-              "con": 2,
-              "hp": -10,
-              "cha": 2
-            },
-            "next": null
-          },
-          "fail": {
-            "narrative": "你被刀客一腳踹飛，重傷嘔血，家族損失慘重。",
+            "narrative": "你剛照圖行氣，一股陰寒之力便竄入右臂，經絡刺痛如針扎。你大驚收功，狼狽爬出枯井。接下來半個月，你右臂都抬不起來，吃飯只能用左手，但那兩句口訣卻印在了腦子裡。",
             "effects": {
               "con": -1,
-              "hp": -15
+              "wis": -1,
+              "morality": -2,
+              "addTag": "tag_meridian_sting"
             },
             "next": null,
             "failGameOver": false
@@ -1728,68 +1920,10 @@ const FALLBACK_DATA = {
           }
         },
         {
-          "eventId": "lp15_martial",
+          "eventId": "evt_well_scroll_131A",
           "order": 2,
-          "text": "祭出絕學",
-          "desc": "領悟布帛真意，絕地反擊！",
-          "type": "check",
-          "requireTags": [
-            "tag_heirloom_secret"
-          ],
-          "forbidTags": [],
-          "checkName": "悟性檢定",
-          "attr": "int",
-          "dc": 13,
-          "tags": "sword_master",
-          "successNarrative": "生死之間，你腦中靈光閃現，以指代劍，竟刺穿了刀客咽喉！",
-          "successEffects": "addMartialArt:b_canyang_sword|wis:2|cha:2",
-          "successNext": "",
-          "failNarrative": "劍招未老，已被對方看破，你胸口中刀，險些喪命！",
-          "failEffects": "hp:-20",
-          "failNext": "",
-          "failGameOver": "",
-          "directNarrative": "",
-          "directEffects": "",
-          "directNext": "",
-          "critSuccessNarrative": "",
-          "critSuccessEffects": "",
-          "critSuccessNext": "",
-          "critFailNarrative": "",
-          "critFailEffects": "",
-          "critFailNext": "",
-          "success": {
-            "narrative": "生死之間，你腦中靈光閃現，以指代劍，竟刺穿了刀客咽喉！",
-            "effects": {
-              "addMartialArt": "b_canyang_sword",
-              "wis": 2,
-              "cha": 2
-            },
-            "next": null
-          },
-          "fail": {
-            "narrative": "劍招未老，已被對方看破，你胸口中刀，險些喪命！",
-            "effects": {
-              "hp": -20
-            },
-            "next": null,
-            "failGameOver": false
-          },
-          "critSuccess": {
-            "narrative": "",
-            "effects": null,
-            "next": null
-          },
-          "critFail": {
-            "narrative": "",
-            "effects": null,
-            "next": null
-          }
-        },
-        {
-          "eventId": "lp15_martial",
-          "order": 3,
-          "text": "轉身逃跑",
-          "desc": "留得青山在，不怕沒柴燒。",
+          "text": "不碰邪功，原物歸位",
+          "desc": "不碰邪功，改練《破浪開山勁》。",
           "type": "direct",
           "requireTags": [],
           "forbidTags": [],
@@ -1804,8 +1938,8 @@ const FALLBACK_DATA = {
           "failEffects": "",
           "failNext": "",
           "failGameOver": "",
-          "directNarrative": "你趁亂翻牆逃走。回頭望去，百年世家已化為一片火海……",
-          "directEffects": "cha:-3",
+          "directNarrative": "你將油布包塞回暗格，拍掉手上的青苔。接下來兩天，你專心鑽研《破浪開山勁》，出閣時已能一掌拍碎青磚。三長老見你沒碰那本冊子，神色鬆了些，你也樂得安全。",
+          "directEffects": "str:1|wis:1|morality:3|addMartialArt:ma_breaking_wave",
           "directNext": "",
           "critSuccessNarrative": "",
           "critSuccessEffects": "",
@@ -1813,23 +1947,26 @@ const FALLBACK_DATA = {
           "critFailNarrative": "",
           "critFailEffects": "",
           "critFailNext": "",
-          "narrative": "你趁亂翻牆逃走。回頭望去，百年世家已化為一片火海……",
+          "narrative": "你將油布包塞回暗格，拍掉手上的青苔。接下來兩天，你專心鑽研《破浪開山勁》，出閣時已能一掌拍碎青磚。三長老見你沒碰那本冊子，神色鬆了些，你也樂得安全。",
           "effects": {
-            "cha": -3
+            "str": 1,
+            "wis": 1,
+            "morality": 3,
+            "addMartialArt": "ma_breaking_wave"
           },
           "next": null
         }
       ]
     },
-    "lp16_martial_start": {
-      "id": "lp16_martial_start",
+    "evt_sickbed_13_2": {
+      "id": "evt_sickbed_13_2",
       "type": "normal",
       "uiType": "",
-      "badge": "劫後餘波",
-      "title": "劫後餘波",
-      "text": "距離滅門之劫已過一年，長鯨幫派人送來拜帖。幫主名為切磋，實則想趁火打劫，吞併你家殘存的產業。你要如何應對？",
-      "speaker": "旁白",
-      "age": 16,
+      "badge": "家族風雲",
+      "title": "病榻夜雨",
+      "text": "你躺在偏房木板床上，肋骨斷了兩根，每呼吸一口氣都像有人拿針扎肺。窗外冬雨淅瀝，更夫敲過三更。你迷迷糊糊間，門被推開——是三長老身邊的啞僕，端著一碗黑乎乎的藥湯。他走到床邊，將藥碗擱在凳上，忽然俯身在你耳邊用極低的聲音說：「少爺，藥裡有『化功散』，喝了丹田氣血會慢慢散掉。老奴從前受過你娘恩惠，今夜替你換過了。」他從懷裡掏出另一碗，倒進你嘴裡，苦澀中帶著甘草味。啞僕走後，你強撐著爬到窗邊，從縫隙裡看見三長老站在院中老槐樹下，啞僕對他搖了搖頭，他罵了句什麼，拂袖而去。",
+      "speaker": "",
+      "age": 13,
       "requireTags": "origin_martial_family",
       "forbidTags": "",
       "priority": 10,
@@ -1837,319 +1974,31 @@ const FALLBACK_DATA = {
       "enemyName": "",
       "enemyHp": "",
       "enemyPos": "",
-      "enemyQi": "",
       "enemyAc": "",
-      "enemyArts": "",
+      "enemyQi": "",
       "enemyInner": "",
+      "enemyArts": "",
       "onVictory": "",
       "onDefeat": "",
       "endingVariant": "",
       "choices": [
         {
-          "eventId": "lp16_martial_start",
+          "eventId": "evt_sickbed_13_2",
           "order": 1,
-          "text": "設下擂台",
-          "desc": "既然要打，就光明正大地打！",
-          "type": "direct",
-          "requireTags": [],
-          "forbidTags": [],
-          "checkName": "",
-          "attr": "",
-          "dc": "",
-          "tags": "",
-          "successNarrative": "",
-          "successEffects": "",
-          "successNext": "",
-          "failNarrative": "",
-          "failEffects": "",
-          "failNext": "",
-          "failGameOver": "",
-          "directNarrative": "你接下拜帖，命人在城西搭起擂台。",
-          "directEffects": "",
-          "directNext": "lp16_martial_brawl",
-          "critSuccessNarrative": "",
-          "critSuccessEffects": "",
-          "critSuccessNext": "",
-          "critFailNarrative": "",
-          "critFailEffects": "",
-          "critFailNext": "",
-          "narrative": "你接下拜帖，命人在城西搭起擂台。",
-          "effects": null,
-          "next": "lp16_martial_brawl"
-        },
-        {
-          "eventId": "lp16_martial_start",
-          "order": 2,
-          "text": "擺下酒席",
-          "desc": "先探探對方的虛實再說。",
-          "type": "direct",
-          "requireTags": [],
-          "forbidTags": [],
-          "checkName": "",
-          "attr": "",
-          "dc": "",
-          "tags": "",
-          "successNarrative": "",
-          "successEffects": "",
-          "successNext": "",
-          "failNarrative": "",
-          "failEffects": "",
-          "failNext": "",
-          "failGameOver": "",
-          "directNarrative": "你揚起笑臉，將長鯨幫一行人迎入大堂。",
-          "directEffects": "",
-          "directNext": "lp16_martial_banquet",
-          "critSuccessNarrative": "",
-          "critSuccessEffects": "",
-          "critSuccessNext": "",
-          "critFailNarrative": "",
-          "critFailEffects": "",
-          "critFailNext": "",
-          "narrative": "你揚起笑臉，將長鯨幫一行人迎入大堂。",
-          "effects": null,
-          "next": "lp16_martial_banquet"
-        }
-      ]
-    },
-    "lp16_martial_brawl": {
-      "id": "lp16_martial_brawl",
-      "type": "normal",
-      "uiType": "",
-      "badge": "劫後餘波",
-      "title": "擂台血戰",
-      "text": "你選擇以武立威，在城中心擺下擂台。長鯨幫派出了一名鐵塔般的橫練高手，滿臉獰笑地登上擂台。",
-      "speaker": "旁白",
-      "age": "",
-      "requireTags": "",
-      "forbidTags": "",
-      "priority": 0,
-      "weight": 0,
-      "enemyName": "",
-      "enemyHp": "",
-      "enemyPos": "",
-      "enemyQi": "",
-      "enemyAc": "",
-      "enemyArts": "",
-      "enemyInner": "",
-      "onVictory": "",
-      "onDefeat": "",
-      "endingVariant": "",
-      "choices": [
-        {
-          "eventId": "lp16_martial_brawl",
-          "order": 1,
-          "text": "硬碰硬",
-          "desc": "以家傳武學正面硬撼對方！",
-          "type": "check",
-          "requireTags": [],
-          "forbidTags": [],
-          "checkName": "臂力檢定",
-          "attr": "str",
-          "dc": 14,
-          "tags": "tag_martial_bloodline",
-          "successNarrative": "你雙臂青筋暴起，一拳將鐵塔大漢轟下擂台，全城震動！",
-          "successEffects": "str:2|cha:3",
-          "successNext": "",
-          "failNarrative": "你力量不及對方，被一記重拳打斷肋骨，重傷倒地。",
-          "failEffects": "hp:-15|cha:-2",
-          "failNext": "",
-          "failGameOver": "",
-          "directNarrative": "",
-          "directEffects": "",
-          "directNext": "",
-          "critSuccessNarrative": "",
-          "critSuccessEffects": "",
-          "critSuccessNext": "",
-          "critFailNarrative": "",
-          "critFailEffects": "",
-          "critFailNext": "",
-          "success": {
-            "narrative": "你雙臂青筋暴起，一拳將鐵塔大漢轟下擂台，全城震動！",
-            "effects": {
-              "str": 2,
-              "cha": 3
-            },
-            "next": null
-          },
-          "fail": {
-            "narrative": "你力量不及對方，被一記重拳打斷肋骨，重傷倒地。",
-            "effects": {
-              "hp": -15,
-              "cha": -2
-            },
-            "next": null,
-            "failGameOver": false
-          },
-          "critSuccess": {
-            "narrative": "",
-            "effects": null,
-            "next": null
-          },
-          "critFail": {
-            "narrative": "",
-            "effects": null,
-            "next": null
-          }
-        },
-        {
-          "eventId": "lp16_martial_brawl",
-          "order": 2,
-          "text": "殘陽出鞘",
-          "desc": "使用祠堂領悟的殺招。",
-          "type": "check",
-          "requireTags": [
-            "tag_heirloom_secret"
-          ],
-          "forbidTags": [],
-          "checkName": "悟性檢定",
-          "attr": "int",
-          "dc": 12,
-          "tags": "sword_master",
-          "successNarrative": "劍光如血，一瞬封喉！對手甚至沒看清你是如何出劍的。",
-          "successEffects": "int:2|cha:4|wis:1",
-          "successNext": "",
-          "failNarrative": "你招式未熟，強行出劍導致真氣逆流，當場嘔血。",
-          "failEffects": "hp:-10|con:-2",
-          "failNext": "",
-          "failGameOver": "",
-          "directNarrative": "",
-          "directEffects": "",
-          "directNext": "",
-          "critSuccessNarrative": "",
-          "critSuccessEffects": "",
-          "critSuccessNext": "",
-          "critFailNarrative": "",
-          "critFailEffects": "",
-          "critFailNext": "",
-          "success": {
-            "narrative": "劍光如血，一瞬封喉！對手甚至沒看清你是如何出劍的。",
-            "effects": {
-              "int": 2,
-              "cha": 4,
-              "wis": 1
-            },
-            "next": null
-          },
-          "fail": {
-            "narrative": "你招式未熟，強行出劍導致真氣逆流，當場嘔血。",
-            "effects": {
-              "hp": -10,
-              "con": -2
-            },
-            "next": null,
-            "failGameOver": false
-          },
-          "critSuccess": {
-            "narrative": "",
-            "effects": null,
-            "next": null
-          },
-          "critFail": {
-            "narrative": "",
-            "effects": null,
-            "next": null
-          }
-        }
-      ]
-    },
-    "lp16_martial_banquet": {
-      "id": "lp16_martial_banquet",
-      "type": "normal",
-      "uiType": "",
-      "badge": "劫後餘波",
-      "title": "鴻門赴宴",
-      "text": "你選擇設宴款待。酒過三巡，長鯨幫主舉起一杯酒遞給你，眼中閃過一絲陰狠：「喝了這杯，以後兩家就是兄弟。」",
-      "speaker": "旁白",
-      "age": "",
-      "requireTags": "",
-      "forbidTags": "",
-      "priority": 0,
-      "weight": 0,
-      "enemyName": "",
-      "enemyHp": "",
-      "enemyPos": "",
-      "enemyQi": "",
-      "enemyAc": "",
-      "enemyArts": "",
-      "enemyInner": "",
-      "onVictory": "",
-      "onDefeat": "",
-      "endingVariant": "",
-      "choices": [
-        {
-          "eventId": "lp16_martial_banquet",
-          "order": 1,
-          "text": "察言觀色",
-          "desc": "觀察酒中是否有詐。",
-          "type": "check",
-          "requireTags": [],
-          "forbidTags": [],
-          "checkName": "悟性檢定",
-          "attr": "int",
-          "dc": 13,
-          "tags": "sharp_eye",
-          "successNarrative": "你敏銳察覺酒色微變，故意失手打翻酒杯，藉機發作反將一軍！",
-          "successEffects": "int:2|gold:200",
-          "successNext": "",
-          "failNarrative": "你毫無防備飲下毒酒，腹如刀絞，被迫簽下割讓產業的字據。",
-          "failEffects": "hp:-20|con:-2|gold:-300",
-          "failNext": "",
-          "failGameOver": "",
-          "directNarrative": "",
-          "directEffects": "",
-          "directNext": "",
-          "critSuccessNarrative": "",
-          "critSuccessEffects": "",
-          "critSuccessNext": "",
-          "critFailNarrative": "",
-          "critFailEffects": "",
-          "critFailNext": "",
-          "success": {
-            "narrative": "你敏銳察覺酒色微變，故意失手打翻酒杯，藉機發作反將一軍！",
-            "effects": {
-              "int": 2,
-              "gold": 200
-            },
-            "next": null
-          },
-          "fail": {
-            "narrative": "你毫無防備飲下毒酒，腹如刀絞，被迫簽下割讓產業的字據。",
-            "effects": {
-              "hp": -20,
-              "con": -2,
-              "gold": -300
-            },
-            "next": null,
-            "failGameOver": false
-          },
-          "critSuccess": {
-            "narrative": "",
-            "effects": null,
-            "next": null
-          },
-          "critFail": {
-            "narrative": "",
-            "effects": null,
-            "next": null
-          }
-        },
-        {
-          "eventId": "lp16_martial_banquet",
-          "order": 2,
-          "text": "隱忍周旋",
-          "desc": "裝傻充愣，避開鋒芒。",
+          "text": "辨識碗裡殘渣",
+          "desc": "辨識化功散。",
           "type": "check",
           "requireTags": [],
           "forbidTags": [],
           "checkName": "心法檢定",
           "attr": "wis",
           "dc": 12,
-          "tags": "tag_martial_bloodline",
-          "successNarrative": "你滴水不漏地與對方周旋，成功拖延了時間，保住家業。",
-          "successEffects": "wis:2|cha:1",
+          "tags": "",
+          "successNarrative": "你端起空碗，湊近鼻尖，果然聞到一絲酸澀。你將殘渣倒在手心辨認，確認是化功散。接下來的日子，你明著喝藥，暗著倒進夜壺。三長老以為毒計得逞，放鬆了對你的警惕。",
+          "successEffects": "wis:1|int:1|reputation:3|addTag:tag_guard_against_trick",
           "successNext": "",
-          "failNarrative": "對方步步緊逼，你應對失措，被對方氣勢完全壓倒。",
-          "failEffects": "wis:-2|cha:-2",
+          "failNarrative": "你重傷之下五感遲鈍，只覺得藥味苦得古怪，卻說不上哪裡不對，最終還是喝了下去。半個月後你傷好了，但丹田裡總像堵著一團棉花，行功時氣血滯澀。",
+          "failEffects": "con:-1|wis:-1|reputation:-2|addTag:tag_dantian_depression",
           "failNext": "",
           "failGameOver": "",
           "directNarrative": "",
@@ -2162,18 +2011,22 @@ const FALLBACK_DATA = {
           "critFailEffects": "",
           "critFailNext": "",
           "success": {
-            "narrative": "你滴水不漏地與對方周旋，成功拖延了時間，保住家業。",
+            "narrative": "你端起空碗，湊近鼻尖，果然聞到一絲酸澀。你將殘渣倒在手心辨認，確認是化功散。接下來的日子，你明著喝藥，暗著倒進夜壺。三長老以為毒計得逞，放鬆了對你的警惕。",
             "effects": {
-              "wis": 2,
-              "cha": 1
+              "wis": 1,
+              "int": 1,
+              "reputation": 3,
+              "addTag": "tag_guard_against_trick"
             },
             "next": null
           },
           "fail": {
-            "narrative": "對方步步緊逼，你應對失措，被對方氣勢完全壓倒。",
+            "narrative": "你重傷之下五感遲鈍，只覺得藥味苦得古怪，卻說不上哪裡不對，最終還是喝了下去。半個月後你傷好了，但丹田裡總像堵著一團棉花，行功時氣血滯澀。",
             "effects": {
-              "wis": -2,
-              "cha": -2
+              "con": -1,
+              "wis": -1,
+              "reputation": -2,
+              "addTag": "tag_dantian_depression"
             },
             "next": null,
             "failGameOver": false
@@ -2188,140 +2041,85 @@ const FALLBACK_DATA = {
             "effects": null,
             "next": null
           }
+        },
+        {
+          "eventId": "evt_sickbed_13_2",
+          "order": 2,
+          "text": "倒藥自保",
+          "desc": "倒藥自保，緩慢自癒。",
+          "type": "direct",
+          "requireTags": [],
+          "forbidTags": [],
+          "checkName": "",
+          "attr": "",
+          "dc": "",
+          "tags": "",
+          "successNarrative": "",
+          "successEffects": "",
+          "successNext": "",
+          "failNarrative": "",
+          "failEffects": "",
+          "failNext": "",
+          "failGameOver": "",
+          "directNarrative": "你把啞僕送來的每碗藥都倒進窗外老槐樹根底下。樹根旁的雜草三天內枯了一片，你看在眼裡，什麼也沒說。靠著每日吐納，你養了兩個月才把斷骨養好，進境比旁人慢了些，但底子乾淨。",
+          "directEffects": "con:1|int:1",
+          "directNext": "",
+          "critSuccessNarrative": "",
+          "critSuccessEffects": "",
+          "critSuccessNext": "",
+          "critFailNarrative": "",
+          "critFailEffects": "",
+          "critFailNext": "",
+          "narrative": "你把啞僕送來的每碗藥都倒進窗外老槐樹根底下。樹根旁的雜草三天內枯了一片，你看在眼裡，什麼也沒說。靠著每日吐納，你養了兩個月才把斷骨養好，進境比旁人慢了些，但底子乾淨。",
+          "effects": {
+            "con": 1,
+            "int": 1
+          },
+          "next": null
         }
       ]
     },
-    "lp17_martial_start": {
-      "id": "lp17_martial_start",
+    "evt_mine_14": {
+      "id": "evt_mine_14",
       "type": "normal",
-      "uiType": "",
-      "badge": "斷魂遺蹤",
-      "title": "斷魂遺蹤",
-      "text": "線人來報，當年參與襲擊你家的「斷魂刀」餘孽，藏身在城外廢棄古廟。古廟地勢險要，守衛森嚴。你打算如何行動？",
-      "speaker": "旁白",
-      "age": 17,
+      "uiType": "modal",
+      "badge": "家族風雲",
+      "title": "礦脈劫案",
+      "text": "十四歲開春後，族中在青石嶺的鐵礦脈接連出事：三批礦工被黑道「鐵煞幫」擄走，族兵去剿，回來時少了七個人。老家主疑心有人通匪，派三長老帶隊徹查，三長老點了你和二十名族兵隨行。到礦上第一夜，你被尿憋醒，出帳時瞥見三長老的親隨在後山崖邊遞給一個蒙面漢子一包銀子。蒙面漢子走後，你繞到崖邊往下看——山坳裡火光點點，至少藏了四五十號人，兵器反光。三長老根本沒打算剿匪，他要借鐵煞幫的手，讓礦上死幾個「不聽話的」，順便讓你也「意外」死在亂刀之下。",
+      "speaker": "",
+      "age": 14,
       "requireTags": "origin_martial_family",
       "forbidTags": "",
       "priority": 10,
-      "weight": 0,
+      "weight": 10,
       "enemyName": "",
       "enemyHp": "",
       "enemyPos": "",
-      "enemyQi": "",
       "enemyAc": "",
-      "enemyArts": "",
+      "enemyQi": "",
       "enemyInner": "",
+      "enemyArts": "",
       "onVictory": "",
       "onDefeat": "",
       "endingVariant": "",
       "choices": [
         {
-          "eventId": "lp17_martial_start",
+          "eventId": "evt_mine_14",
           "order": 1,
-          "text": "趁夜潛伏",
-          "desc": "從屋頂潛伏，逐一暗殺。",
-          "type": "direct",
-          "requireTags": [],
-          "forbidTags": [],
-          "checkName": "",
-          "attr": "",
-          "dc": "",
-          "tags": "",
-          "successNarrative": "",
-          "successEffects": "",
-          "successNext": "",
-          "failNarrative": "",
-          "failEffects": "",
-          "failNext": "",
-          "failGameOver": "",
-          "directNarrative": "你換上夜行衣，消失在無邊的夜色中。",
-          "directEffects": "",
-          "directNext": "lp17_martial_stealth",
-          "critSuccessNarrative": "",
-          "critSuccessEffects": "",
-          "critSuccessNext": "",
-          "critFailNarrative": "",
-          "critFailEffects": "",
-          "critFailNext": "",
-          "narrative": "你換上夜行衣，消失在無邊的夜色中。",
-          "effects": null,
-          "next": "lp17_martial_stealth"
-        },
-        {
-          "eventId": "lp17_martial_start",
-          "order": 2,
-          "text": "正面強攻",
-          "desc": "踹門而入，殺他個片甲不留！",
-          "type": "direct",
-          "requireTags": [],
-          "forbidTags": [],
-          "checkName": "",
-          "attr": "",
-          "dc": "",
-          "tags": "",
-          "successNarrative": "",
-          "successEffects": "",
-          "successNext": "",
-          "failNarrative": "",
-          "failEffects": "",
-          "failNext": "",
-          "failGameOver": "",
-          "directNarrative": "你提起兵刃，大步流星走向古廟正門。",
-          "directEffects": "",
-          "directNext": "lp17_martial_assault",
-          "critSuccessNarrative": "",
-          "critSuccessEffects": "",
-          "critSuccessNext": "",
-          "critFailNarrative": "",
-          "critFailEffects": "",
-          "critFailNext": "",
-          "narrative": "你提起兵刃，大步流星走向古廟正門。",
-          "effects": null,
-          "next": "lp17_martial_assault"
-        }
-      ]
-    },
-    "lp17_martial_stealth": {
-      "id": "lp17_martial_stealth",
-      "type": "normal",
-      "uiType": "",
-      "badge": "斷魂遺蹤",
-      "title": "古廟暗影",
-      "text": "你趁著夜色翻過院牆，猶如一隻狸貓。前方大殿內，幾名山賊正在打瞌睡，而頭目似乎在內堂對帳。",
-      "speaker": "旁白",
-      "age": "",
-      "requireTags": "",
-      "forbidTags": "",
-      "priority": 0,
-      "weight": 0,
-      "enemyName": "",
-      "enemyHp": "",
-      "enemyPos": "",
-      "enemyQi": "",
-      "enemyAc": "",
-      "enemyArts": "",
-      "enemyInner": "",
-      "onVictory": "",
-      "onDefeat": "",
-      "endingVariant": "",
-      "choices": [
-        {
-          "eventId": "lp17_martial_stealth",
-          "order": 1,
-          "text": "盜取密信",
-          "desc": "不戀戰，偷走頭目的帳本。",
+          "text": "叫醒族兵",
+          "desc": "連夜佈防，拔劍迎戰匪首。 ",
           "type": "check",
           "requireTags": [],
           "forbidTags": [],
-          "checkName": "身法檢定",
-          "attr": "dex",
-          "dc": 14,
-          "tags": "sharp_eye",
-          "successNarrative": "你悄無聲息摸走密信，赫然發現這群人背後還有黑手！",
-          "successEffects": "dex:2|int:2|addTag:sharp_eye",
+          "checkName": "臂力檢定",
+          "attr": "str",
+          "dc": 13,
+          "tags": "",
+          "successNarrative": "你一掌劈碎鐵砧，帶著十二名族兵守礦洞，一記「破浪開山」將匪首砸飛。天亮時，三長老看著潰散的匪眾，臉色比鍋底還黑。回府後，老家主當眾賞你一把鑌鐵腰刀，族中開始有人叫你「小少爺」。",
+          "successEffects": "str:1|con:1|reputation:8|morality:5",
           "successNext": "",
-          "failNarrative": "你不慎踢翻燭台驚醒賊眾，背部中刀狼狽逃竄。",
-          "failEffects": "hp:-15|dex:-1",
+          "failNarrative": "你一拳砸在匪首刀身上，虎口震裂，兵器脫手。族兵見你吃虧，士氣大洩。事後清點，礦上死了三個族兵。三長老在老家主面前「如實稟報」你輕敵冒進，老家主沉默良久，罰你閉門思過半年。",
+          "failEffects": "str:-1|reputation:-5|morality:1",
           "failNext": "",
           "failGameOver": "",
           "directNarrative": "",
@@ -2334,19 +2132,21 @@ const FALLBACK_DATA = {
           "critFailEffects": "",
           "critFailNext": "",
           "success": {
-            "narrative": "你悄無聲息摸走密信，赫然發現這群人背後還有黑手！",
+            "narrative": "你一掌劈碎鐵砧，帶著十二名族兵守礦洞，一記「破浪開山」將匪首砸飛。天亮時，三長老看著潰散的匪眾，臉色比鍋底還黑。回府後，老家主當眾賞你一把鑌鐵腰刀，族中開始有人叫你「小少爺」。",
             "effects": {
-              "dex": 2,
-              "int": 2,
-              "addTag": "sharp_eye"
+              "str": 1,
+              "con": 1,
+              "reputation": 8,
+              "morality": 5
             },
             "next": null
           },
           "fail": {
-            "narrative": "你不慎踢翻燭台驚醒賊眾，背部中刀狼狽逃竄。",
+            "narrative": "你一拳砸在匪首刀身上，虎口震裂，兵器脫手。族兵見你吃虧，士氣大洩。事後清點，礦上死了三個族兵。三長老在老家主面前「如實稟報」你輕敵冒進，老家主沉默良久，罰你閉門思過半年。",
             "effects": {
-              "hp": -15,
-              "dex": -1
+              "str": -1,
+              "reputation": -5,
+              "morality": 1
             },
             "next": null,
             "failGameOver": false
@@ -2363,22 +2163,85 @@ const FALLBACK_DATA = {
           }
         },
         {
-          "eventId": "lp17_martial_stealth",
+          "eventId": "evt_mine_14",
           "order": 2,
-          "text": "暗殺頭目",
-          "desc": "擒賊先擒王，一擊必殺。",
+          "text": "暗運邪功",
+          "desc": "暗中吸食敵方小頭目內力。",
+          "type": "check",
+          "requireTags": [
+            "evil"
+          ],
+          "forbidTags": [],
+          "checkName": "心法檢定",
+          "attr": "wis",
+          "dc": 13,
+          "tags": " ",
+          "successNarrative": "你摸進帳篷，一掌按在匪首後心。灰白氣流順骨縫導入你經脈，匪首瞬間乾枯。暗中督戰的三長老親眼看見這一幕，瞳孔驟縮，卻沒聲張，只是盯著你笑了：「好，好得很。」那笑容讓你脊背發涼。",
+          "successEffects": "wis:1|str:1|reputation:-2|morality:-8|addTag:tag_demonic_heart_growing",
+          "successNext": "",
+          "failNarrative": "匪首內力遠勝於你，反衝之力把你震飛。你連滾帶爬逃出，背後中了兩刀。回礦上後，三長老看著你的刀傷，意味深長：「傷口不深，你跑得倒快。」此後，你屋外多了兩個打雜的，日夜盯你的梢。",
+          "failEffects": "con:-1|dex:-1|reputation:-3|morality:-3",
+          "failNext": "",
+          "failGameOver": "",
+          "directNarrative": "",
+          "directEffects": "",
+          "directNext": "",
+          "critSuccessNarrative": "",
+          "critSuccessEffects": "",
+          "critSuccessNext": "",
+          "critFailNarrative": "",
+          "critFailEffects": "",
+          "critFailNext": "",
+          "success": {
+            "narrative": "你摸進帳篷，一掌按在匪首後心。灰白氣流順骨縫導入你經脈，匪首瞬間乾枯。暗中督戰的三長老親眼看見這一幕，瞳孔驟縮，卻沒聲張，只是盯著你笑了：「好，好得很。」那笑容讓你脊背發涼。",
+            "effects": {
+              "wis": 1,
+              "str": 1,
+              "reputation": -2,
+              "morality": -8,
+              "addTag": "tag_demonic_heart_growing"
+            },
+            "next": null
+          },
+          "fail": {
+            "narrative": "匪首內力遠勝於你，反衝之力把你震飛。你連滾帶爬逃出，背後中了兩刀。回礦上後，三長老看著你的刀傷，意味深長：「傷口不深，你跑得倒快。」此後，你屋外多了兩個打雜的，日夜盯你的梢。",
+            "effects": {
+              "con": -1,
+              "dex": -1,
+              "reputation": -3,
+              "morality": -3
+            },
+            "next": null,
+            "failGameOver": false
+          },
+          "critSuccess": {
+            "narrative": "",
+            "effects": null,
+            "next": null
+          },
+          "critFail": {
+            "narrative": "",
+            "effects": null,
+            "next": null
+          }
+        },
+        {
+          "eventId": "evt_mine_14",
+          "order": 3,
+          "text": "佈設火油機關",
+          "desc": "誘敵深入，智退強敵。",
           "type": "check",
           "requireTags": [],
           "forbidTags": [],
           "checkName": "悟性檢定",
           "attr": "int",
-          "dc": 13,
-          "tags": "sword_master",
-          "successNarrative": "你精準找到對方真氣運行的破綻，一劍刺穿了頭目的心臟。",
-          "successEffects": "int:2|cha:2|gold:150",
+          "dc": 12,
+          "tags": "",
+          "successNarrative": "你將匪眾引入礦道窄口，火牆轟然騰起，將他們截成三段。族兵趁勢反殺，斬獲十餘人。三長老站在坡上，望遠鏡放下又舉起，半晌沒說出話。回府後，族中老人開始對你另眼相看。",
+          "successEffects": "int:1|cha:1|reputation:6|morality:4",
           "successNext": "",
-          "failNarrative": "刺殺失敗，頭目驚醒後與你搏命，你負傷撤退。",
-          "failEffects": "hp:-12|str:-1",
+          "failNarrative": "火油引線受潮，點了三回沒著。鐵煞幫衝進礦道，你被匪首一刀背拍暈。族兵拼死把你拖出，礦上死了五個人。回府後三長老淡淡譏諷：「讀書人的腦子，上了陣不一定好使。」你只能咬牙忍下。",
+          "failEffects": "int:-1|reputation:-3|morality:1",
           "failNext": "",
           "failGameOver": "",
           "directNarrative": "",
@@ -2391,19 +2254,21 @@ const FALLBACK_DATA = {
           "critFailEffects": "",
           "critFailNext": "",
           "success": {
-            "narrative": "你精準找到對方真氣運行的破綻，一劍刺穿了頭目的心臟。",
+            "narrative": "你將匪眾引入礦道窄口，火牆轟然騰起，將他們截成三段。族兵趁勢反殺，斬獲十餘人。三長老站在坡上，望遠鏡放下又舉起，半晌沒說出話。回府後，族中老人開始對你另眼相看。",
             "effects": {
-              "int": 2,
-              "cha": 2,
-              "gold": 150
+              "int": 1,
+              "cha": 1,
+              "reputation": 6,
+              "morality": 4
             },
             "next": null
           },
           "fail": {
-            "narrative": "刺殺失敗，頭目驚醒後與你搏命，你負傷撤退。",
+            "narrative": "火油引線受潮，點了三回沒著。鐵煞幫衝進礦道，你被匪首一刀背拍暈。族兵拼死把你拖出，礦上死了五個人。回府後三長老淡淡譏諷：「讀書人的腦子，上了陣不一定好使。」你只能咬牙忍下。",
             "effects": {
-              "hp": -12,
-              "str": -1
+              "int": -1,
+              "reputation": -3,
+              "morality": 1
             },
             "next": null,
             "failGameOver": false
@@ -2421,47 +2286,47 @@ const FALLBACK_DATA = {
         }
       ]
     },
-    "lp17_martial_assault": {
-      "id": "lp17_martial_assault",
+    "evt_mountain_river_15": {
+      "id": "evt_mountain_river_15",
       "type": "normal",
-      "uiType": "",
-      "badge": "斷魂遺蹤",
-      "title": "破門而入",
-      "text": "你一腳踹碎古廟大門，木屑橫飛！十幾名山賊瞬間拔出兵器將你團團包圍。退無可退，唯有一死戰！",
-      "speaker": "旁白",
-      "age": "",
-      "requireTags": "",
+      "uiType": "modal",
+      "badge": "家族風雲",
+      "title": "山河訣",
+      "text": "你十五歲這年，老家主察覺外敵生疑——青石嶺礦脈的事他看出一二，三長老近來又頻頻與外姓人往來。他決意暗中挑選心性純良的後輩傳授鎮族絕學《山河訣》。與此同時，三長老也在夜半找上門，攤牌試探。他坐在你屋裡，桌上擺著一壺酒、一本黑皮冊子：「小子，老家主那點《山河訣》，最多讓你練到一流高手。老夫這本《蝕骨勁》全本，三年可抵他三十年。你選哪邊？」",
+      "speaker": "",
+      "age": 15,
+      "requireTags": "origin_martial_family",
       "forbidTags": "",
-      "priority": 0,
-      "weight": 0,
+      "priority": 10,
+      "weight": 10,
       "enemyName": "",
       "enemyHp": "",
       "enemyPos": "",
-      "enemyQi": "",
       "enemyAc": "",
-      "enemyArts": "",
+      "enemyQi": "",
       "enemyInner": "",
+      "enemyArts": "",
       "onVictory": "",
       "onDefeat": "",
       "endingVariant": "",
       "choices": [
         {
-          "eventId": "lp17_martial_assault",
+          "eventId": "evt_mountain_river_15",
           "order": 1,
-          "text": "血戰到底",
-          "desc": "憑著一腔怒火，殺出一條血路！",
+          "text": "跪求正統功法",
+          "desc": "表明心跡，求傳鎮族絕學。",
           "type": "check",
           "requireTags": [],
           "forbidTags": [],
-          "checkName": "根骨檢定",
-          "attr": "con",
-          "dc": 15,
-          "tags": "vengeful",
-          "successNarrative": "你宛如修羅附體，身中數刀卻越戰越勇，將山賊全數斬殺！",
-          "successEffects": "con:3|hp:-10|addTag:vengeful",
+          "checkName": "心法檢定",
+          "attr": "wis",
+          "dc": 14,
+          "tags": "",
+          "successNarrative": "你跪在榻前坦承一切。老家主聽完沉默半晌，忽然笑了：「老夫等的就是你這句話。」他將《山河訣》口訣傾囊相授，並把族中印信交你隨身攜帶。你走出書房時，只覺肩上多了一副重擔。",
+          "successEffects": "wis:2|con:1|reputation:10|morality:8|addMartialArt:ma_mountain_river",
           "successNext": "",
-          "failNarrative": "雙拳難敵四手，你陷入苦戰，最終因失血過多昏死過去。",
-          "failEffects": "hp:-25|con:-2",
+          "failNarrative": "你提到夜邀時語氣發虛，被老家主看穿。他臉色沉了下去：「你去了，還回來跪我，是把他當退路？」他沒再提傳功的事。第二天三長老見你，笑得很慈祥：「碰壁了吧？」你兩頭不討好，處境越發艱難。",
+          "failEffects": "wis:-1|cha:-1|reputation:-5|morality:1",
           "failNext": "",
           "failGameOver": "",
           "directNarrative": "",
@@ -2474,19 +2339,23 @@ const FALLBACK_DATA = {
           "critFailEffects": "",
           "critFailNext": "",
           "success": {
-            "narrative": "你宛如修羅附體，身中數刀卻越戰越勇，將山賊全數斬殺！",
+            "narrative": "你跪在榻前坦承一切。老家主聽完沉默半晌，忽然笑了：「老夫等的就是你這句話。」他將《山河訣》口訣傾囊相授，並把族中印信交你隨身攜帶。你走出書房時，只覺肩上多了一副重擔。",
             "effects": {
-              "con": 3,
-              "hp": -10,
-              "addTag": "vengeful"
+              "wis": 2,
+              "con": 1,
+              "reputation": 10,
+              "morality": 8,
+              "addMartialArt": "ma_mountain_river"
             },
             "next": null
           },
           "fail": {
-            "narrative": "雙拳難敵四手，你陷入苦戰，最終因失血過多昏死過去。",
+            "narrative": "你提到夜邀時語氣發虛，被老家主看穿。他臉色沉了下去：「你去了，還回來跪我，是把他當退路？」他沒再提傳功的事。第二天三長老見你，笑得很慈祥：「碰壁了吧？」你兩頭不討好，處境越發艱難。",
             "effects": {
-              "hp": -25,
-              "con": -2
+              "wis": -1,
+              "cha": -1,
+              "reputation": -5,
+              "morality": 1
             },
             "next": null,
             "failGameOver": false
@@ -2503,22 +2372,24 @@ const FALLBACK_DATA = {
           }
         },
         {
-          "eventId": "lp17_martial_assault",
+          "eventId": "evt_mountain_river_15",
           "order": 2,
-          "text": "威懾賊眾",
-          "desc": "亮出世家招牌，瓦解戰意。",
+          "text": "夜赴三長老密會",
+          "desc": "虛以委蛇，博取信任。",
           "type": "check",
-          "requireTags": [],
+          "requireTags": [
+            "tag_demonic_heart_growing"
+          ],
           "forbidTags": [],
-          "checkName": "名望檢定",
-          "attr": "cha",
-          "dc": 14,
-          "tags": "tag_martial_bloodline",
-          "successNarrative": "你一聲暴喝，強大的氣場讓這群烏合之眾膽寒，紛紛棄械投降。",
-          "successEffects": "cha:3|wis:2|gold:100",
+          "checkName": "心法檢定",
+          "attr": "wis",
+          "dc": 13,
+          "tags": "tag_demonic_heart_growing",
+          "successNarrative": "你沒急著答應，提出「先看後半部」。三長老猶豫一瞬給了你，你飛快記下七成口訣，三日後給他回話：「我幹。」三長老以為你上鉤了，拍著你肩膀笑：「你比你爹機靈。」但他不知道，你心裡已經有了自己的盤算。",
+          "successEffects": "wis:1|cha:1|reputation:-2|morality:-7|addMartialArt:ma_bone_erosion_full",
           "successNext": "",
-          "failNarrative": "賊眾根本不買帳：「什麼破落戶，兄弟們併肩子上！」你慘遭圍毆。",
-          "failEffects": "hp:-15|cha:-2",
+          "failNarrative": "你接書的手微微縮了一下，被他看在眼裡。他沒翻臉，只是拍拍你臉：「小子，你膽子不小，敢來，又不敢要。」你走出廟門時後背全是冷汗。從第二天起，你屋外多了兩個「打雜的」日夜盯著你。",
+          "failEffects": "cha:-1|reputation:-2|morality:-3|addTag:tag_elder_killing_intent",
           "failNext": "",
           "failGameOver": "",
           "directNarrative": "",
@@ -2531,19 +2402,83 @@ const FALLBACK_DATA = {
           "critFailEffects": "",
           "critFailNext": "",
           "success": {
-            "narrative": "你一聲暴喝，強大的氣場讓這群烏合之眾膽寒，紛紛棄械投降。",
+            "narrative": "你沒急著答應，提出「先看後半部」。三長老猶豫一瞬給了你，你飛快記下七成口訣，三日後給他回話：「我幹。」三長老以為你上鉤了，拍著你肩膀笑：「你比你爹機靈。」但他不知道，你心裡已經有了自己的盤算。",
             "effects": {
-              "cha": 3,
-              "wis": 2,
-              "gold": 100
+              "wis": 1,
+              "cha": 1,
+              "reputation": -2,
+              "morality": -7,
+              "addMartialArt": "ma_bone_erosion_full"
             },
             "next": null
           },
           "fail": {
-            "narrative": "賊眾根本不買帳：「什麼破落戶，兄弟們併肩子上！」你慘遭圍毆。",
+            "narrative": "你接書的手微微縮了一下，被他看在眼裡。他沒翻臉，只是拍拍你臉：「小子，你膽子不小，敢來，又不敢要。」你走出廟門時後背全是冷汗。從第二天起，你屋外多了兩個「打雜的」日夜盯著你。",
             "effects": {
-              "hp": -15,
-              "cha": -2
+              "cha": -1,
+              "reputation": -2,
+              "morality": -3,
+              "addTag": "tag_elder_killing_intent"
+            },
+            "next": null,
+            "failGameOver": false
+          },
+          "critSuccess": {
+            "narrative": "",
+            "effects": null,
+            "next": null
+          },
+          "critFail": {
+            "narrative": "",
+            "effects": null,
+            "next": null
+          }
+        },
+        {
+          "eventId": "evt_mountain_river_15",
+          "order": 3,
+          "text": "夜探長老私宅",
+          "desc": "兩不相幫，獲取謀逆鐵證。",
+          "type": "check",
+          "requireTags": [],
+          "forbidTags": [],
+          "checkName": "身法檢定",
+          "attr": "dex",
+          "dc": 13,
+          "tags": "",
+          "successNarrative": "你翻進三長老書房，從暗格中搜出他與鐵煞幫的親筆信、購買化功散的收據，以及密謀發難的字條。你將證據揣進懷裡，翻牆出去時連狗都沒驚動。手握這些鐵證，你終於有了反擊的底氣。",
+          "successEffects": "dex:1|int:1|reputation:5|morality:4|addTag:tag_rebellion_evidence",
+          "successNext": "",
+          "failNarrative": "你剛摸到書架後頭，腳下絆到一根細線，鈴鐺作響。兩個護院衝進來，你翻窗逃走時後背挨了一棍。證據沒拿到，還險些被擒。第二天三長老「關切」地問你背上的傷，眼神卻像刀子一樣。",
+          "failEffects": "dex:-1|con:-1|reputation:-2",
+          "failNext": "",
+          "failGameOver": "",
+          "directNarrative": "",
+          "directEffects": "",
+          "directNext": "",
+          "critSuccessNarrative": "",
+          "critSuccessEffects": "",
+          "critSuccessNext": "",
+          "critFailNarrative": "",
+          "critFailEffects": "",
+          "critFailNext": "",
+          "success": {
+            "narrative": "你翻進三長老書房，從暗格中搜出他與鐵煞幫的親筆信、購買化功散的收據，以及密謀發難的字條。你將證據揣進懷裡，翻牆出去時連狗都沒驚動。手握這些鐵證，你終於有了反擊的底氣。",
+            "effects": {
+              "dex": 1,
+              "int": 1,
+              "reputation": 5,
+              "morality": 4,
+              "addTag": "tag_rebellion_evidence"
+            },
+            "next": null
+          },
+          "fail": {
+            "narrative": "你剛摸到書架後頭，腳下絆到一根細線，鈴鐺作響。兩個護院衝進來，你翻窗逃走時後背挨了一棍。證據沒拿到，還險些被擒。第二天三長老「關切」地問你背上的傷，眼神卻像刀子一樣。",
+            "effects": {
+              "dex": -1,
+              "con": -1,
+              "reputation": -2
             },
             "next": null,
             "failGameOver": false
@@ -2560,7 +2495,398 @@ const FALLBACK_DATA = {
           }
         }
       ]
+    },
+    "evt_manor_blood_16": {
+      "id": "evt_manor_blood_16",
+      "type": "normal",
+      "uiType": "modal",
+      "badge": "家族風雲",
+      "title": "深宅之變",
+      "text": "十六歲那年冬天，老家主閉關衝擊第八式《山河訣》，卻在閉關密室裡七竅流血暴斃。你趕到時，密室門從裡頭反鎖，撞開後只看見老家主趴在蒲團上，面色青紫，嘴角黑血已經凝固。三長老站在人群最前頭，掏出一封「遺書」高聲宣讀：「……著三房之子繼承家業，長房孫兒，逐出宗族。」靈堂外頭火把通明，三百私兵已經圍了祠堂。你身邊只有十二個族兵，手裡或者半本《山河訣》，或者殘篇《蝕骨勁》。",
+      "speaker": "",
+      "age": 16,
+      "requireTags": "origin_martial_family",
+      "forbidTags": "",
+      "priority": 10,
+      "weight": 10,
+      "enemyName": "",
+      "enemyHp": "",
+      "enemyPos": "",
+      "enemyAc": "",
+      "enemyQi": "",
+      "enemyInner": "",
+      "enemyArts": "",
+      "onVictory": "",
+      "onDefeat": "",
+      "endingVariant": "",
+      "choices": [
+        {
+          "eventId": "evt_manor_blood_16",
+          "order": 1,
+          "text": "拔劍上前",
+          "desc": "當眾揭穿偽造遺書，與三長老正面決戰。",
+          "type": "check",
+          "requireTags": [],
+          "forbidTags": [],
+          "checkName": "臂力檢定",
+          "attr": "str",
+          "dc": 15,
+          "tags": "tag_rebellion_evidence|tag_guard_against_trick",
+          "successNarrative": "你一劍挑飛遺書，掏出密信當眾宣讀。三長老暴起發難，你以《山河訣》硬接一掌，反手一劍穿他肩胛。天亮時，你扶著老家主靈位坐上家主之位。你接過家主佩劍，劍刃上的血跡還未乾透。",
+          "successEffects": "str:1|wis:1|reputation:10|morality:8|",
+          "successNext": "",
+          "failNarrative": "三百私兵齊齊拔刀，你帶十二人死戰。眼看幼弟要被砍死，你拼著最後一口氣殺出血路，將他推上馬車，自己提刀斷後。你親眼看著祠堂在身後燒成白地，幼弟在車上哭得撕心裂肺。",
+          "failEffects": "con:-1|dex:1|reputation:-5|morality:5|addTag:tag_hidden_qilin",
+          "failNext": "",
+          "failGameOver": "",
+          "directNarrative": "",
+          "directEffects": "",
+          "directNext": "",
+          "critSuccessNarrative": "",
+          "critSuccessEffects": "",
+          "critSuccessNext": "",
+          "critFailNarrative": "",
+          "critFailEffects": "",
+          "critFailNext": "",
+          "success": {
+            "narrative": "你一劍挑飛遺書，掏出密信當眾宣讀。三長老暴起發難，你以《山河訣》硬接一掌，反手一劍穿他肩胛。天亮時，你扶著老家主靈位坐上家主之位。你接過家主佩劍，劍刃上的血跡還未乾透。",
+            "effects": {
+              "str": 1,
+              "wis": 1,
+              "reputation": 10,
+              "morality": 8
+            },
+            "next": null
+          },
+          "fail": {
+            "narrative": "三百私兵齊齊拔刀，你帶十二人死戰。眼看幼弟要被砍死，你拼著最後一口氣殺出血路，將他推上馬車，自己提刀斷後。你親眼看著祠堂在身後燒成白地，幼弟在車上哭得撕心裂肺。",
+            "effects": {
+              "con": -1,
+              "dex": 1,
+              "reputation": -5,
+              "morality": 5,
+              "addTag": "tag_hidden_qilin"
+            },
+            "next": null,
+            "failGameOver": false
+          },
+          "critSuccess": {
+            "narrative": "",
+            "effects": null,
+            "next": null
+          },
+          "critFail": {
+            "narrative": "",
+            "effects": null,
+            "next": null
+          }
+        },
+        {
+          "eventId": "evt_manor_blood_16",
+          "order": 2,
+          "text": "蝕骨勁",
+          "desc": "趁雙方血戰，吸乾三長老內力",
+          "type": "check",
+          "requireTags": [
+            "tag_demonic_heart_growing"
+          ],
+          "forbidTags": [],
+          "checkName": "心法檢定",
+          "attr": "wis",
+          "dc": 14,
+          "tags": "tag_demonic_heart_growing",
+          "successNarrative": "你假意投降，扣住三長老脈門。灰白氣流倒灌進你體內，他半炷香工夫便乾枯成一具皮包骨的屍體。你站起來，看著滿地丟刀的私兵，冷笑著將庫房金銀塞進馬車，點燃了這座大宅。",
+          "successEffects": "wis:2|str:1|reputation:-10|morality:-10|addTag:tag_bone_devourer",
+          "successNext": "",
+          "failNarrative": "三長老咬碎毒囊，一口黑血噴在你臉上。你眼睛劇痛鬆手，他反手一掌拍碎你的心脈。你噴血順水漂了半里地，撿回條命，但功力廢了七成。第二天，你成了勾結外匪、弒親奪位的全族通緝犯。",
+          "failEffects": "con:-2|wis:-1|reputation:-10|morality:-5|addTag:tag_ashura_disciple",
+          "failNext": "",
+          "failGameOver": "",
+          "directNarrative": "",
+          "directEffects": "",
+          "directNext": "",
+          "critSuccessNarrative": "",
+          "critSuccessEffects": "",
+          "critSuccessNext": "",
+          "critFailNarrative": "",
+          "critFailEffects": "",
+          "critFailNext": "",
+          "success": {
+            "narrative": "你假意投降，扣住三長老脈門。灰白氣流倒灌進你體內，他半炷香工夫便乾枯成一具皮包骨的屍體。你站起來，看著滿地丟刀的私兵，冷笑著將庫房金銀塞進馬車，點燃了這座大宅。",
+            "effects": {
+              "wis": 2,
+              "str": 1,
+              "reputation": -10,
+              "morality": -10,
+              "addTag": "tag_bone_devourer"
+            },
+            "next": null
+          },
+          "fail": {
+            "narrative": "三長老咬碎毒囊，一口黑血噴在你臉上。你眼睛劇痛鬆手，他反手一掌拍碎你的心脈。你噴血順水漂了半里地，撿回條命，但功力廢了七成。第二天，你成了勾結外匪、弒親奪位的全族通緝犯。",
+            "effects": {
+              "con": -2,
+              "wis": -1,
+              "reputation": -10,
+              "morality": -5,
+              "addTag": "tag_ashura_disciple"
+            },
+            "next": null,
+            "failGameOver": false
+          },
+          "critSuccess": {
+            "narrative": "",
+            "effects": null,
+            "next": null
+          },
+          "critFail": {
+            "narrative": "",
+            "effects": null,
+            "next": null
+          }
+        }
+      ]
+    },
+    "evt_jianghu_17_sword": {
+      "id": "evt_jianghu_17_sword",
+      "type": "normal",
+      "uiType": "modal",
+      "badge": "江湖出山",
+      "title": "世家執劍人",
+      "text": "十七歲，你走出沈家大門，回頭看了一眼那座青磚大宅。門楣上的匾額換過了，新漆在太陽底下亮得刺眼。你腰懸老家主賜的鑌鐵腰刀，身後跟著十二個忠心族兵。路邊茶攤上有人認出你，起身拱手：「這不是青石嶺那位十七歲的家主嗎？」你坐下，要了碗粗茶，心裡想的是：宗族那攤子爛事，得一件件收拾。江湖？先把家裡的賬算清楚。",
+      "speaker": "",
+      "age": 17,
+      "requireTags": "tag_martial_son",
+      "forbidTags": "",
+      "priority": 10,
+      "weight": 10,
+      "enemyName": "",
+      "enemyHp": "",
+      "enemyPos": "",
+      "enemyAc": "",
+      "enemyQi": "",
+      "enemyInner": "",
+      "enemyArts": "",
+      "onVictory": "",
+      "onDefeat": "",
+      "endingVariant": "house_sword",
+      "choices": [
+        {
+          "eventId": "evt_jianghu_17_sword",
+          "order": 1,
+          "text": "準備踏入江湖",
+          "desc": "",
+          "type": "direct",
+          "requireTags": [
+            "tag_martial_son"
+          ],
+          "forbidTags": [],
+          "checkName": "",
+          "attr": "",
+          "dc": "",
+          "tags": "",
+          "successNarrative": "",
+          "successEffects": "",
+          "successNext": "",
+          "failNarrative": "",
+          "failEffects": "",
+          "failNext": "",
+          "failGameOver": "",
+          "directNarrative": "你接過家主佩劍，劍鞘上還沾著祠堂香灰——江湖路遠，但沈家的賬，你得先算清楚。",
+          "directEffects": "",
+          "directNext": "",
+          "critSuccessNarrative": "",
+          "critSuccessEffects": "",
+          "critSuccessNext": "",
+          "critFailNarrative": "",
+          "critFailEffects": "",
+          "critFailNext": "",
+          "narrative": "你接過家主佩劍，劍鞘上還沾著祠堂香灰——江湖路遠，但沈家的賬，你得先算清楚。",
+          "effects": null,
+          "next": null
+        }
+      ]
+    },
+    "evt_jianghu_17_hidden": {
+      "id": "evt_jianghu_17_hidden",
+      "type": "normal",
+      "uiType": "modal",
+      "badge": "江湖出山",
+      "title": "隱麟行客",
+      "text": "十七歲，你牽著幼弟的手，走在官道上。他問你「哥，我們去哪」，你說「哪都行，離那破宅子越遠越好」。你們在碼頭搭了艘貨船，船老大看你帶著孩子，給了半價。夜裡幼弟睡著了，你坐在船頭看星星，心想：總有一天要回去，把該殺的人殺了，把該拿的東西拿回來。",
+      "speaker": "",
+      "age": 17,
+      "requireTags": "tag_hidden_qilin",
+      "forbidTags": "",
+      "priority": 10,
+      "weight": 10,
+      "enemyName": "",
+      "enemyHp": "",
+      "enemyPos": "",
+      "enemyAc": "",
+      "enemyQi": "",
+      "enemyInner": "",
+      "enemyArts": "",
+      "onVictory": "",
+      "onDefeat": "",
+      "endingVariant": "hidden_qilin",
+      "choices": [
+        {
+          "eventId": "evt_jianghu_17_hidden",
+          "order": 1,
+          "text": "準備踏入江湖",
+          "desc": "",
+          "type": "direct",
+          "requireTags": [
+            "tag_hidden_qilin"
+          ],
+          "forbidTags": [],
+          "checkName": "",
+          "attr": "",
+          "dc": "",
+          "tags": "",
+          "successNarrative": "",
+          "successEffects": "",
+          "successNext": "",
+          "failNarrative": "",
+          "failEffects": "",
+          "failNext": "",
+          "failGameOver": "",
+          "directNarrative": "你牽著幼弟踏上貨船，船尾的浪花把沈家大宅越推越遠——總有一天，你會順著這條水路殺回來。",
+          "directEffects": "",
+          "directNext": "",
+          "critSuccessNarrative": "",
+          "critSuccessEffects": "",
+          "critSuccessNext": "",
+          "critFailNarrative": "",
+          "critFailEffects": "",
+          "critFailNext": "",
+          "narrative": "你牽著幼弟踏上貨船，船尾的浪花把沈家大宅越推越遠——總有一天，你會順著這條水路殺回來。",
+          "effects": null,
+          "next": null
+        }
+      ]
+    },
+    "evt_jianghu_17_devourer": {
+      "id": "evt_jianghu_17_devourer",
+      "type": "normal",
+      "uiType": "modal",
+      "badge": "江湖出山",
+      "title": "噬骨魔種",
+      "text": "十七歲，你趕著一輛馬車，車上三箱金銀，懷裡揣著三長老的骨灰罈——你打算路過哪條河就給他撒哪條河裡。路邊有兩個毛賊想劫道，你連車都沒下，隔空一揮手，灰白氣流把那兩人拍飛進溝裡。他們爬起來跪著喊「大俠饒命」，你笑了：「別叫大俠，叫祖宗。」",
+      "speaker": "",
+      "age": 17,
+      "requireTags": "tag_bone_devourer",
+      "forbidTags": "",
+      "priority": 10,
+      "weight": 10,
+      "enemyName": "",
+      "enemyHp": "",
+      "enemyPos": "",
+      "enemyAc": "",
+      "enemyQi": "",
+      "enemyInner": "",
+      "enemyArts": "",
+      "onVictory": "",
+      "onDefeat": "",
+      "endingVariant": "bone_devourer",
+      "choices": [
+        {
+          "eventId": "evt_jianghu_17_devourer",
+          "order": 1,
+          "text": "準備踏入江湖",
+          "desc": "",
+          "type": "direct",
+          "requireTags": [
+            "tag_bone_devourer"
+          ],
+          "forbidTags": [],
+          "checkName": "",
+          "attr": "",
+          "dc": "",
+          "tags": "",
+          "successNarrative": "",
+          "successEffects": "",
+          "successNext": "",
+          "failNarrative": "",
+          "failEffects": "",
+          "failNext": "",
+          "failGameOver": "",
+          "directNarrative": "馬車碾過官道，三箱金銀在車斗裡叮噹作響，你回頭看了一眼燒成白地的沈宅——江湖？從今天起，規矩你來定。",
+          "directEffects": "",
+          "directNext": "",
+          "critSuccessNarrative": "",
+          "critSuccessEffects": "",
+          "critSuccessNext": "",
+          "critFailNarrative": "",
+          "critFailEffects": "",
+          "critFailNext": "",
+          "narrative": "馬車碾過官道，三箱金銀在車斗裡叮噹作響，你回頭看了一眼燒成白地的沈宅——江湖？從今天起，規矩你來定。",
+          "effects": null,
+          "next": null
+        }
+      ]
+    },
+    "evt_jianghu_17_ashura": {
+      "id": "evt_jianghu_17_ashura",
+      "type": "normal",
+      "uiType": "modal",
+      "badge": "江湖出山",
+      "title": "修羅棄徒",
+      "text": "十七歲，你拄著一根樹枝當拐棍，一瘸一拐走在山路上。背後是通緝令，前頭是茫茫林海。你在破廟裡過夜，聽見外頭有江湖人聊天：「聽說青石嶺那家子，十七歲的小子弒叔敗露跑了，三長老出了二百兩銀子買他人頭。」你把臉往陰影裡縮了縮，心想：二百兩？老子這條命還挺值錢。",
+      "speaker": "",
+      "age": 17,
+      "requireTags": "tag_ashura_disciple",
+      "forbidTags": "",
+      "priority": 10,
+      "weight": 10,
+      "enemyName": "",
+      "enemyHp": "",
+      "enemyPos": "",
+      "enemyAc": "",
+      "enemyQi": "",
+      "enemyInner": "",
+      "enemyArts": "",
+      "onVictory": "",
+      "onDefeat": "",
+      "endingVariant": "ashura_disciple",
+      "choices": [
+        {
+          "eventId": "evt_jianghu_17_ashura",
+          "order": 1,
+          "text": "準備踏入江湖",
+          "desc": "",
+          "type": "direct",
+          "requireTags": [
+            "tag_ashura_disciple"
+          ],
+          "forbidTags": [],
+          "checkName": "",
+          "attr": "",
+          "dc": "",
+          "tags": "",
+          "successNarrative": "",
+          "successEffects": "",
+          "successNext": "",
+          "failNarrative": "",
+          "failEffects": "",
+          "failNext": "",
+          "failGameOver": "",
+          "directNarrative": "你拄著樹枝一瘸一拐走進破廟，外頭通緝令上的墨跡還沒乾——二百兩買你的人頭？那就看誰先來送死。",
+          "directEffects": "",
+          "directNext": "",
+          "critSuccessNarrative": "",
+          "critSuccessEffects": "",
+          "critSuccessNext": "",
+          "critFailNarrative": "",
+          "critFailEffects": "",
+          "critFailNext": "",
+          "narrative": "你拄著樹枝一瘸一拐走進破廟，外頭通緝令上的墨跡還沒乾——二百兩買你的人頭？那就看誰先來送死。",
+          "effects": null,
+          "next": null
+        }
+      ]
     }
   },
-  "VERSION": 1793627321760
+  "VERSION": 1793837490541
 };
