@@ -41,11 +41,47 @@ const DataLoader = {
   },
 
   _apply(d) {
-    G.data.TAGS = d.TAGS || {};
-    G.data.ORIGINS = d.ORIGINS || {};
-    G.data.SECTS = d.SECTS || {};
-    G.data.MARTIAL_ARTS = d.MARTIAL_ARTS || {};
-    G.data.EVENTS = d.EVENTS || {};
-    G.data.COMPANIONS = d.COMPANIONS || {};
-  }
+    // ★ 判斷是否為正式環境 (只要不是 localhost/127.0.0.1 就是正式環境)
+    const isProd = window.location.hostname !== '127.0.0.1' && 
+                   window.location.hostname !== 'localhost' &&
+                   !window.location.protocol.includes('file'); // 防止本地直接開 HTML 也觸發過濾
+
+    console.log(`[DataLoader] 當前環境: ${isProd ? '🚀 正式環境 (將過濾 test_)' : '🛠️ 開發環境 (不過濾)'}`);
+
+    // 輔助過濾函數：兼容對象和陣列
+    const filterData = (data) => {
+      if (!data || !isProd) return data || {};
+      
+      // 如果是陣列 (Array)
+      if (Array.isArray(data)) {
+        return data.filter(item => {
+          const id = String(item.id || '').toLowerCase();
+          return !id.startsWith('test_') && !id.startsWith('dev_');
+        });
+      }
+      
+      // 如果是對象 (Object)
+      if (typeof data === 'object') {
+        const filtered = {};
+        Object.keys(data).forEach(key => {
+          const lowerKey = key.toLowerCase();
+          if (!lowerKey.startsWith('test_') && !lowerKey.startsWith('dev_')) {
+            filtered[key] = data[key];
+          }
+        });
+        return filtered;
+      }
+      return data;
+    };
+
+    // 套用過濾
+    G.data.TAGS = filterData(d.TAGS);
+    G.data.ORIGINS = filterData(d.ORIGINS);
+    G.data.SECTS = filterData(d.SECTS);
+    G.data.MARTIAL_ARTS = filterData(d.MARTIAL_ARTS);
+    G.data.LIFEPATH_EVENTS = filterData(d.LIFEPATH_EVENTS);
+    G.data.LIFEPATH_CHOICES = filterData(d.LIFEPATH_CHOICES);
+    G.data.EVENTS = filterData(d.EVENTS);
+    G.data.COMPANIONS = filterData(d.COMPANIONS);
+  },
 };
