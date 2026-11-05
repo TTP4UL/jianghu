@@ -312,8 +312,8 @@ const FALLBACK_DATA = {
     }
   },
   "ORIGINS": {
-    "test": {
-      "id": "test",
+    "test_origin": {
+      "id": "test_origin",
       "name": "測試出身",
       "desc": "測試中...",
       "intro": "測試中...",
@@ -2888,5 +2888,5 @@ const FALLBACK_DATA = {
       ]
     }
   },
-  "VERSION": 1793839560532
+  "VERSION": 1793839708588
 };
