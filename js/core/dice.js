@@ -21,23 +21,22 @@ const DiceSystem = {
     `;
     
     banner.classList.add('hidden');
-    breakdown.innerHTML = '<span class="text-[#8a7561] font-serif tracking-wider animate-pulse">命運流轉，凝神擲骰中……</span>';
+    breakdown.innerHTML = '<span class="text-[#8a7561] font-serif tracking-wider">擲骰中……</span>';
 
-    // ★ 重置並觸發動畫 (先移除 class 強制重繪)
-    visual.classList.remove('dice-rolling');
-    void visual.offsetWidth; // 強制瀏覽器 Reflow，保證動畫每次必觸發
-    visual.className = 'w-24 h-24 rounded-2xl bg-gradient-to-tr from-[#8a1c14] via-[#a82d25] to-[#c2410c] flex items-center justify-center text-white text-3xl font-black shadow-lg border-2 border-[#fef3c7]/60 dice-rolling';
-    
+    // 啟動輕微呼吸動畫，無角度旋轉
+    visual.className = 'w-24 h-24 rounded-2xl bg-gradient-to-tr from-[#8a1c14] via-[#a82d25] to-[#c2410c] flex items-center justify-center text-white text-3xl font-black shadow-md border-2 border-[#fef3c7]/60 dice-rolling';
     valueEl.className = 'dice-fast-number font-mono';
     modal.classList.remove('hidden');
 
-    // ★ 數字極速跳動反饋（每 40ms 跳一個隨機數）
+    // ★ 純數字高速翻滾（每 35ms 隨機切換）
     const rollTimer = setInterval(() => {
       valueEl.textContent = Math.floor(Math.random() * 20) + 1;
-    }, 40);
+    }, 35);
 
+    // 0.5 秒迅速結算，爽快感最佳
     setTimeout(() => {
       clearInterval(rollTimer);
+      visual.classList.remove('dice-rolling');
       valueEl.className = 'font-mono';
 
       // 1. 決定最終點數
@@ -49,7 +48,6 @@ const DiceSystem = {
 
       // 2. 結算數值
       const total = d20 + mod + tagResult.total;
-      visual.classList.remove('dice-rolling');
       valueEl.textContent = d20;
 
       const nat20 = d20 === 20;
@@ -91,7 +89,7 @@ const DiceSystem = {
       };
       
       breakdown.innerHTML = html;
-    }, 750);
+    }, 500);
   },
 
   _banner(el, text, variant) {

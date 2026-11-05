@@ -68,35 +68,22 @@ body {
 }
 
 /* D20 動畫 */
-@keyframes diceRollingAnim {
-  0% {
-    transform: scale(0.65) rotate(0deg);
-    opacity: 0.7;
-  }
-  20% {
-    transform: scale(1.18) rotate(140deg);
-    opacity: 1;
-  }
-  45% {
-    transform: scale(0.92) rotate(260deg);
-  }
-  70% {
-    transform: scale(1.08) rotate(330deg);
-  }
-  85% {
-    transform: scale(0.97) rotate(355deg);
-  }
-  100% {
-    transform: scale(1) rotate(360deg);
-    opacity: 1;
-  }
+@keyframes diceBreathPulse {
+  0% { transform: scale(0.9); }
+  50% { transform: scale(1.06); }
+  100% { transform: scale(1); }
 }
 
 .dice-rolling {
   display: inline-flex !important;
-  transform-origin: center center;
-  animation: diceRollingAnim 0.75s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
-  will-change: transform, opacity;
+  animation: diceBreathPulse 0.4s ease-in-out infinite alternate !important;
+  will-change: transform;
+}
+
+/* 數字跳動時輕微微光 */
+.dice-fast-number {
+  color: #fffbeb;
+  text-shadow: 0 0 8px rgba(254, 243, 199, 0.6);
 }
 
 /* 滾動時中央數字微光閃爍 */
