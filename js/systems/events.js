@@ -124,7 +124,7 @@ const EventSystem = {
 
     // ★ 自動補位：如果沒有選項，自動結束
     if (validChoices.length === 0) {
-      HUD.log('narrative', '（這件事就此告一段落）');
+    HUD.log('narrative', T('no_more_choices'));
       setTimeout(() => ExplorationSystem.endEvent(), 1000);
       return;
     }
@@ -139,9 +139,28 @@ const EventSystem = {
   },
 
   handleChoice(choice) {
+    // ★ 初始化日誌與事件名
+    if (!G.player.lifeLog) G.player.lifeLog = [];
+    const evTitle = G.data.EVENTS[choice.eventId]?.title || '江湖奇遇';
+    
     if (choice.type === 'direct') {
       if (choice.narrative) HUD.log('narrative', choice.narrative);
       EffectSystem.apply(choice.effects);
+      
+      // 判斷是否重大事件
+      const isMajor = choice.effects && (
+        choice.effects.reputation || choice.effects.morality || 
+        choice.effects.addMartialArt || choice.effects.addTag
+      );
+
+      G.player.lifeLog.push({ 
+        age: G.currentAge, 
+        event: evTitle, 
+        choice: choice.text, 
+        result: null,
+        isMajor: !!isMajor
+      });
+      
       this.resolveNext(choice.next);
       return;
     }
@@ -173,6 +192,22 @@ const EventSystem = {
             };
           }
           
+          let resultStr = res.nat20 ? '大成功' : res.nat1 ? '大失敗' : res.success ? '成功' : '失敗';
+          
+          // 判斷是否重大事件
+          const isMajor = res.nat20 || res.nat1 || (branch.effects && (
+            branch.effects.reputation || branch.effects.morality || 
+            branch.effects.addMartialArt || branch.effects.addTag
+          ));
+
+          G.player.lifeLog.push({ 
+            age: G.currentAge, 
+            event: evTitle, 
+            choice: choice.text, 
+            result: resultStr,
+            isMajor: !!isMajor
+          });
+
           if (branch.narrative) HUD.log('narrative', branch.narrative);
           EffectSystem.apply(branch.effects);
           
@@ -188,7 +223,7 @@ const EventSystem = {
 
   resolveNext(nextTarget) {
     if (nextTarget) {
-      const targets = String(nextTarget).split(',').map(s => s.trim()).filter(Boolean);
+      const targets = String(nextTarget).split('|').map(s => s.trim()).filter(Boolean);
       const chosenId = targets[Math.floor(Math.random() * targets.length)];
       if (G.data.EVENTS[chosenId]) {
         return this.load(chosenId); 
@@ -196,8 +231,8 @@ const EventSystem = {
     }
     
     HUD.closeEncounterModal();
+    SaveSystem.save();  // ★ 新增
     
-    // ★ 核心判斷：13-17歲回歸 Lifepath 結算，18歲後回歸 Exploration 結算
     if (G.currentAge < 18) {
       LifepathSystem.nextYear();
     } else {

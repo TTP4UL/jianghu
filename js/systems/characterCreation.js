@@ -193,22 +193,6 @@ const CharacterCreationSystem = {
     this.renderSummary();
   },
 
-  // ★ 新增：計算升級所需潛力點
-  getCostForNextPoint(currentVal) {
-    if (currentVal < 3) return 1;
-    if (currentVal < 6) return 2;
-    if (currentVal < 9) return 3;
-    return 4;
-  },
-
-  // ★ 新增：計算降級退還潛力點
-  getRefundForPoint(prevVal) {
-    if (prevVal < 3) return 1;
-    if (prevVal < 6) return 2;
-    if (prevVal < 9) return 3;
-    return 4;
-  },
-
   renderStatBoard() {
     const board = document.getElementById('statBoard');
     if (!board) return;
@@ -216,7 +200,7 @@ const CharacterCreationSystem = {
     
     Object.keys(STATS_INFO).forEach(k => {
       const val = this.state.stats[k] !== undefined ? this.state.stats[k] : 0; 
-      const cost = this.getCostForNextPoint(val);
+      const cost = StatUtils.getCostForNextPoint(val + 10);
       const canAfford = this.state.freePoints >= cost;
       
       const div = document.createElement('div');
@@ -246,14 +230,14 @@ const CharacterCreationSystem = {
       if (this.state.stats[k] >= 25) {
         return alert('該屬性已達先天極限（15）！');
       }
-      const cost = this.getCostForNextPoint(this.state.stats[k]);
+      const cost = StatUtils.getCostForNextPoint(this.state.stats[k] + 10);
       if (this.state.freePoints >= cost) {
         this.state.stats[k]++; 
         this.state.freePoints -= cost;
       }
     } else if (delta < 0) {
       if (this.state.stats[k] <= base) return;
-      const refund = this.getRefundForPoint(this.state.stats[k] - 1);
+      const refund = StatUtils.getRefundForPoint(this.state.stats[k] - 1 + 10);
       this.state.stats[k]--; 
       this.state.freePoints += refund;
     }
@@ -278,11 +262,11 @@ const CharacterCreationSystem = {
 
       while (tempPoints > 0 && attempts < 100) {
         attempts++;
-        const availableKeys = keys.filter(k => tempStats[k] < 18);
+        const availableKeys = keys.filter(k => tempStats[k] < 15);
         if (availableKeys.length === 0) break;
 
         const randomKey = availableKeys[Math.floor(Math.random() * availableKeys.length)];
-        const cost = this.getCostForNextPoint(tempStats[randomKey]);
+        const cost = StatUtils.getCostForNextPoint(tempStats[randomKey] + 10);
 
         if (tempPoints >= cost) {
           tempStats[randomKey]++;
@@ -290,7 +274,7 @@ const CharacterCreationSystem = {
         } else {
           let canAddAny = false;
           for (const k of availableKeys) {
-            if (tempPoints >= this.getCostForNextPoint(tempStats[k])) {
+            if (tempPoints >= StatUtils.getCostForNextPoint(tempStats[k] + 10)) {
               canAddAny = true; break;
             }
           }
@@ -369,8 +353,8 @@ finish() {
 
     const conMod = Math.floor((finalStats.con - 10) / 2);
     const dexMod = Math.floor((finalStats.dex - 10) / 2);
-    const wisMod = Math.floor((finalStats.wis - 10) / 2);
-    const intMod = Math.floor((finalStats.int - 10) / 2); // ★ 新增：悟性修正
+    const intMod = Math.floor((finalStats.int - 10) / 2);
+    const wisMod = Math.floor((finalStats.wis - 10) / 2); 
     
     let maxHp = (sect ? sect.baseHp : 24) + conMod * 3;
     let maxPos = (sect ? sect.basePos : 14) + Math.max(0, intMod) * 2; 
@@ -395,30 +379,6 @@ finish() {
       if (idx !== -1) loadout[a.slot][idx] = id;
     });
 
-    Object.keys(loadout).forEach(slotKey => {
-      loadout[slotKey].forEach(artId => {
-        if (!artId) return;
-        const art = G.data.MARTIAL_ARTS[artId];
-        if (!art) return;
-
-        if (art.grantTags) {
-          String(art.grantTags).split('|').map(t => t.trim()).forEach(t => {
-            if (t && !tags.includes(t)) tags.push(t);
-          });
-        }
-
-        if (art.innerEffect) {
-          String(art.innerEffect).split('|').forEach(eff => {
-            const [key, val] = eff.split(':');
-            const num = Number(val);
-            if (key === 'maxHp') maxHp += num;
-            if (key === 'maxPos') maxPos += num;
-            if (key === 'maxQi') maxQi += num;
-          });
-        }
-      });
-    });
-
     // 4. 建立玩家物件
     G.player = {
       name, gender: s.gender, origin: s.origin, sect: s.sect,
@@ -433,10 +393,21 @@ finish() {
       prof: 2,
       morality: 0,
       reputation: 0,
-      contribution: 0
+      contribution: 0,
+      punchDiceType: 8,
+      lifeLog: []
     };
 
-    // ★ 關鍵：直接讀取起源表原本的 o.intro
+    // ★ 核心簡化：使用工具統一加上初始裝備的內功加成與 Tag
+    Object.keys(loadout).forEach(slotKey => {
+      loadout[slotKey].forEach(artId => {
+        if (artId) {
+          MartialArtUtils.toggleInnerEffect(G.player, G.data.MARTIAL_ARTS[artId], true);
+        }
+      });
+    });
+
+    // 後續彈窗與音效保持不變...
     const originTitle = o.name + (sect ? ` · ${sect.name}` : '');
     const introText = o.intro || `十三歲，${name} 正式邁入江湖。從此以後，一切靠自己。`;
 
@@ -498,6 +469,14 @@ finish() {
     document.getElementById('narrativeLogs').innerHTML = '';
     document.getElementById('interactionPanel').innerHTML = '';
     document.getElementById('enemyHud').classList.add('hidden');
+
+    // ★ 新增：如果有存檔，重新顯示讀檔按鈕
+    if (typeof SaveSystem !== 'undefined' && SaveSystem.hasSave()) {
+      document.getElementById('loadBtn').classList.remove('hidden');
+    } else {
+      document.getElementById('loadBtn').classList.add('hidden');
+    }
+
     G.player = null;
     G.currentAge = 13;
     this.enter();

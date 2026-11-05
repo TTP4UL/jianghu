@@ -55,93 +55,42 @@ const ExplorationSystem = {
 
   doAction(actionType) {
     if (actionType === 'retreat') {
-      HUD.log('lifepath', '你選擇閉關修煉，真氣與氣血恢復圓滿。');
+      HUD.log('lifepath', T('retreat'));
       EffectSystem.apply({ hp: 999, pos: 999, qi: 999 });
-      
-      // ★ 核心修正：直接呼叫 LifepathSystem 的結算方法，確保儲備點數正確相加
+
+      // ★ 新增：閉關有 30% 機率移除一個 debuff
+      const debuffs = (G.player.tags || []).filter(t => t.startsWith('debuff_'));
+      if (debuffs.length > 0 && Math.random() < 0.3) {
+        const removeId = debuffs[Math.floor(Math.random() * debuffs.length)];
+        if (TagUtils.remove(removeId)) {
+          const tagName = G.data.TAGS[removeId]?.name || removeId;
+          HUD.log('lifepath', T('debuff_heal', { tag: tagName }));
+        }
+      }
+
       LifepathSystem.endYear(1);
     } else {
       const eventId = this.pickNextEvent(actionType);
       if (eventId) {
         EventSystem.load(eventId);
       } else {
-        HUD.log('narrative', '你逛了一圈，沒有遇到什麼特別的事。');
+        HUD.log('narrative', T('empty_explore'));
         this.endEvent(); 
       }
     }
   },
 
   pickNextEvent(actionType) {
-    if (!G.data.EVENTS) return null;
-
-    const candidates = Object.values(G.data.EVENTS).filter(e => {
-      // 1. 排除結局與戰鬥主體
-      if (e.type === 'ending' || e.type === 'combat') return false;
-      
-      // ★ 核心修改：如果 weight 明確填了 0，或者字串 '0'，就絕對不會被隨機抽中！
-      if (e.weight !== undefined && e.weight !== '' && Number(e.weight) === 0) return false;
-
-      // 2. 區分酒館與探索
-      if (actionType === 'tavern') {
-        if (e.badge !== '酒館' && e.uiType !== 'tavern' && !e.title.includes('酒')) return false;
-      } else if (actionType === 'explore') {
-        if (e.badge === '酒館' || e.uiType === 'tavern') return false;
-      }
-      
-      // 3. 年齡檢查
-      if (e.age) {
-        if (String(e.age).includes('-')) {
-          const [min, max] = e.age.split('-').map(Number);
-          if (G.currentAge < min || G.currentAge > max) return false;
-        } else if (Number(e.age) !== G.currentAge) {
-          return false;
-        }
-      } else {
-        // 如果 Events 表冇填 age，預設當作 18 歲後歷練事件
-        if (G.currentAge < 18) return false;
-      }
-
-      // 4. Tag 檢查
-      if (e.requireTags && e.requireTags.length > 0 && !TagUtils.hasAll(e.requireTags)) return false;
-      if (e.forbidTags && e.forbidTags.length > 0 && !TagUtils.hasNone(e.forbidTags)) return false;
-
-      return true;
+    return EventPicker.pick({ 
+      isLifepath: false, 
+      actionType: actionType 
     });
-
-    if (candidates.length === 0) return null;
-
-    // 5. 優先檢查專屬事件 (例如必定觸發嘅主線)
-    const specific = candidates.filter(e => Number(e.priority) > 0)
-      .sort((a, b) => Number(b.priority) - Number(a.priority));
-      
-    if (specific.length > 0) return specific[0].id;
-
-    // 6. 隨機事件池按 weight 抽籤
-    const totalWeight = candidates.reduce((sum, e) => {
-      // 如果 weight 留空，預設為 10；如果係數字就轉數字
-      let w = e.weight;
-      if (w === undefined || w === '') w = 10;
-      return sum + Number(w);
-    }, 0);
-    
-    let rand = Math.random() * totalWeight;
-
-    for (const ev of candidates) {
-      let w = ev.weight;
-      if (w === undefined || w === '') w = 10;
-      w = Number(w);
-      
-      if (rand < w) return ev.id;
-      rand -= w;
-    }
-
-    return candidates[0].id;
   },
 
-  // ★ 自動過渡：不顯示任何按鈕，直接跳季
+  // ★ 補回呢個方法
   endEvent() {
     SaveSystem.save();
-    this.nextSeason(); 
+    this.nextSeason();
   },
 
   nextSeason() {
@@ -151,7 +100,7 @@ const ExplorationSystem = {
     if (G.currentSeason >= 4) {
       G.currentSeason = 0;
       G.currentAge++;
-      HUD.log('narrative', `【歲月如梭】轉眼間，又過了一年，你已經 ${G.currentAge} 歲了。`);
+      HUD.log('narrative', T('year_passed', { age: G.currentAge }));
     }
     
     SaveSystem.save();

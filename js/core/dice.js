@@ -14,26 +14,33 @@ const DiceSystem = {
     const breakdown = document.getElementById('diceBreakdown');
 
     titleEl.textContent = title;
+    
+    const totalMod = mod + tagResult.total;
     formulaEl.innerHTML = `
-      <span class="text-xs">屬性修正: ${mod >= 0 ? '+' : ''}${mod} | </span>
+      <span class="text-xs">總修正: ${totalMod >= 0 ? '+' : ''}${totalMod} | </span>
       <span class="text-sm font-bold text-[#78614c] ml-1">目標難度 (DC):</span>
       <span class="text-2xl font-black text-[#a82d25] ml-1 tracking-wider">${dc}</span>
     `;
     
+    // 清除所有舊狀態
     banner.classList.add('hidden');
+    banner.classList.remove('banner-stamped');
+    visual.classList.remove('crit-success-box', 'crit-fail-box', 'dice-pass-box', 'dice-fail-box');
+    valueEl.classList.remove('crit-success-number', 'crit-fail-number', 'dice-pass-number', 'dice-fail-number');
+
     breakdown.innerHTML = '<span class="text-[#8a7561] font-serif tracking-wider">擲骰中……</span>';
 
-    // 啟動輕微呼吸動畫，無角度旋轉
+    // 啟動輕微微彈動效
     visual.className = 'w-24 h-24 rounded-2xl bg-gradient-to-tr from-[#8a1c14] via-[#a82d25] to-[#c2410c] flex items-center justify-center text-white text-3xl font-black shadow-md border-2 border-[#fef3c7]/60 dice-rolling';
     valueEl.className = 'dice-fast-number font-mono';
     modal.classList.remove('hidden');
 
-    // ★ 純數字高速翻滾（每 35ms 隨機切換）
+    // 數字高速跳動（每 35ms 跳一個隨機數）
     const rollTimer = setInterval(() => {
       valueEl.textContent = Math.floor(Math.random() * 20) + 1;
     }, 35);
 
-    // 0.5 秒迅速結算，爽快感最佳
+    // 0.5 秒迅速結算
     setTimeout(() => {
       clearInterval(rollTimer);
       visual.classList.remove('dice-rolling');
@@ -54,16 +61,28 @@ const DiceSystem = {
       const nat1 = d20 === 1;
       let success = total >= dc;
       
-      // 3. 成功 / 失敗反饋
+      // 3. ★ 四階完整回饋體系 (大成功 / 大失敗 / 普通通過 / 普通失手)
       if (nat20) { 
         success = true; 
+        visual.classList.add('crit-success-box');
+        valueEl.classList.add('crit-success-number');
         this._banner(banner, '★ 大成功 · 天人合一 ★', 'gold'); 
         soundEngine.playGong(); 
       } else if (nat1) { 
         success = false; 
+        visual.classList.add('crit-fail-box');
+        valueEl.classList.add('crit-fail-number');
         this._banner(banner, '☠ 大失敗 · 走火失手 ☠', 'red'); 
+        HUD.shakeScreen();
       } else if (success) {
+        // ★ 普通成功：翠玉光華微彈
+        visual.classList.add('dice-pass-box');
+        valueEl.classList.add('dice-pass-number');
         soundEngine.playBladeClash();
+      } else {
+        // ★ 普通失敗：暗灰沉降微頓
+        visual.classList.add('dice-fail-box');
+        valueEl.classList.add('dice-fail-number');
       }
 
       let finalEffects = success ? successEffects : failEffects;
@@ -94,8 +113,10 @@ const DiceSystem = {
 
   _banner(el, text, variant) {
     el.textContent = text;
-    el.className = 'text-xs font-black tracking-widest uppercase py-1 px-3 rounded-full mb-3 inline-block font-serif ' +
-      (variant === 'gold' ? 'bg-[#b45309] text-white shadow-md' : 'bg-red-800 text-white');
+    el.className = 'text-xs font-black tracking-widest uppercase py-1.5 px-4 rounded-full mb-3 inline-block font-serif banner-stamped ' +
+      (variant === 'gold' 
+        ? 'bg-gradient-to-r from-[#b45309] to-[#d97706] text-[#fffbeb] border border-[#fef08a] shadow-[0_0_12px_rgba(245,158,11,0.6)]' 
+        : 'bg-gradient-to-r from-[#7f1d1d] to-[#991b1b] text-white border border-[#f87171] shadow-[0_0_12px_rgba(185,28,28,0.6)]');
     el.classList.remove('hidden');
   },
 

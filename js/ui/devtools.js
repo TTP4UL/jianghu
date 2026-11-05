@@ -11,7 +11,6 @@ const DevTools = {
 
     const panel = document.createElement('div');
     panel.id = 'devPanel';
-    // ★ 加入 max-h-[85vh] 和 overflow-y-auto，防止選項太多撐爆螢幕
     panel.className = 'fixed bottom-16 right-4 z-50 w-80 max-h-[85vh] overflow-y-auto custom-scrollbar wuxia-panel-box rounded-xl p-4 shadow-2xl hidden flex-col space-y-3 text-xs font-serif border border-[#a89680]';
     
     panel.innerHTML = `
@@ -28,8 +27,26 @@ const DevTools = {
         <button onclick="DevTools.addReputation()" class="bg-[#f5ede0] hover:bg-[#e8decb] border border-[#cfc0a9] text-[#2c1f14] p-2 rounded transition">🏆 威望+貢獻+50</button>
       </div>
 
-      <!-- ★ 新增：強制骰子模式 (包含 19 和 2) -->
-      <div class="space-y-1 pt-1 border-t border-[#d8ccb8]">
+      <!-- ★ 新增：名聲與正邪控制 -->
+      <div class="space-y-1 pt-2 border-t border-[#d8ccb8]">
+        <label class="text-[#594432] font-bold">名聲與正邪 (測試矩陣稱號)</label>
+        <div class="flex gap-1 mt-1">
+          <input type="number" id="devRepInput" placeholder="名聲 (-100~100)" class="flex-1 w-0 bg-white border border-[#cfc0a9] rounded p-1.5 text-[#2c1f14] focus:outline-none focus:border-[#a82d25]">
+          <input type="number" id="devMorInput" placeholder="正邪 (-100~100)" class="flex-1 w-0 bg-white border border-[#cfc0a9] rounded p-1.5 text-[#2c1f14] focus:outline-none focus:border-[#a82d25]">
+          <button onclick="DevTools.setAlignment()" class="bg-[#1e6b4d] hover:bg-[#155038] px-3 rounded text-white font-bold transition">設</button>
+        </div>
+        <div class="grid grid-cols-2 gap-1 mt-1.5">
+          <button onclick="DevTools.quickAlign(50, 50)" class="bg-[#ecfdf5] border border-[#a7f3d0] text-[#047857] py-1 rounded font-bold hover:bg-[#d1fae5] transition">名門大俠</button>
+          <button onclick="DevTools.quickAlign(-50, -50)" class="bg-[#fef2f2] border border-[#fca5a5] text-[#b91c1c] py-1 rounded font-bold hover:bg-[#fee2e2] transition">魔道巨擘</button>
+          <button onclick="DevTools.quickAlign(50, -50)" class="bg-[#fffbeb] border border-[#fde68a] text-[#b45309] py-1 rounded font-bold hover:bg-[#fef3c7] transition">偽善君子</button>
+          <button onclick="DevTools.quickAlign(-50, 50)" class="bg-[#eff6ff] border border-[#bfdbfe] text-[#1d4ed8] py-1 rounded font-bold hover:bg-[#dbeafe] transition">孤膽俠客</button>
+          <button onclick="DevTools.quickAlign(0, 50)" class="bg-[#f8fafc] border border-[#cbd5e1] text-[#475569] py-1 rounded font-bold hover:bg-[#f1f5f9] transition">隱世高人</button>
+          <button onclick="DevTools.quickAlign(0, -50)" class="bg-[#f8fafc] border border-[#cbd5e1] text-[#475569] py-1 rounded font-bold hover:bg-[#f1f5f9] transition">隱世邪修</button>
+        </div>
+      </div>
+
+      <!-- 強制骰子模式 -->
+      <div class="space-y-1 pt-2 border-t border-[#d8ccb8]">
         <label class="text-[#594432] font-bold">D20 檢定模式</label>
         <div class="flex flex-wrap gap-1 mt-1">
           <button onclick="DevTools.setDiceMode('random')" id="diceMode-random" class="flex-1 py-1 border border-[#cfc0a9] rounded bg-[#a82d25] text-white font-bold transition">正常</button>
@@ -40,8 +57,8 @@ const DevTools = {
         </div>
       </div>
 
-      <!-- ★ 新增：獲得 / 移除 Tag -->
-      <div class="space-y-1 pt-1 border-t border-[#d8ccb8]">
+      <!-- 獲得 / 移除 Tag -->
+      <div class="space-y-1 pt-2 border-t border-[#d8ccb8]">
         <label class="text-[#594432] font-bold">Tag 控制 (輸入 ID)</label>
         <div class="flex gap-1">
           <input type="text" id="devTagInput" placeholder="例如: sword_master" class="flex-1 bg-white border border-[#cfc0a9] rounded p-1.5 text-[#2c1f14] focus:outline-none focus:border-[#a82d25]">
@@ -51,7 +68,7 @@ const DevTools = {
       </div>
 
       <!-- 獲得武學 -->
-      <div class="space-y-1 pt-1 border-t border-[#d8ccb8]">
+      <div class="space-y-1 pt-2 border-t border-[#d8ccb8]">
         <label class="text-[#594432] font-bold">獲得武學 (輸入 ID)</label>
         <div class="flex gap-1">
           <input type="text" id="devArtInput" placeholder="例如: s_dugu" class="flex-1 bg-white border border-[#cfc0a9] rounded p-1.5 text-[#2c1f14] focus:outline-none focus:border-[#a82d25]">
@@ -60,7 +77,7 @@ const DevTools = {
       </div>
 
       <!-- 獲得同伴 -->
-      <div class="space-y-1">
+      <div class="space-y-1 pt-2 border-t border-[#d8ccb8]">
         <label class="text-[#594432] font-bold">獲得同伴 (輸入 ID)</label>
         <div class="flex gap-1">
           <input type="text" id="devCompInput" placeholder="例如: comp_dongxie" class="flex-1 bg-white border border-[#cfc0a9] rounded p-1.5 text-[#2c1f14] focus:outline-none focus:border-[#a82d25]">
@@ -69,7 +86,7 @@ const DevTools = {
       </div>
 
       <!-- 跳轉事件 / 年齡 -->
-      <div class="space-y-1 pt-1 border-t border-[#d8ccb8]">
+      <div class="space-y-1 pt-2 border-t border-[#d8ccb8]">
         <label class="text-[#594432] font-bold">跳轉事件 / 年齡控制</label>
         <div class="flex gap-1 mb-1">
           <input type="text" id="devEventInput" placeholder="Event ID 例如: act3_boss" class="flex-1 bg-white border border-[#cfc0a9] rounded p-1.5 text-[#2c1f14] focus:outline-none focus:border-[#a82d25]">
@@ -82,7 +99,7 @@ const DevTools = {
       </div>
 
       <!-- 強制重載 -->
-      <div class="space-y-1 pt-1 border-t border-[#d8ccb8]">
+      <div class="space-y-1 pt-2 border-t border-[#d8ccb8]">
         <button onclick="DataLoader.init()" class="w-full bg-[#0369a1] hover:bg-[#075985] text-white font-bold p-2 rounded transition">
           <i class="fa-solid fa-rotate mr-1"></i> 強制重載雲端數據
         </button>
@@ -121,6 +138,31 @@ const DevTools = {
   requirePlayer() {
     if (!G.player) { alert('請先創建角色！'); return false; }
     return true;
+  },
+
+  // === 名聲與正邪控制 ===
+  setAlignment() {
+    if (!this.requirePlayer()) return;
+    const rep = Number(document.getElementById('devRepInput').value);
+    const mor = Number(document.getElementById('devMorInput').value);
+    
+    if (isNaN(rep) || isNaN(mor)) return alert('請輸入數字！');
+    
+    G.player.reputation = Math.max(-100, Math.min(100, rep));
+    G.player.morality = Math.max(-100, Math.min(100, mor));
+    
+    HUD.render();
+    SaveSystem.save();
+    HUD.log('dice', `【Dev】設定名聲: ${G.player.reputation}，正邪: ${G.player.morality}`);
+  },
+
+  quickAlign(rep, mor) {
+    if (!this.requirePlayer()) return;
+    G.player.reputation = rep;
+    G.player.morality = mor;
+    HUD.render();
+    SaveSystem.save();
+    HUD.log('dice', `【Dev】快速設定稱號測試：名聲 ${rep} / 正邪 ${mor}`);
   },
 
   // === 骰子控制 ===

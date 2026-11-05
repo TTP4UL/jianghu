@@ -1,4 +1,6 @@
 const HUD = {
+   _tooltipTimer: null,
+
   getTagStyle(tag) {
     const grade = (tag.grade || 'E').toUpperCase();
     switch (grade) {
@@ -29,11 +31,21 @@ const HUD = {
   },
 
   _positionTooltip(e, tt) {
+    // ★ 清除舊嘅隱藏定時器
+    if (this._tooltipTimer) {
+      clearTimeout(this._tooltipTimer);
+      this._tooltipTimer = null;
+    }
+
     tt.classList.remove('hidden');
     let x = e.clientX + 15;
     let y = e.clientY + 15;
     if (x + 260 > window.innerWidth) x = e.clientX - 270;
     if (y + 150 > window.innerHeight) y = e.clientY - 160;
+    // 防止貼邊
+    x = Math.max(10, x);
+    y = Math.max(10, y);
+    
     tt.style.left = `${x}px`;
     tt.style.top = `${y}px`;
     setTimeout(() => tt.classList.remove('opacity-0'), 10);
@@ -43,7 +55,79 @@ const HUD = {
     const tt = document.getElementById('tagTooltip');
     if (!tt) return;
     tt.classList.add('opacity-0');
-    setTimeout(() => tt.classList.add('hidden'), 200);
+    
+    // ★ 記錄定時器，防止衝突
+    if (this._tooltipTimer) clearTimeout(this._tooltipTimer);
+    this._tooltipTimer = setTimeout(() => {
+      tt.classList.add('hidden');
+      this._tooltipTimer = null;
+    }, 200);
+  },
+
+    // ★ 新增：全局 Tooltip 事件委託
+  initTooltipEvents() {
+    if (this._tooltipInit) return;
+    this._tooltipInit = true;
+
+    document.addEventListener('mouseover', (e) => {
+      const el = e.target.closest('[data-tooltip]');
+      if (!el) return;
+      
+      // 防止在子元素間移動時重複觸發
+      const fromEl = e.relatedTarget ? e.relatedTarget.closest('[data-tooltip]') : null;
+      if (el === fromEl) return;
+
+      const type = el.getAttribute('data-tooltip');
+      
+      if (type === 'tag') {
+        const id = el.getAttribute('data-id');
+        if (G.data.TAGS[id]) this.showTagTooltip(e, G.data.TAGS[id]);
+      } 
+      else if (type === 'art') {
+        const id = el.getAttribute('data-id');
+        if (G.data.MARTIAL_ARTS[id]) this.showArtTooltip(e, G.data.MARTIAL_ARTS[id]);
+      }
+      else if (type === 'alignment') {
+        // ★ 處理稱號 Hover
+        const tt = document.getElementById('tagTooltip');
+        if (!tt) return;
+        document.getElementById('ttTagGrade').textContent = '綜合';
+        document.getElementById('ttTagGrade').className = `text-[10px] px-1.5 py-0.5 rounded border font-black bg-[#f5ede0] text-[#594432] border-[#d8ccb8]`;
+        document.getElementById('ttTagName').textContent = el.dataset.title;
+        document.getElementById('ttTagDesc').innerHTML = `
+          江湖對你的看法與你的本心。<br>
+          <span class="text-[#047857] font-bold">名聲：</span> ${el.dataset.rep > 0 ? '+' : ''}${el.dataset.rep}<br>
+          <span class="text-[#a82d25] font-bold">正邪：</span> ${el.dataset.mor > 0 ? '+' : ''}${el.dataset.mor}
+        `;
+        document.getElementById('ttTagBonus').classList.add('hidden');
+        this._positionTooltip(e, tt);
+      }
+    });
+
+    document.addEventListener('mouseout', (e) => {
+      const el = e.target.closest('[data-tooltip]');
+      if (!el) return;
+      
+      // 檢查滑鼠係咪真係離開咗呢個標籤
+      const toEl = e.relatedTarget ? e.relatedTarget.closest('[data-tooltip]') : null;
+      if (el === toEl) return;
+
+      this.hideTagTooltip();
+    });
+
+    document.addEventListener('click', (e) => {
+      const el = e.target.closest('[data-tooltip]');
+      if (!el) return;
+      if (el.getAttribute('data-tooltip') === 'alignment') return; // 稱號唔使手機點擊
+      
+      const type = el.getAttribute('data-tooltip');
+      const id = el.getAttribute('data-id');
+      if (type === 'tag' && G.data.TAGS[id]) this.showTagTooltip(e, G.data.TAGS[id]);
+      if (type === 'art' && G.data.MARTIAL_ARTS[id]) this.showArtTooltip(e, G.data.MARTIAL_ARTS[id]);
+      
+      const hide = () => { this.hideTagTooltip(); document.removeEventListener('click', hide); };
+      setTimeout(() => document.addEventListener('click', hide), 10);
+    });
   },
 
   showTagTooltip(e, tag) {
@@ -151,19 +235,39 @@ const HUD = {
       }
     } 
     // 如果是內功，處理 innerEffect
-    else if (art.slot === 'inner' && art.innerEffect) {
-      String(art.innerEffect).split('|').forEach(eff => {
-        const [key, val] = eff.split(':');
-        const k = key.trim().toLowerCase();
-        const num = Number(val);
-        const sign = num > 0 ? `+${num}` : `${num}`;
-        if (k === 'regen' || k === 'hp_regen') effectParts.push(`每回合回血 ${sign}`);
-        if (k === 'qi_regen') effectParts.push(`每回合回氣 ${sign}`);
-        if (k === 'pos_regen') effectParts.push(`每回合回架勢 ${sign}`);
-        if (k === 'maxhp') effectParts.push(`氣血上限 ${sign}`);
-        if (k === 'maxqi') effectParts.push(`真氣上限 ${sign}`);
-        if (k === 'maxpos') effectParts.push(`架勢上限 ${sign}`);
-      });
+    else if (art.slot === 'inner') {
+      const statusMap = { poison: '中毒', stun: '眩暈', ac_down: '閃避壓制' };
+
+      if (art.innerEffect) {
+        String(art.innerEffect).split('|').forEach(eff => {
+          const [key, val] = eff.split(':');
+          const k = key.trim().toLowerCase();
+          const num = Number(val);
+          const sign = num > 0 ? `+${num}` : `${num}`;
+          if (k === 'regen' || k === 'hp_regen') effectParts.push(`每回合回血 ${sign}`);
+          if (k === 'qi_regen') effectParts.push(`每回合回氣 ${sign}`);
+          if (k === 'pos_regen') effectParts.push(`每回合回架勢 ${sign}`);
+          if (k === 'maxhp') effectParts.push(`氣血上限 ${sign}`);
+          if (k === 'maxqi') effectParts.push(`真氣上限 ${sign}`);
+          if (k === 'maxpos') effectParts.push(`架勢上限 ${sign}`);
+          if (k === 'immune') {
+            const statusName = statusMap[String(val).toLowerCase()] || val;
+            effectParts.push(`免疫${statusName}`);
+          }
+        });
+      }
+
+      // ★ 獨立 immune 欄位（例如 ma_mountain_river 的 immune: "poison"）
+      if (art.immune) {
+        String(art.immune).split('|').forEach(s => {
+          const v = s.trim().toLowerCase();
+          if (!v) return;
+          const statusName = statusMap[v] || v;
+          if (!effectParts.includes(`免疫${statusName}`)) {
+            effectParts.push(`免疫${statusName}`);
+          }
+        });
+      }
     }
 
     document.getElementById('ttTagBonus').innerHTML = `<span class="text-[#047857]">效果：</span>${effectParts.join('，') || '無特殊效果'}`;
@@ -228,10 +332,9 @@ const HUD = {
           const span = document.createElement('span');
           span.className = 'px-2 py-0.5 rounded border text-[11px] bg-[#f0fdf4] border-[#bbf7d0] text-[#166534] shadow-2xs cursor-help transition-transform hover:scale-105';
           span.innerHTML = `🧘 運轉【${art.name}】`;
-          span.onmouseenter = (e) => this.showArtTooltip(e, art);
-          span.onmousemove = (e) => this.showArtTooltip(e, art);
-          span.onmouseleave = () => this.hideTagTooltip();
-          span.onclick = (e) => { e.stopPropagation(); this.showArtTooltip(e, art); const hide = () => { this.hideTagTooltip(); document.removeEventListener('click', hide); }; setTimeout(() => document.addEventListener('click', hide), 10); };
+          // ★ 改為 data-tooltip
+          span.setAttribute('data-tooltip', 'art');
+          span.setAttribute('data-id', art.id);
           loadoutContainer.appendChild(span);
         }
       }
@@ -245,25 +348,21 @@ const HUD = {
           const span = document.createElement('span');
           span.className = 'px-2 py-0.5 rounded border text-[11px] bg-[#fef2f2] border-[#fecdd3] text-[#991b1b] shadow-2xs cursor-help transition-transform hover:scale-105';
           span.innerHTML = `⚔️ 裝備【${art.name}】`;
-          span.onmouseenter = (e) => this.showArtTooltip(e, art);
-          span.onmousemove = (e) => this.showArtTooltip(e, art);
-          span.onmouseleave = () => this.hideTagTooltip();
-          span.onclick = (e) => { e.stopPropagation(); this.showArtTooltip(e, art); const hide = () => { this.hideTagTooltip(); document.removeEventListener('click', hide); }; setTimeout(() => document.addEventListener('click', hide), 10); };
+          span.setAttribute('data-tooltip', 'art');
+          span.setAttribute('data-id', art.id);
           loadoutContainer.appendChild(span);
         });
       }
 
-      // ★ 新增：身法 (紫色標籤)
+      // 身法
       if (p.loadout.utility && p.loadout.utility[0]) {
         const art = G.data.MARTIAL_ARTS[p.loadout.utility[0]];
         if (art) {
           const span = document.createElement('span');
           span.className = 'px-2 py-0.5 rounded border text-[11px] bg-[#faf5ff] border-[#d8b4fe] text-[#7e22ce] shadow-2xs cursor-help transition-transform hover:scale-105';
           span.innerHTML = `💨 身法【${art.name}】`;
-          span.onmouseenter = (e) => this.showArtTooltip(e, art);
-          span.onmousemove = (e) => this.showArtTooltip(e, art);
-          span.onmouseleave = () => this.hideTagTooltip();
-          span.onclick = (e) => { e.stopPropagation(); this.showArtTooltip(e, art); const hide = () => { this.hideTagTooltip(); document.removeEventListener('click', hide); }; setTimeout(() => document.addEventListener('click', hide), 10); };
+          span.setAttribute('data-tooltip', 'art');
+          span.setAttribute('data-id', art.id);
           loadoutContainer.appendChild(span);
         }
       }
@@ -282,32 +381,103 @@ const HUD = {
         const span = document.createElement('span');
         span.className = `px-2 py-0.5 rounded border text-[11px] ${colorClass} shadow-2xs cursor-help transition-transform hover:scale-105`;
         span.textContent = `【${tag.name}】`;
-        
-        span.onmouseenter = (e) => this.showTagTooltip(e, tag);
-        span.onmousemove = (e) => this.showTagTooltip(e, tag);
-        span.onmouseleave = () => this.hideTagTooltip();
-        span.onclick = (e) => { e.stopPropagation(); this.showTagTooltip(e, tag); const hide = () => { this.hideTagTooltip(); document.removeEventListener('click', hide); }; setTimeout(() => document.addEventListener('click', hide), 10); };
-        
+        // ★ 改為 data-tooltip
+        span.setAttribute('data-tooltip', 'tag');
+        span.setAttribute('data-id', t);
         container.appendChild(span);
       });
     }
 
-    const repEl = document.getElementById('hudReputation');
-    if (repEl) repEl.textContent = p.reputation || 0;
+
+// ★ 名聲顯示（保持不變）
+const repEl = document.getElementById('hudReputation');
+const repLabelEl = document.getElementById('hudReputationLabel');
+if (repEl) {
+  const rep = p.reputation || 0;
+  let label = '江湖名聲';
+  let colorCls = 'text-[#2c1f14]';
+
+  if (rep >= 50) { label = '俠名遠播'; colorCls = 'text-[#15803d]'; }
+  else if (rep >= 15) { label = '小有名氣'; colorCls = 'text-[#16a34a]'; }
+  else if (rep > -15) { label = '無名之輩'; colorCls = 'text-[#8a7561]'; }
+  else if (rep > -50) { label = '惡名昭彰'; colorCls = 'text-[#dc2626]'; }
+  else { label = '臭名遠播'; colorCls = 'text-[#b91c1c]'; }
+
+  repEl.textContent = rep;
+  repEl.className = `font-mono text-base font-black ${colorCls}`;
+
+  if (repLabelEl) {
+    repLabelEl.textContent = label;
+    repLabelEl.className = `text-[10px] ${colorCls} block font-bold`;
+  }
+}
+
     const contEl = document.getElementById('hudContribution');
     if (contEl) contEl.textContent = p.contribution || 0;
 
+    // ★ 核心改動：二維矩陣稱號 (名聲 x 正邪)
     const moralityBadge = document.getElementById('hudMoralityBadge');
     if (moralityBadge) {
-      const m = p.morality || 0;
-      let title = ''; let styleCls = '';
-      if (m >= 50) { title = `名門大俠 · 正道 (${m})`; styleCls = 'text-[#15803d] bg-[#f0fdf4] border-[#86efac] shadow-[0_0_8px_rgba(22,163,74,0.25)]'; }
-      else if (m >= 15) { title = `俠骨仁心 · 善 (${m})`; styleCls = 'text-[#16a34a] bg-[#f0fdf4] border-[#bbf7d0]'; }
-      else if (m <= -50) { title = `魔道巨擘 · 極惡 (${m})`; styleCls = 'text-[#991b1b] bg-[#fef2f2] border-[#f87171] shadow-[0_0_8px_rgba(185,28,28,0.25)]'; }
-      else if (m <= -15) { title = `行事狠辣 · 邪 (${m})`; styleCls = 'text-[#b91c1c] bg-[#fef2f2] border-[#fca5a5]'; }
-      else { title = `正邪不染 · 中立 (0)`; styleCls = 'text-[#594432] bg-[#f5ede0] border-[#cfc0a9]'; }
+      const rep = p.reputation || 0;
+      const mor = p.morality || 0;
+      
+      // 閾值設定：>= 15 算高，<= -15 算低，其餘算 0
+      const isRepHighPos = rep >= 15;
+      const isRepHighNeg = rep <= -15;
+      const isRepZero = !isRepHighPos && !isRepHighNeg;
+
+      const isMorHighPos = mor >= 15;
+      const isMorHighNeg = mor <= -15;
+      const isMorZero = !isMorHighPos && !isMorHighNeg;
+
+      let title = '正邪不染';
+      let styleCls = 'text-[#594432] bg-[#f5ede0] border-[#cfc0a9]';
+
+      if (isRepHighPos && isMorHighPos) {
+        title = '名門大俠';
+        styleCls = 'text-[#15803d] bg-[#f0fdf4] border-[#86efac] shadow-[0_0_8px_rgba(22,163,74,0.25)]';
+      } 
+      else if (isRepHighNeg && isMorHighNeg) {
+        title = '魔道巨擘';
+        styleCls = 'text-[#991b1b] bg-[#fef2f2] border-[#f87171] shadow-[0_0_8px_rgba(185,28,28,0.25)]';
+      } 
+      else if (isRepHighPos && isMorHighNeg) {
+        title = '偽善君子';
+        styleCls = 'text-[#b45309] bg-[#fffbeb] border-[#fde68a] shadow-[0_0_8px_rgba(217,119,6,0.25)]';
+      } 
+      else if (isRepHighNeg && isMorHighPos) {
+        title = '孤膽俠客';
+        styleCls = 'text-[#1d4ed8] bg-[#eff6ff] border-[#bfdbfe] shadow-[0_0_8px_rgba(59,130,246,0.25)]';
+      } 
+      else if (isRepZero && isMorHighPos) {
+        title = '隱世高人';
+        styleCls = 'text-[#047857] bg-[#ecfdf5] border-[#a7f3d0]';
+      } 
+      else if (isRepZero && isMorHighNeg) {
+        title = '隱世邪修';
+        styleCls = 'text-[#7f1d1d] bg-[#fef2f2] border-[#fca5a5]';
+      } 
+      else if (isRepHighPos && isMorZero) {
+        title = '江湖名流';
+        styleCls = 'text-[#16a34a] bg-[#f0fdf4] border-[#bbf7d0]';
+      } 
+      else if (isRepHighNeg && isMorZero) {
+        title = '過街老鼠';
+        styleCls = 'text-[#dc2626] bg-[#fef2f2] border-[#fca5a5]';
+      } 
+      else {
+        title = '無名小卒';
+        styleCls = 'text-[#78614c] bg-[#fbf9f4] border-[#d8ccb8]';
+      }
+
       moralityBadge.className = `seal-stamp text-xs py-1 px-3 rounded-sm font-serif font-black tracking-wider transition-all ${styleCls}`;
       moralityBadge.textContent = title;
+
+      // ★ 改用全局 data-tooltip 機制
+      moralityBadge.setAttribute('data-tooltip', 'alignment');
+      moralityBadge.dataset.title = title;
+      moralityBadge.dataset.rep = rep;
+      moralityBadge.dataset.mor = mor;
     }
   },
 
@@ -421,9 +591,13 @@ const HUD = {
   log(type, text, stanceOrSpeaker = '旁白') {
     const c = document.getElementById('narrativeLogs');
     if (!c) return;
+    
+    // ★ 核心防呆：確保 text 係字串，防止 undefined 報錯
+    const safeText = text !== undefined && text !== null ? String(text) : '';
+
     const e = document.createElement('div');
     
-    let formattedText = text
+    let formattedText = safeText
       .replace(/【暴擊】/g, '<span class="text-[#b45309] font-black">【暴擊】</span>')
       .replace(/【閃避】/g, '<span class="text-[#78716c] font-black">【閃避】</span>')
       .replace(/【破防】/g, '<span class="font-black underline decoration-2">【破防】</span>');

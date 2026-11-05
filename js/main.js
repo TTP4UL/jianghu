@@ -7,6 +7,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
   DataLoader.init();
   
+  // ★ 新增：初始化全局 Tooltip 事件委託
+  if (typeof HUD !== 'undefined' && HUD.initTooltipEvents) {
+    HUD.initTooltipEvents();
+  }
+  
   // 判斷是否本地端 (localhost)
   const isLocal = window.location.hostname === '127.0.0.1' || 
                   window.location.hostname === 'localhost';
@@ -19,8 +24,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  const saved = SaveSystem.load();
-  if (saved) {
+  if (SaveSystem.hasSave()) {
     document.getElementById('loadBtn').classList.remove('hidden');
   }
   
@@ -38,14 +42,27 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// ★ 全域讀檔函數
 function mainLoadGame() {
   const saved = SaveSystem.load();
   if (!saved) return alert('沒有找到存檔');
   
   G.player = saved.player;
   G.currentAge = saved.currentAge;
+  G.currentSeason = saved.currentSeason || 0;
   G.usedEvents = saved.usedEvents || [];
+  G.pendingPoints = saved.pendingPoints || 0;
+  G.tempAllocStats = saved.tempAllocStats || null;
+  
+  // 舊存檔兼容：如果冇 martialArts 但 loadout 有，同步返
+  if (G.player.martialArts && G.player.martialArts.length === 0 && G.player.loadout) {
+    const fromLoadout = [];
+    ['attack', 'inner', 'utility'].forEach(slot => {
+      (G.player.loadout[slot] || []).forEach(id => {
+        if (id && !fromLoadout.includes(id)) fromLoadout.push(id);
+      });
+    });
+    G.player.martialArts = fromLoadout;
+  }
   
   document.getElementById('screen-setup').classList.add('hidden');
   document.getElementById('screen-play').classList.remove('hidden');
@@ -54,18 +71,22 @@ function mainLoadGame() {
   document.getElementById('loadoutBtn').classList.remove('hidden');
   document.getElementById('ageBadge').classList.remove('hidden');
   document.getElementById('loadBtn').classList.add('hidden');
-
+  
   HUD.render();
   
-  // 如果是本地端，顯示開發者按鈕
   const isLocal = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
   if (isLocal && typeof DevTools !== 'undefined') DevTools.show();
-
-  if (saved.currentAge >= 18 && !saved.currentCombatEvent) {
-    switchSystem('events', { startEvent: 'act1_inn' });
-  } else if (saved.currentCombatEvent) {
+  
+  // ★ 核心修正：恢復系統狀態（唔用 switchSystem('lifepath')，因為佢會重置年齡）
+  if (saved.currentCombatEvent) {
+    // 戰鬥中存檔 → 重啟戰鬥（敵人滿血，因為 G.enemy 冇被存）
     switchSystem('combat', { event: saved.currentCombatEvent });
+  } else if (G.currentAge < 18) {
+    // 13-17 歲 → 直接 runYear()，唔經 enter()（避免重置）
+    G.currentSystem = 'lifepath';
+    LifepathSystem.runYear();
   } else {
-    switchSystem('lifepath');
+    // 18 歲後 → 直接 exploration
+    switchSystem('exploration');
   }
 }

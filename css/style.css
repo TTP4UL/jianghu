@@ -411,3 +411,101 @@ body {
   border-radius: 3px;
   background: rgba(0, 0, 0, 0.25);
 }
+
+/* =========================================================
+   ★ D20 大成功 / 大失敗 全局武俠特效
+========================================================= */
+
+/* 1. 大成功：金光破空、天人合一 */
+@keyframes critSuccessGlow {
+  0% { box-shadow: 0 0 0 rgba(217, 119, 6, 0); }
+  30% { box-shadow: 0 0 50px 20px rgba(245, 158, 11, 0.65), inset 0 0 25px rgba(254, 243, 199, 0.8); }
+  100% { box-shadow: 0 0 25px 8px rgba(217, 119, 6, 0.4); }
+}
+
+@keyframes critSuccessPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); filter: brightness(1.2); }
+}
+
+.crit-success-box {
+  background: linear-gradient(135deg, #78350f, #d97706, #b45309) !important;
+  border-color: #fef08a !important;
+  animation: critSuccessGlow 0.5s ease-out forwards, critSuccessPulse 1.2s infinite ease-in-out !important;
+}
+
+.crit-success-number {
+  color: #fffbeb !important;
+  text-shadow: 0 0 15px rgba(254, 240, 138, 0.9), 0 0 30px rgba(245, 158, 11, 0.7);
+}
+
+/* 2. 大失敗：走火失手、魔煞震顫 */
+@keyframes critFailGlitch {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-3px, 2px); }
+  40% { transform: translate(3px, -2px); }
+  60% { transform: translate(-2px, -2px); }
+  80% { transform: translate(2px, 2px); }
+}
+
+@keyframes critFailGlow {
+  0% { box-shadow: 0 0 0 rgba(185, 28, 28, 0); }
+  30% { box-shadow: 0 0 50px 20px rgba(185, 28, 28, 0.7), inset 0 0 25px rgba(0, 0, 0, 0.8); }
+  100% { box-shadow: 0 0 20px 6px rgba(153, 27, 27, 0.5); }
+}
+
+.crit-fail-box {
+  background: linear-gradient(135deg, #450a0a, #7f1d1d, #1c1917) !important;
+  border-color: #ef4444 !important;
+  animation: critFailGlow 0.5s ease-out forwards, critFailGlitch 0.25s infinite ease-in-out !important;
+}
+
+.crit-fail-number {
+  color: #fca5a5 !important;
+  text-shadow: 0 0 12px rgba(239, 68, 68, 0.8);
+}
+
+/* 3. 橫幅蓋印彈跳動畫 */
+@keyframes bannerStampIn {
+  0% { transform: scale(2.2); opacity: 0; }
+  60% { transform: scale(0.92); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.banner-stamped {
+  animation: bannerStampIn 0.35s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+}
+
+/* =========================================================
+   ★ D20 普通成功 / 普通失敗 輕量水墨反饋
+========================================================= */
+
+/* 普通成功：翠玉微光彈動 */
+@keyframes dicePassPop {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 rgba(16, 185, 129, 0); }
+  50% { transform: scale(1.06); box-shadow: 0 0 20px rgba(16, 185, 129, 0.5); border-color: #6ee7b7; }
+  100% { transform: scale(1); box-shadow: 0 0 8px rgba(16, 185, 129, 0.25); border-color: #34d399; }
+}
+
+.dice-pass-box {
+  animation: dicePassPop 0.35s ease-out forwards !important;
+}
+.dice-pass-number {
+  color: #ecfdf5 !important;
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.7);
+}
+
+/* 普通失敗：暗濁沉降微頓 */
+@keyframes diceFailDrop {
+  0% { transform: scale(1.02); }
+  40% { transform: scale(0.92) translateY(3px); filter: grayscale(40%); }
+  100% { transform: scale(0.96) translateY(0); filter: grayscale(25%); border-color: #78716c; }
+}
+
+.dice-fail-box {
+  animation: diceFailDrop 0.35s ease-out forwards !important;
+}
+.dice-fail-number {
+  color: #d6d3d1 !important;
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+}

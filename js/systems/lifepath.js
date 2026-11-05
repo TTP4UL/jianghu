@@ -14,23 +14,35 @@ const LifepathSystem = {
       return this.showAllocModal(G.pendingPoints);
     }
 
-    const event = this.pickEvent();
-    if (!event) {
+    const eventId = this.pickEvent();
+    if (!eventId) {
       HUD.setScene(`${G.currentAge}歲 · 平淡`, '歲月靜好');
-      HUD.log('narrative', `這一年平平淡淡，沒有發生什麼特別的事。`);
+      HUD.log('narrative', T('peaceful_year'));
       this.renderLifepathChoices([]);
       return;
     }
 
-    G.usedEvents.push(event.id);
+    G.usedEvents.push(eventId);
     
-    // ★ 核心修改：如果事件是 modal，直接交給 EventSystem 處理彈窗！
+    const event = G.data.EVENTS[eventId];
+    if (!event) return;
+
+    // ★ 如果事件是 modal，直接交給 EventSystem 處理彈窗！
     if (event.uiType === 'modal') {
-      return EventSystem.load(event.id);
+      return EventSystem.load(eventId);
+    }
+
+    // ★ 終極防呆：如果連 text 都沒有，直接當作無事發生跳過
+    if (!event.text || String(event.text).trim() === '') {
+      console.warn('Event missing text:', eventId);
+      HUD.setScene(`${G.currentAge}歲 · 平淡`, '歲月靜好');
+      HUD.log('narrative', T('peaceful_year'));
+      this.renderLifepathChoices([]);
+      return;
     }
 
     // 普通事件維持原樣
-    HUD.setScene(`${G.currentAge}歲 · 成長`, event.title);
+    HUD.setScene(`${G.currentAge}歲 · 成長`, event.title || '江湖事');
     HUD.log(event.speaker ? 'dialogue' : 'narrative', event.text, event.speaker || '旁白');
     
     const choices = event.choices || [];
@@ -49,7 +61,7 @@ const LifepathSystem = {
       checkText: c.type === 'check' ? `${STATS_INFO[c.attr]?.name || c.attr} DC ${c.dc}` : '',
       desc: c.desc,
       primary: c.type === 'check',
-      action: () => this.handleChoice(c)
+      action: () => EventSystem.handleChoice(c)
     }));
 
     if (renderList.length > 0) {
@@ -66,124 +78,10 @@ const LifepathSystem = {
   },
 
   pickEvent() {
-    if (!G.data.EVENTS) return null;
-    
-    // ★ 核心改動：直接從 EVENTS 表抓取符合年齡的事件
-    const all = Object.values(G.data.EVENTS).filter(e => {
-      // 排除結局
-      if (e.type === 'ending') return false;
-      
-      // 判斷年齡是否符合（支援單一數字或 13-17 範圍）
-      if (e.age) {
-        if (String(e.age).includes('-')) {
-          const [min, max] = String(e.age).split('-').map(Number);
-          if (G.currentAge < min || G.currentAge > max) return false;
-        } else if (Number(e.age) !== G.currentAge) {
-          return false;
-        }
-      } else {
-        // 如果冇填 age，就唔會喺成長期觸發
-        return false; 
-      }
-
-      // 排除 18 歲以上才觸發嘅歷練事件
-      if (Number(e.age) >= 18) return false;
-
-      if (G.usedEvents.includes(e.id)) return false;
-
-      return true;
+    return EventPicker.pick({ 
+      isLifepath: true, 
+      usedEvents: G.usedEvents 
     });
-
-    // 優先檢查專屬事件
-    const specific = all.filter(e => 
-      (e.requireTags && e.requireTags.length > 0 && TagUtils.hasAll(e.requireTags)) &&
-      TagUtils.hasNone(e.forbidTags)
-    ).sort((a, b) => (Number(b.priority) || 0) - (Number(a.priority) || 0));
-
-    if (specific.length > 0) return specific[0];
-
-    // 普通事件池
-    const common = all.filter(e => 
-      (!e.requireTags || e.requireTags.length === 0) &&
-      TagUtils.hasNone(e.forbidTags)
-    );
-
-    if (common.length === 0) return null;
-
-    // 權重抽籤
-    const totalWeight = common.reduce((sum, e) => sum + (Number(e.weight) || 10), 0);
-    let rand = Math.random() * totalWeight;
-
-    for (const ev of common) {
-      const w = Number(ev.weight) || 10;
-      if (rand < w) return ev;
-      rand -= w;
-    }
-
-    return common[0];
-  },
-
-  handleChoice(choice) {
-    if (choice.type === 'direct') {
-      if (choice.narrative) HUD.log('narrative', choice.narrative);
-      
-      const effectText = parseEffectsToText(choice.effects);
-      if (effectText) HUD.log('dice', `【結算】${effectText}`);
-      
-      EffectSystem.apply(choice.effects);
-      
-      // ★ 核心修正：如果有下一個節點，直接交給 EventSystem 播；如果沒有，直接跳下一年
-      if (choice.next && G.data.EVENTS[choice.next]) {
-        EventSystem.load(choice.next);
-      } else {
-        this.nextYear();
-      }
-      return;
-    }
-
-    if (choice.type === 'check') {
-      DiceSystem.check({
-        title: choice.checkName, attr: choice.attr, dc: choice.dc, tags: choice.tags,
-        successEffects: choice.success?.effects, 
-        failEffects: choice.fail?.effects,
-        critSuccessEffects: choice.critSuccess?.effects,
-        critFailEffects: choice.critFail?.effects,
-        onComplete: (res) => {
-          let branch = res.success ? (choice.success || {}) : (choice.fail || {});
-          
-          if (res.nat20 && choice.critSuccess) {
-            branch = {
-              narrative: choice.critSuccess.narrative || branch.narrative,
-              effects: choice.critSuccess.effects || branch.effects,
-              next: choice.critSuccess.next || branch.next,
-              failGameOver: choice.critSuccess.failGameOver || branch.failGameOver
-            };
-          }
-          if (res.nat1 && choice.critFail) {
-            branch = {
-              narrative: choice.critFail.narrative || branch.narrative,
-              effects: choice.critFail.effects || branch.effects,
-              next: choice.critFail.next || branch.next,
-              failGameOver: choice.critFail.failGameOver || branch.failGameOver
-            };
-          }
-          
-          if (branch.narrative) HUD.log('narrative', branch.narrative);
-          EffectSystem.apply(branch.effects);
-          
-          if (!res.success && branch.failGameOver) {
-            return switchSystem('ending', { id: 'lifepath_death' });
-          }
-          
-          // ★ 核心修正：如果有下一個節點，去 EventSystem 播；如果沒有，直接跳下一年
-          if (branch.next && G.data.EVENTS[branch.next]) {
-            EventSystem.load(branch.next);
-          } else {
-            this.nextYear();
-          }
-        }
-      });
-    }
   },
 
   nextYear() {
@@ -205,22 +103,6 @@ const LifepathSystem = {
     this.renderAllocBoard();
   },
 
-  getCostForNextPoint(currentVal) {
-    const displayVal = currentVal - 10;
-    if (displayVal < 3) return 1;
-    if (displayVal < 6) return 2;
-    if (displayVal < 9) return 3;
-    return 4;
-  },
-
-  getRefundForPoint(prevVal) {
-    const displayVal = prevVal - 10;
-    if (displayVal < 3) return 1;
-    if (displayVal < 6) return 2;
-    if (displayVal < 9) return 3;
-    return 4;
-  },
-
   renderAllocBoard() {
     const board = document.getElementById('allocStatBoard');
     board.innerHTML = '';
@@ -234,7 +116,7 @@ const LifepathSystem = {
       const displayVal = rawVal - 10;
       const addedPoints = rawVal - baseStats[k];
       const mod = Math.floor((rawVal - 10) / 2);
-      const cost = this.getCostForNextPoint(rawVal);
+      const cost = StatUtils.getCostForNextPoint(rawVal);
       
       // ★ 判斷呢個屬性係咪仲可以升級，而且點數足夠
       const isMaxed = rawVal >= 25;
@@ -287,15 +169,15 @@ const LifepathSystem = {
     const currentVal = G.tempAllocStats[k];
 
     if (delta > 0) {
-      if (currentVal >= 25) return; // ★ 上限 28 (顯示 18)
-      const cost = this.getCostForNextPoint(currentVal);
+      if (currentVal >= 25) return;
+      const cost = StatUtils.getCostForNextPoint(currentVal); // ★ 改為 StatUtils
       if (G.pendingPoints >= cost) {
         G.tempAllocStats[k]++;
         G.pendingPoints -= cost;
       }
     } else if (delta < 0) {
       if (currentVal <= base) return;
-      const refund = this.getRefundForPoint(currentVal - 1);
+      const refund = StatUtils.getRefundForPoint(currentVal - 1);
       G.tempAllocStats[k]--;
       G.pendingPoints += refund;
     }
@@ -306,34 +188,10 @@ const LifepathSystem = {
     G.player.savedPoints = (G.player.savedPoints || 0) + G.pendingPoints;
     G.pendingPoints = 0;
     
-    // 記錄舊修正值
-    const oldDexMod = Math.floor((G.player.stats.dex - 10) / 2);
-    const oldConMod = Math.floor((G.player.stats.con - 10) / 2);
-    const oldIntMod = Math.floor((G.player.stats.int - 10) / 2); // ★ 新增：舊悟性修正
-
+    // ★ 核心簡化：使用工具統一處理衍生屬性
+    const oldStats = { ...G.player.stats };
     G.player.stats = { ...G.tempAllocStats };
-    
-    // 計算新修正值
-    const newDexMod = Math.floor((G.player.stats.dex - 10) / 2);
-    const newConMod = Math.floor((G.player.stats.con - 10) / 2);
-    const newIntMod = Math.floor((G.player.stats.int - 10) / 2); // ★ 新增：新悟性修正
-    
-    // 更新 AC (身法)
-    G.player.ac = 10 + newDexMod; 
-    
-    // 更新氣血上限 (根骨)
-    const hpDiff = (newConMod - oldConMod) * 3; 
-    if (hpDiff !== 0) {
-      G.player.maxHp = Math.max(1, G.player.maxHp + hpDiff);
-      G.player.hp = Math.max(1, Math.min(G.player.maxHp, G.player.hp + hpDiff));
-    }
-
-    // ★ 新增：更新架勢上限 (悟性)
-    const posDiff = (Math.max(0, newIntMod) - Math.max(0, oldIntMod)) * 2;
-    if (posDiff !== 0) {
-      G.player.maxPos = Math.max(1, G.player.maxPos + posDiff);
-      G.player.pos = Math.max(0, Math.min(G.player.maxPos, G.player.pos + posDiff));
-    }
+    StatUtils.applyDerivedStats(G.player, oldStats);
     
     document.getElementById('allocModal').classList.add('hidden');
     HUD.render();
@@ -360,8 +218,7 @@ const LifepathSystem = {
     document.getElementById('adultModal').classList.add('hidden');
     
     HUD.setScene('第壹章', '江湖歷練');
-    HUD.log('lifepath', '十八歲，你正式踏入江湖。這一年，你開始了自己傳奇的江湖生涯。');
-    
+    HUD.log('lifepath', T('adult_start'));    
     switchSystem('exploration');
     SaveSystem.save();
   }

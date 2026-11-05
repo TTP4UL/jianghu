@@ -237,10 +237,10 @@ tailwind.config = {
       </div>
       
       <div class="grid grid-cols-2 gap-2">
-        <div class="bg-white border border-[#d8ccb8] p-2 rounded-lg text-center shadow-2xs">
-          <span class="text-[10px] text-[#8a7561] block font-bold">江湖威望</span>
-          <span id="hudReputation" class="font-mono text-base font-black text-[#2c1f14]">0</span>
-        </div>
+<div class="bg-white border border-[#d8ccb8] p-2 rounded-lg text-center shadow-2xs">
+  <span id="hudReputationLabel" class="text-[10px] text-[#8a7561] block font-bold">江湖名聲</span>
+  <span id="hudReputation" class="font-mono text-base font-black text-[#2c1f14]">0</span>
+</div>
         <div class="bg-white border border-[#d8ccb8] p-2 rounded-lg text-center shadow-2xs">
           <span class="text-[10px] text-[#8a7561] block font-bold">門派貢獻</span>
           <span id="hudContribution" class="font-mono text-base font-black text-[#2c1f14]">0</span>
@@ -517,8 +517,10 @@ tailwind.config = {
   <script>
     const jsFiles = [
       'js/core/sound.js',
+      'js/core/texts.js',
       'js/core/state.js',
       'js/core/tags.js',
+      'js/core/utils.js',
       'js/core/data.js',
       'data/fallback.js',
       'js/core/dice.js',

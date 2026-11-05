@@ -79,8 +79,6 @@ const DataLoader = {
     G.data.ORIGINS = filterData(d.ORIGINS);
     G.data.SECTS = filterData(d.SECTS);
     G.data.MARTIAL_ARTS = filterData(d.MARTIAL_ARTS);
-    G.data.LIFEPATH_EVENTS = filterData(d.LIFEPATH_EVENTS);
-    G.data.LIFEPATH_CHOICES = filterData(d.LIFEPATH_CHOICES);
     G.data.EVENTS = filterData(d.EVENTS);
     G.data.COMPANIONS = filterData(d.COMPANIONS);
   },

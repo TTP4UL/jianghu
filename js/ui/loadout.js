@@ -20,55 +20,131 @@ const LoadoutUI = {
     };
     return map[g] || map.E;
   },
-  
+
+  // ★ 新增：特效 badge 工廠，避免重複代碼
+  _makeBadge(text, variant) {
+    const map = {
+      red:    'bg-[#fef2f2] text-[#b91c1c] border-[#fca5a5]',
+      orange: 'bg-[#fff7ed] text-[#c2410c] border-[#fdba74]',
+      purple: 'bg-[#faf5ff] text-[#7e22ce] border-[#d8b4fe]',
+      yellow: 'bg-[#fefce8] text-[#854d0e] border-[#fde047]',
+      green:  'bg-[#ecfdf5] text-[#047857] border-[#a7f3d0]',
+      blue:   'bg-[#eff6ff] text-[#1d4ed8] border-[#bfdbfe]',
+      cyan:   'bg-[#f0f9ff] text-[#0369a1] border-[#bae6fd]',
+      amber:  'bg-[#fffbeb] text-[#b45309] border-[#fde68a]',
+      rose:   'bg-[#fff1f2] text-[#be123c] border-[#fecdd3]',
+      gray:   'bg-[#f5ede0] text-[#78614c] border-[#d8ccb8]'
+    };
+    return `<span class="${map[variant] || map.gray} px-2 py-0.5 rounded text-[11px] border font-bold font-mono">${text}</span>`;
+  },
+
+  _parseSpecialEffectBadges(specialEffect, badges) {
+    if (!specialEffect) return;
+    String(specialEffect).split('|').forEach(e => {
+      const eff = e.trim();
+
+      // 舊有
+      if (eff.includes('pierce')) badges.push(this._makeBadge('破防穿透', 'purple'));
+      if (eff.includes('stun')) badges.push(this._makeBadge('點穴眩暈', 'yellow'));
+      if (eff.includes('heal')) badges.push(this._makeBadge('吸血化氣', 'rose'));
+
+      if (eff.includes('poison')) {
+        const match = eff.match(/poison:(\d+):(\d+)/);
+        if (match) badges.push(this._makeBadge(`劇毒 (${match[1]}回合)`, 'green'));
+        else badges.push(this._makeBadge('劇毒附著', 'green'));
+      }
+
+      // ★ 新增
+      if (eff.includes('drain_qi:')) {
+        const m = eff.match(/drain_qi:(\d+)/);
+        if (m) badges.push(this._makeBadge(`吸取真氣 ${m[1]}`, 'cyan'));
+      }
+      if (eff.includes('enemy_qi:')) {
+        const m = eff.match(/enemy_qi:(-?\d+)/);
+        if (m && Number(m[1]) < 0) badges.push(this._makeBadge(`散敵真氣 ${Math.abs(m[1])}`, 'cyan'));
+      }
+      if (eff.includes('self_qi:')) {
+        const m = eff.match(/self_qi:(\d+)/);
+        if (m) badges.push(this._makeBadge(`回氣 ${m[1]}`, 'green'));
+      }
+      if (eff.includes('shield:')) {
+        const m = eff.match(/shield:(\d+):(\d+)/);
+        if (m) badges.push(this._makeBadge(`減傷 ${m[1]} (${m[2]}回)`, 'blue'));
+      }
+      if (eff.includes('shield_pct:')) {
+        const m = eff.match(/shield_pct:([\d.]+):(\d+)/);
+        if (m) badges.push(this._makeBadge(`減傷 ${parseFloat(m[1]) * 100}% (${m[2]}回)`, 'blue'));
+      }
+      if (eff.includes('reflect:')) {
+        const m = eff.match(/reflect:([\d.]+):(\d+)/);
+        if (m) badges.push(this._makeBadge(`反傷 ${parseFloat(m[1]) * 100}% (${m[2]}回)`, 'red'));
+      }
+      if (eff.includes('self_ac:')) {
+        const m = eff.match(/self_ac:(-?\d+):(\d+)/);
+        if (m) badges.push(this._makeBadge(`自身閃避 ${Number(m[1]) > 0 ? '+' : ''}${m[1]} (${m[2]}回)`, 'purple'));
+      }
+      if (eff.includes('enemy_ac:')) {
+        const m = eff.match(/enemy_ac:(-?\d+):(\d+)/);
+        if (m) badges.push(this._makeBadge(`敵方閃避 ${Number(m[1]) > 0 ? '+' : ''}${m[1]} (${m[2]}回)`, 'purple'));
+      }
+    });
+  },
+
   getArtStats(art) {
     if (!art) return '';
     let badges = [];
-    
-    if (art.slot === 'attack') {
+
+    // 招式 / 身法
+    if (art.slot === 'attack' || art.slot === 'utility') {
       const cost = art.qiCost || 2;
-      badges.push(`<span class="bg-[#f5ede0] text-[#78614c] px-2 py-0.5 rounded text-[11px] border border-[#d8ccb8] font-mono font-bold">真氣 ${cost}</span>`);
-      
-      if (art.fixedDamage) {
-        badges.push(`<span class="bg-[#fef2f2] text-[#b91c1c] px-2 py-0.5 rounded text-[11px] border border-[#fca5a5] font-mono font-bold">傷害 ${art.fixedDamage}</span>`);
-      } else if (art.basePower) {
-        const diceCount = Math.max(1, Math.floor(art.basePower / 10));
-        const diceType = art.diceType || 8;
-        badges.push(`<span class="bg-[#fef2f2] text-[#b91c1c] px-2 py-0.5 rounded text-[11px] border border-[#fca5a5] font-mono font-bold">威力 ${diceCount}d${diceType}</span>`);
+      badges.push(this._makeBadge(`真氣 ${cost}`, 'gray'));
+
+      if (art.slot === 'attack') {
+        if (art.fixedDamage) {
+          badges.push(this._makeBadge(`傷害 ${art.fixedDamage}`, 'red'));
+        } else if (art.basePower) {
+          const diceCount = Math.max(1, Math.floor(art.basePower / 10));
+          const diceType = art.diceType || 8;
+          badges.push(this._makeBadge(`威力 ${diceCount}d${diceType}`, 'red'));
+        }
+        if (art.hits && Number(art.hits) > 1) {
+          badges.push(this._makeBadge(`${art.hits}連擊`, 'orange'));
+        }
       }
-      
-      if (art.hits && Number(art.hits) > 1) {
-        badges.push(`<span class="bg-[#fff7ed] text-[#c2410c] px-2 py-0.5 rounded text-[11px] border border-[#fdba74] font-bold">${art.hits}連擊</span>`);
-      }
-      
-      if (art.specialEffect) {
-        String(art.specialEffect).split('|').forEach(e => {
-          const eff = e.trim();
-          if (eff.includes('pierce')) badges.push(`<span class="bg-[#faf5ff] text-[#7e22ce] px-2 py-0.5 rounded text-[11px] border border-[#d8b4fe] font-bold">破防穿透</span>`);
-          if (eff.includes('stun')) badges.push(`<span class="bg-[#fefce8] text-[#854d0e] px-2 py-0.5 rounded text-[11px] border border-[#fde047] font-bold">點穴眩暈</span>`);
-          if (eff.includes('poison')) {
-            const match = eff.match(/poison:(\d+):(\d+)/);
-            if (match) badges.push(`<span class="bg-[#ecfdf5] text-[#047857] px-2 py-0.5 rounded text-[11px] border border-[#a7f3d0] font-bold">劇毒 (${match[1]}回合)</span>`);
-            else badges.push(`<span class="bg-[#ecfdf5] text-[#047857] px-2 py-0.5 rounded text-[11px] border border-[#a7f3d0] font-bold">劇毒附著</span>`);
-          }
-          if (eff.includes('heal')) badges.push(`<span class="bg-[#fff1f2] text-[#be123c] px-2 py-0.5 rounded text-[11px] border border-[#fecdd3] font-bold">吸血化氣</span>`);
-        });
-      }
+
+      this._parseSpecialEffectBadges(art.specialEffect, badges);
     }
 
+    // 內功 innerEffect
     if (art.slot === 'inner' && art.innerEffect) {
       String(art.innerEffect).split('|').forEach(e => {
         const [key, val] = e.split(':');
         const k = key.trim().toLowerCase();
-        let num = Number(val ? val.trim() : 0);
+        const num = Number(val ? val.trim() : 0);
         const sign = num >= 0 ? `+${num}` : `${num}`;
-        
-        if (k === 'regen' || k === 'hp_regen') badges.push(`<span class="bg-[#ecfdf5] text-[#047857] px-2 py-0.5 rounded text-[11px] border border-[#a7f3d0] font-bold">回血 ${sign}</span>`);
-        if (k === 'qi_regen') badges.push(`<span class="bg-[#eff6ff] text-[#1d4ed8] px-2 py-0.5 rounded text-[11px] border border-[#bfdbfe] font-bold">回氣 ${sign}</span>`);
-        if (k === 'pos_regen') badges.push(`<span class="bg-[#fffbeb] text-[#b45309] px-2 py-0.5 rounded text-[11px] border border-[#fde68a] font-bold">回架 ${sign}</span>`);
-        if (k === 'maxhp') badges.push(`<span class="bg-[#fef2f2] text-[#b91c1c] px-2 py-0.5 rounded text-[11px] border border-[#fca5a5] font-bold">血上限 ${sign}</span>`);
-        if (k === 'maxqi') badges.push(`<span class="bg-[#eff6ff] text-[#1d4ed8] px-2 py-0.5 rounded text-[11px] border border-[#bfdbfe] font-bold">氣上限 ${sign}</span>`);
-        if (k === 'maxpos') badges.push(`<span class="bg-[#fffbeb] text-[#b45309] px-2 py-0.5 rounded text-[11px] border border-[#fde68a] font-bold">架上限 ${sign}</span>`);
+
+        if (k === 'regen' || k === 'hp_regen') badges.push(this._makeBadge(`回血 ${sign}`, 'green'));
+        if (k === 'qi_regen') badges.push(this._makeBadge(`回氣 ${sign}`, 'blue'));
+        if (k === 'pos_regen') badges.push(this._makeBadge(`回架 ${sign}`, 'amber'));
+        if (k === 'maxhp') badges.push(this._makeBadge(`血上限 ${sign}`, 'red'));
+        if (k === 'maxqi') badges.push(this._makeBadge(`氣上限 ${sign}`, 'blue'));
+        if (k === 'maxpos') badges.push(this._makeBadge(`架上限 ${sign}`, 'amber'));
+        if (k === 'immune') {
+          const statusMap = { poison: '中毒', stun: '眩暈', ac_down: '閃避壓制' };
+          const statusName = statusMap[String(val).toLowerCase()] || val;
+          badges.push(this._makeBadge(`免疫${statusName}`, 'yellow'));
+        }
+      });
+    }
+
+    // ★ 獨立 immune 欄位（例如 ma_mountain_river）
+    if (art.slot === 'inner' && art.immune) {
+      const statusMap = { poison: '中毒', stun: '眩暈', ac_down: '閃避壓制' };
+      String(art.immune).split('|').forEach(s => {
+        const v = s.trim().toLowerCase();
+        if (!v) return;
+        const statusName = statusMap[v] || v;
+        badges.push(this._makeBadge(`免疫${statusName}`, 'yellow'));
       });
     }
 
@@ -193,32 +269,16 @@ const LoadoutUI = {
     const loadout = G.player.loadout[slotKey];
     const emptyIdx = loadout.indexOf(null);
     if (emptyIdx === -1) return alert('該槽位已滿！請先卸下現有功法。');
-    
+
     loadout[emptyIdx] = artId;
     const art = G.data.MARTIAL_ARTS[artId];
-    
-    // ★ 核心修復：將 grantTags 的判斷移出 inner 限制，讓所有類型的功法都能獲得 Tag
+
     if (art) {
-      if (art.grantTags) {
-        String(art.grantTags).split('|').map(s => s.trim()).forEach(t => {
-          if (t && !G.player.tags.includes(t)) G.player.tags.push(t);
-        });
-      }
-      
-      // 只有內功才處理上限加成
-      if (slotKey === 'inner' && art.innerEffect) {
-        String(art.innerEffect).split('|').forEach(eff => {
-          const [key, val] = eff.split(':');
-          const k = key.trim().toLowerCase();
-          const num = Number(val);
-          if (k === 'maxhp') { G.player.maxHp += num; if (G.player.hp > G.player.maxHp) G.player.hp = G.player.maxHp; }
-          if (k === 'maxpos') { G.player.maxPos += num; if (G.player.pos > G.player.maxPos) G.player.pos = G.player.maxPos; }
-          if (k === 'maxqi') { G.player.maxQi += num; if (G.player.qi > G.player.maxQi) G.player.qi = G.player.maxQi; }
-        });
-      }
+      // ★ 統一處理內功上限與 Tag 賦予
+      MartialArtUtils.toggleInnerEffect(G.player, art, true);
       HUD.log('dice', `【裝備】${art.name}`);
     }
-    
+
     this.render();
     HUD.render();
     SaveSystem.save();
@@ -227,30 +287,13 @@ const LoadoutUI = {
   unequip(slotKey, idx) {
     const artId = G.player.loadout[slotKey][idx];
     if (!artId) return;
-    
+
     const art = G.data.MARTIAL_ARTS[artId];
     G.player.loadout[slotKey][idx] = null;
 
-    // ★ 核心修復：將 grantTags 的判斷移出 inner 限制，讓所有類型的功法卸下時都能移除 Tag
     if (art) {
-      if (art.grantTags) {
-        String(art.grantTags).split('|').map(s => s.trim()).forEach(t => {
-          const tagIdx = G.player.tags.indexOf(t);
-          if (tagIdx !== -1) G.player.tags.splice(tagIdx, 1);
-        });
-      }
-      
-      // 只有內功才處理上限扣除
-      if (slotKey === 'inner' && art.innerEffect) {
-        String(art.innerEffect).split('|').forEach(eff => {
-          const [key, val] = eff.split(':');
-          const k = key.trim().toLowerCase();
-          const num = Number(val);
-          if (k === 'maxhp') { G.player.maxHp = Math.max(1, G.player.maxHp - num); if (G.player.hp > G.player.maxHp) G.player.hp = G.player.maxHp; }
-          if (k === 'maxpos') { G.player.maxPos = Math.max(1, G.player.maxPos - num); if (G.player.pos > G.player.maxPos) G.player.pos = G.player.maxPos; }
-          if (k === 'maxqi') { G.player.maxQi = Math.max(1, G.player.maxQi - num); if (G.player.qi > G.player.maxQi) G.player.qi = G.player.maxQi; }
-        });
-      }
+      // ★ 統一處理內功上限扣除與 Tag 移除
+      MartialArtUtils.toggleInnerEffect(G.player, art, false);
       HUD.log('dice', `【卸下】${art.name}`);
     }
 
