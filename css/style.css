@@ -68,12 +68,54 @@ body {
 }
 
 /* D20 動畫 */
-@keyframes rollD20 {
-  0%   { transform: scale(0.6) rotateX(0) rotateY(0) rotateZ(0); opacity: 0.2; }
-  50%  { transform: scale(1.1) rotateX(360deg) rotateY(720deg) rotateZ(270deg); }
-  100% { transform: scale(1) rotateX(720deg) rotateY(1080deg) rotateZ(360deg); opacity: 1; }
+@keyframes diceRollingAnim {
+  0% {
+    transform: scale(0.65) rotate(0deg);
+    opacity: 0.7;
+  }
+  20% {
+    transform: scale(1.18) rotate(140deg);
+    opacity: 1;
+  }
+  45% {
+    transform: scale(0.92) rotate(260deg);
+  }
+  70% {
+    transform: scale(1.08) rotate(330deg);
+  }
+  85% {
+    transform: scale(0.97) rotate(355deg);
+  }
+  100% {
+    transform: scale(1) rotate(360deg);
+    opacity: 1;
+  }
 }
-.dice-rolling { animation: rollD20 0.85s cubic-bezier(0.18,0.89,0.32,1.28) forwards; }
+
+.dice-rolling {
+  display: inline-flex !important;
+  transform-origin: center center;
+  animation: diceRollingAnim 0.75s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
+  will-change: transform, opacity;
+}
+
+/* 滾動時中央數字微光閃爍 */
+.dice-fast-number {
+  animation: diceNumGlow 0.12s infinite alternate;
+}
+@keyframes diceNumGlow {
+  from { opacity: 0.6; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1.1); }
+}
+
+/* 骰子中央數字滾動時的高光效果 */
+.dice-pulse-text {
+  animation: diceTextPulse 0.1s infinite alternate;
+}
+@keyframes diceTextPulse {
+  0% { opacity: 0.8; transform: scale(0.92); }
+  100% { opacity: 1; transform: scale(1.08); }
+}
 
 /* 傷害飄字動畫 */
 @keyframes floatUp {

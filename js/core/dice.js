@@ -1,5 +1,4 @@
 const DiceSystem = {
-  // ★ 加入 critSuccess 同 critFail 參數
   check({ title, attr, dc, tags, successEffects, failEffects, critSuccessEffects, critFailEffects, onComplete }) {
     soundEngine.playDiceRoll();
     const eff = getEffectiveStats();
@@ -22,33 +21,53 @@ const DiceSystem = {
     `;
     
     banner.classList.add('hidden');
-    valueEl.textContent = '...';
+    breakdown.innerHTML = '<span class="text-[#8a7561] font-serif tracking-wider animate-pulse">命運流轉，凝神擲骰中……</span>';
+
+    // ★ 重置並觸發動畫 (先移除 class 強制重繪)
+    visual.classList.remove('dice-rolling');
+    void visual.offsetWidth; // 強制瀏覽器 Reflow，保證動畫每次必觸發
     visual.className = 'w-24 h-24 rounded-2xl bg-gradient-to-tr from-[#8a1c14] via-[#a82d25] to-[#c2410c] flex items-center justify-center text-white text-3xl font-black shadow-lg border-2 border-[#fef3c7]/60 dice-rolling';
-    breakdown.innerHTML = '擲骰中……';
+    
+    valueEl.className = 'dice-fast-number font-mono';
     modal.classList.remove('hidden');
 
+    // ★ 數字極速跳動反饋（每 40ms 跳一個隨機數）
+    const rollTimer = setInterval(() => {
+      valueEl.textContent = Math.floor(Math.random() * 20) + 1;
+    }, 40);
+
     setTimeout(() => {
-      // 1. 先擲出隨機點數 (用 let)
+      clearInterval(rollTimer);
+      valueEl.className = 'font-mono';
+
+      // 1. 決定最終點數
       let d20 = Math.floor(Math.random() * 20) + 1;
-      // ★ 開發者強制干預
       if (G.forceDiceMode === 'crit') d20 = 20;
       if (G.forceDiceMode === 'nineteen') d20 = 19;
       if (G.forceDiceMode === 'two') d20 = 2;
       if (G.forceDiceMode === 'fail') d20 = 1;
-      // 3. 計算總分
+
+      // 2. 結算數值
       const total = d20 + mod + tagResult.total;
       visual.classList.remove('dice-rolling');
       valueEl.textContent = d20;
 
-      const nat20 = d20 === 20, nat1 = d20 === 1;
+      const nat20 = d20 === 20;
+      const nat1 = d20 === 1;
       let success = total >= dc;
       
-      // 4. 顯示特效
-      if (nat20) { success = true; this._banner(banner, '★ 大成功 · 天人合一 ★', 'gold'); soundEngine.playGong(); }
-      else if (nat1) { success = false; this._banner(banner, '☠ 大失敗 · 走火失手 ☠', 'red'); }
-      else if (success) soundEngine.playBladeClash();
+      // 3. 成功 / 失敗反饋
+      if (nat20) { 
+        success = true; 
+        this._banner(banner, '★ 大成功 · 天人合一 ★', 'gold'); 
+        soundEngine.playGong(); 
+      } else if (nat1) { 
+        success = false; 
+        this._banner(banner, '☠ 大失敗 · 走火失手 ☠', 'red'); 
+      } else if (success) {
+        soundEngine.playBladeClash();
+      }
 
-      // ★ 決定顯示邊個效果 (大成功 / 大失敗 / 普通)
       let finalEffects = success ? successEffects : failEffects;
       if (nat20 && critSuccessEffects) finalEffects = critSuccessEffects;
       if (nat1 && critFailEffects) finalEffects = critFailEffects;
@@ -56,13 +75,13 @@ const DiceSystem = {
       const effectText = (typeof parseEffectsToText === 'function') ? parseEffectsToText(finalEffects) : '';
 
       let html = `
-        <div class="mb-2 font-bold text-[#2c1f14] text-lg">
-          總計: <span class="text-xl text-[#a82d25]">${total}</span> 
-          <span class="ml-3 ${success ? 'text-green-700' : 'text-red-700'}">${success ? '成功' : '失敗'}</span>
+        <div class="mb-2 font-bold text-[#2c1f14] text-lg font-serif">
+          總計: <span class="text-xl text-[#a82d25] font-mono">${total}</span> 
+          <span class="ml-3 ${success ? 'text-green-700' : 'text-red-700'}">${success ? '通過' : '失手'}</span>
         </div>
       `;
       if (effectText) {
-        html += `<div class="text-sm mt-2 text-[#594432] bg-[#f5ede0]/50 p-2 rounded border border-[#d8ccb8]"><span class="font-bold text-[#b45309]">效果：</span>${effectText}</div>`;
+        html += `<div class="text-sm mt-2 text-[#594432] bg-[#f5ede0]/50 p-2 rounded border border-[#d8ccb8] font-serif"><span class="font-bold text-[#b45309]">效果：</span>${effectText}</div>`;
       }
 
       this.diceCallback = () => {
@@ -72,17 +91,20 @@ const DiceSystem = {
       };
       
       breakdown.innerHTML = html;
-    }, 850);
+    }, 750);
   },
 
   _banner(el, text, variant) {
     el.textContent = text;
-    el.className = 'text-xs font-black tracking-widest uppercase py-1 px-3 rounded-full mb-3 inline-block ' +
+    el.className = 'text-xs font-black tracking-widest uppercase py-1 px-3 rounded-full mb-3 inline-block font-serif ' +
       (variant === 'gold' ? 'bg-[#b45309] text-white shadow-md' : 'bg-red-800 text-white');
     el.classList.remove('hidden');
   },
 
   resolve() {
-    if (this.diceCallback) { this.diceCallback(); this.diceCallback = null; }
+    if (this.diceCallback) { 
+      this.diceCallback(); 
+      this.diceCallback = null; 
+    }
   }
 };
