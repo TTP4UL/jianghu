@@ -260,6 +260,7 @@ tailwind.config = {
         <div class="flex items-center space-x-2">
           <span id="sceneBadge" class="seal-stamp text-[11px] py-0.5">序幕</span>
           <h3 id="sceneTitle" class="font-serif text-base font-black text-[#2c1f14]">江湖初現</h3>
+<span id="combatTurnBadge" class="hidden text-[11px] px-1.5 py-0.5 rounded bg-[#fef3c7] text-[#92400e] border border-[#f59e0b] font-bold ml-2">第 1 回合</span>
         </div>
         <div class="text-xs text-[#8a7561] flex items-center gap-1 font-serif">
           <i class="fa-solid fa-dice-d20 text-[#a82d25]"></i><span>D20 檢定</span>
@@ -298,6 +299,8 @@ tailwind.config = {
       <!-- ★ 核心修改：劇情記錄區加上 min-h-0 和 overflow-y-auto，強制其在剩餘空間內滾動 -->
       <div id="narrativeLogs" class="flex-1 overflow-y-auto min-h-0 space-y-3 py-3 pr-2 font-serif text-sm sm:text-[15px] leading-relaxed custom-scrollbar"></div>
       
+      <div id="utilityPanel" class="hidden w-full mb-2"></div>
+
       <!-- 選項面板 (圖2、圖3純白卡片/硃砂紅按鈕) -->
       <div id="interactionPanel" class="pt-3 border-t border-[#d8ccb8] flex-shrink-0 z-10 flex flex-col gap-2.5 max-h-[35dvh] lg:max-h-[45vh] overflow-y-auto custom-scrollbar pr-1"></div>
       
@@ -526,15 +529,20 @@ tailwind.config = {
       'js/core/dice.js',
       'js/core/effects.js',
       'js/core/save.js',
-      'js/ui/hud.js',
+      'js/ui/hud-tooltip.js',
+      'js/ui/hud-effects.js',
+      'js/ui/hud-core.js',
       'js/ui/overview.js',
       'js/ui/loadout.js',
       'js/ui/devtools.js',
       'js/systems/characterCreation.js',
       'js/systems/lifepath.js',
-      'js/systems/exploration.js', // ★ 新增呢個
+      'js/systems/exploration.js',
       'js/systems/events.js',
-      'js/systems/combat.js',
+      'js/systems/combat/combat-effects.js',
+      'js/systems/combat/combat-actions.js',
+      'js/systems/combat/combat-enemy.js',
+      'js/systems/combat/combat-core.js',
       'js/systems/ending.js',
       'js/main.js'
     ];

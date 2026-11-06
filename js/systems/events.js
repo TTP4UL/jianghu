@@ -24,15 +24,13 @@ const EventSystem = {
       return switchSystem('combat', { event: ev });
     }
 
-// 3. ★ 奇遇彈窗 (uiType === 'modal')
+    // 3. ★ 奇遇彈窗 (uiType === 'modal')
     if (ev.uiType === 'modal') {
-      // 1. 先寫入右側主日誌，留下歷史紀錄
       HUD.setScene(ev.badge || '江湖奇遇', ev.title || '未知遭遇');
       if (ev.text) {
         HUD.log(ev.speaker ? 'dialogue' : 'narrative', ev.text, ev.speaker || '旁白');
       }
 
-      // 2. 填入彈窗內容與副標
       document.getElementById('encounterBadge').textContent = ev.badge || '江湖奇遇';
       document.getElementById('encounterTitle').textContent = ev.title || '未知遭遇';
       
@@ -46,33 +44,37 @@ const EventSystem = {
       const optsContainer = document.getElementById('encounterOptions');
       optsContainer.innerHTML = '';
       
-      (ev.choices || []).forEach(c => {
-        if (c.requireTags && c.requireTags.length > 0 && !TagUtils.hasAll(c.requireTags)) return;
-        if (c.forbidTags && c.forbidTags.length > 0 && !TagUtils.hasNone(c.forbidTags)) return;
+      // ★ 改用 ChoiceUtils 處理
+      const processedChoices = ChoiceUtils.process(ev.choices || []);
 
+      processedChoices.forEach(ch => {
         const btn = document.createElement('button');
-        const hasCheck = c.type === 'check';
-        const checkAttr = c.attr ? (STATS_INFO[c.attr]?.name || c.attr) : '';
+        const hasCheck = !!ch.checkText;
 
-        // 檢定選項：暖金宣紙微漸層底；普通選項：素雅白紙底
-        const cardBgClass = hasCheck 
-          ? 'bg-gradient-to-r from-[#fdf6e9] via-[#fcf9f2] to-white border-2 border-[#d4a373] shadow-xs' 
-          : 'bg-white border border-[#d8ccb8] shadow-2xs';
+        // 如果你有鎖定狀態，可以喺彈窗度加特別樣式
+        const cardBgClass = ch.disabled 
+          ? 'bg-[#f5f3ee] border-[#e5dcce] opacity-60 grayscale cursor-not-allowed'
+          : hasCheck 
+            ? 'bg-gradient-to-r from-[#fdf6e9] via-[#fcf9f2] to-white border-2 border-[#d4a373] shadow-xs hover:border-[#a82d25] hover:shadow-md hover:-translate-y-0.5' 
+            : 'bg-white border border-[#d8ccb8] shadow-2xs hover:border-[#a82d25] hover:shadow-md hover:-translate-y-0.5';
 
-        btn.className = `relative w-full p-3.5 rounded-lg text-left flex flex-col justify-between mb-2.5 transition-all duration-200 cursor-pointer ${cardBgClass} hover:border-[#a82d25] hover:shadow-md hover:-translate-y-0.5 group font-serif`;
+        btn.className = `relative w-full p-3.5 rounded-lg text-left flex flex-col justify-between mb-2.5 transition-all duration-200 group font-serif ${cardBgClass}`;
 
-        // 判定先行：深赭底金字印章直接前置在標題前
         let checkPrefixHtml = '';
         if (hasCheck) {
           checkPrefixHtml = `
             <span class="seal-stamp text-[11px] px-2 py-0.5 rounded-sm bg-[#92400e] text-[#fef3c7] border border-[#78350f] font-mono font-bold tracking-wider mr-2 shadow-2xs">
-              🎲 ${checkAttr} DC ${c.dc}
+              🎲 ${ch.checkText}
             </span>
           `;
         }
 
+        let lockHtml = ch.disabled ? `<span class="text-[10px] px-1.5 py-0.5 rounded font-bold bg-[#e8decb] text-[#78614c] border border-[#d8ccb8] ml-2"><i class="fa-solid fa-lock mr-1"></i>未解鎖</span>` : '';
+        let descHtml = ch.disabled && ch.lockReason 
+          ? `<p class="text-xs text-[#b91c1c] font-bold mt-1 bg-[#fef2f2] px-2 py-0.5 rounded inline-block border border-[#fca5a5]">${ch.lockReason}</p>`
+          : (ch.desc ? `<p class="text-xs text-[#594432] font-medium leading-relaxed mt-0.5">${ch.desc}</p>` : '');
+
         btn.innerHTML = `
-          <!-- 左側竹簡刻紋飾線 -->
           <div class="absolute top-2 bottom-2 left-1.5 w-1 ${hasCheck ? 'bg-[#b45309]' : 'bg-[#cfc0a9]'} rounded-full opacity-70 group-hover:bg-[#a82d25] transition-colors"></div>
 
           <div class="pl-2.5 w-full">
@@ -80,28 +82,31 @@ const EventSystem = {
               <div class="flex items-center flex-wrap gap-1">
                 ${checkPrefixHtml}
                 <span class="font-black text-sm sm:text-base tracking-wide text-[#2c1f14] group-hover:text-[#a82d25] transition-colors">
-                  ${c.text}
+                  ${ch.label}
                 </span>
+                ${lockHtml}
               </div>
-              <!-- 右側古風引導箭頭 -->
-              <span class="text-xs text-[#b3a490] group-hover:text-[#a82d25] group-hover:translate-x-1 transition-all">
+              <span class="text-xs text-[#b3a490] ${ch.disabled ? '' : 'group-hover:text-[#a82d25] group-hover:translate-x-1'} transition-all">
                 <i class="fa-solid fa-chevron-right"></i>
               </span>
             </div>
-            ${c.desc ? `<p class="text-xs text-[#594432] font-medium leading-relaxed mt-0.5">${c.desc}</p>` : ''}
+            ${descHtml}
           </div>
         `;
         
         btn.onclick = () => {
-          // 防重複點擊
+          if (ch.disabled) {
+            ch.action(); // 會觸發無法選擇的 log
+            return;
+          }
           optsContainer.querySelectorAll('button').forEach(b => {
             b.disabled = true;
             b.classList.add('opacity-40', 'cursor-not-allowed');
           });
 
           document.getElementById('encounterModal').classList.add('hidden');
-          HUD.log('narrative', `你選擇了：${c.text}`);
-          this.handleChoice(c);
+          HUD.log('narrative', `你選擇了：${ch.label}`);
+          ch.action();
         };
 
         optsContainer.appendChild(btn);
@@ -115,27 +120,19 @@ const EventSystem = {
     HUD.setScene(ev.badge || '江湖', ev.title || '遭遇');
     if (ev.text) HUD.log(ev.speaker ? 'dialogue' : 'narrative', ev.text, ev.speaker || '旁白');
 
-    const choices = ev.choices || [];
-    const validChoices = choices.filter(c => {
-      if (c.requireTags && c.requireTags.length > 0 && !TagUtils.hasAll(c.requireTags)) return false;
-      if (c.forbidTags && c.forbidTags.length > 0 && !TagUtils.hasNone(c.forbidTags)) return false;
-      return true;
-    });
+    // ★ 改用 ChoiceUtils 處理
+    const formattedChoices = ChoiceUtils.process(ev.choices || []);
 
-    // ★ 自動補位：如果沒有選項，自動結束
-    if (validChoices.length === 0) {
-    HUD.log('narrative', T('no_more_choices'));
-      setTimeout(() => ExplorationSystem.endEvent(), 1000);
+    if (formattedChoices.length === 0) {
+      HUD.log('narrative', T('no_more_choices'));
+      setTimeout(() => {
+        if (G.currentAge < 18) LifepathSystem.nextYear();
+        else ExplorationSystem.endEvent();
+      }, 1000);
       return;
     }
 
-    HUD.renderChoices(validChoices.map(c => ({
-      label: c.text,
-      checkText: c.type === 'check' ? `${STATS_INFO[c.attr]?.name || c.attr} DC ${c.dc}` : '',
-      desc: c.desc,
-      primary: c.type === 'check',
-      action: () => this.handleChoice(c)
-    })));
+    HUD.renderChoices(formattedChoices);
   },
 
   handleChoice(choice) {

@@ -33,26 +33,8 @@ function switchSystem(name, payload) {
   if (sys && sys.enter) sys.enter(payload);
   else console.error('[System] Not found:', name);
 }
-
 function getEffectiveStats() {
-  const base = { ...G.player.stats };
-  (G.player.companions || []).forEach(cid => {
-    const c = G.data.COMPANIONS[cid];
-    if (!c || !c.passiveStats) return;
-    Object.entries(c.passiveStats).forEach(([k, v]) => {
-      if (k in base) base[k] = (base[k] || 0) + v;
-    });
-  });
-  return base;
-}
-
-function getCompanionTags() {
-  const tags = [];
-  (G.player.companions || []).forEach(cid => {
-    const c = G.data.COMPANIONS[cid];
-    if (c && c.tags) tags.push(...c.tags);
-  });
-  return tags;
+  return { ...G.player.stats };
 }
 
 const STATS_INFO = {

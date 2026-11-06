@@ -159,3 +159,70 @@ const EventPicker = {
     return candidates[0].id;
   }
 };
+
+const ChoiceUtils = {
+  process(rawChoices) {
+    if (!rawChoices) return [];
+
+    return rawChoices.map(c => {
+      let isLocked = false;
+      let lockReason = '';
+
+      // 1. 檢查 requireTags
+      if (c.requireTags && c.requireTags.length > 0 && !TagUtils.hasAll(c.requireTags)) {
+        isLocked = true;
+        const missingTags = c.requireTags.filter(t => !TagUtils.has(t));
+        const tagNames = missingTags.map(t => G.data.TAGS[t]?.name || t).join('、');
+        lockReason = `需要特性【${tagNames}】`;
+      }
+
+      // 2. 檢查 forbidTags
+      if (c.forbidTags && c.forbidTags.length > 0 && !TagUtils.hasNone(c.forbidTags)) {
+        isLocked = true;
+        lockReason = `擁有某種特性，無法選擇`;
+      }
+
+      // 3. 檢查 requireStats (能力值限制)
+      if (c.requireStats && String(c.requireStats).trim() !== '') {
+        String(c.requireStats).split('|').forEach(req => {
+          const [attr, valStr] = req.split(':');
+          const reqVal = Number(valStr);
+          if (G.player.stats[attr] < reqVal) {
+            isLocked = true;
+            const attrName = STATS_INFO[attr]?.name || attr;
+            lockReason = `需要 ${attrName} 達到 ${reqVal - 10}（目前 ${G.player.stats[attr] - 10}）`;
+          }
+        });
+      }
+
+      // ★ 新增：4. 檢查 requireGold (金錢限制)
+      if (c.requireGold) {
+        const reqGold = Number(c.requireGold);
+        if (G.player.gold < reqGold) {
+          isLocked = true;
+          lockReason = `需要 ${reqGold} 兩（目前 ${G.player.gold} 兩）`;
+        }
+      }
+
+      // 如果被鎖定，且 Excel 未設定 showIfLocked，則直接隱藏 (返回 null)
+      if (isLocked && !c.showIfLocked) return null;
+
+      // 返回 HUD 需要的格式
+      return {
+        label: c.text,
+        checkText: c.type === 'check' ? `${STATS_INFO[c.attr]?.name || c.attr} DC ${c.dc}` : '',
+        desc: c.desc,
+        primary: c.type === 'check',
+        disabled: isLocked,
+        lockReason: lockReason,
+        action: () => {
+          if (isLocked) {
+            HUD.log('combat', `你無法選擇此項：${lockReason}`, 'neutral');
+            return;
+          }
+          EventSystem.handleChoice(c);
+        }
+      };
+    }).filter(Boolean); // 過濾掉 null
+  }
+};

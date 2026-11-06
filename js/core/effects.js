@@ -63,9 +63,30 @@ const EffectSystem = {
       else if (k === 'addCompanion') {
         const arr = Array.isArray(v) ? v : [v];
         arr.forEach(cid => {
-          if (!p.companions.includes(cid) && G.data.COMPANIONS[cid] && p.companions.length < 2) {
+          if (!p.companions.includes(cid) && G.data.COMPANIONS[cid]) {
+            if (p.companions.length >= 2) {
+              // ★ 新增：滿員提示
+              HUD.log('lifepath', `【隊伍已滿】${G.data.COMPANIONS[cid].name} 本想跟隨你，但你身邊已無空位。`, 'enemy');
+              return;
+            }
             p.companions.push(cid);
             HUD.log('lifepath', `${G.data.COMPANIONS[cid].name} 加入了你的旅途`);
+          }
+        });
+      }
+      else if (k === 'removeCompanion') {
+        const arr = Array.isArray(v) ? v : [v];
+        arr.forEach(cid => {
+          const idx = p.companions.indexOf(cid);
+          if (idx !== -1) {
+            p.companions.splice(idx, 1);
+            const compName = G.data.COMPANIONS[cid]?.name || cid;
+            HUD.log('lifepath', `${compName} 離開了你的隊伍。`);
+            
+            // ★ 新增：自動清理該同伴的羈絆 Tag
+            const shortId = cid.replace('comp_', '');
+            const tagsToRemove = (p.tags || []).filter(t => t.startsWith('bond_') && t.includes(shortId));
+            tagsToRemove.forEach(t => TagUtils.remove(t));
           }
         });
       }

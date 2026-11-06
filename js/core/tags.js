@@ -11,7 +11,7 @@ const TagUtils = {
 
   has(tagId) {
     if (!G.player) return false;
-    return G.player.tags.includes(tagId) || getCompanionTags().includes(tagId);
+    return G.player.tags.includes(tagId);
   },
 
   hasAll(tagIds) {
@@ -93,12 +93,48 @@ const TagUtils = {
     if (!G.data.TAGS[tagId]) return false;
     if (G.player.tags.includes(tagId)) return false;
     G.player.tags.push(tagId);
+    
+    // ★ 改動：處理 passiveStats (不受 global 影響)
+    const tag = G.data.TAGS[tagId];
+    if (tag && tag.passiveStats) {
+      String(tag.passiveStats).split('|').forEach(part => {
+        const [k, v] = part.split(':');
+        const num = Number(v) || 0;
+        if (k === 'maxHp') { G.player.maxHp += num; G.player.hp += num; }
+        if (k === 'maxPos') { G.player.maxPos += num; G.player.pos += num; }
+        if (k === 'maxQi') { G.player.maxQi += num; G.player.qi += num; }
+      });
+    }
     return true;
   },
 
   remove(tagId) {
     const idx = G.player.tags.indexOf(tagId);
-    if (idx !== -1) { G.player.tags.splice(idx, 1); return true; }
+    if (idx !== -1) { 
+      G.player.tags.splice(idx, 1); 
+      
+      // ★ 改動：處理 passiveStats
+      const tag = G.data.TAGS[tagId];
+      if (tag && tag.passiveStats) {
+        String(tag.passiveStats).split('|').forEach(part => {
+          const [k, v] = part.split(':');
+          const num = Number(v) || 0;
+          if (k === 'maxHp') { 
+            G.player.maxHp = Math.max(1, G.player.maxHp - num); 
+            G.player.hp = Math.min(G.player.hp, G.player.maxHp); 
+          }
+          if (k === 'maxPos') { 
+            G.player.maxPos = Math.max(1, G.player.maxPos - num); 
+            G.player.pos = Math.min(G.player.pos, G.player.maxPos); 
+          }
+          if (k === 'maxQi') { 
+            G.player.maxQi = Math.max(1, G.player.maxQi - num); 
+            G.player.qi = Math.min(G.player.qi, G.player.maxQi); 
+          }
+        });
+      }
+      return true; 
+    }
     return false;
   }
 };

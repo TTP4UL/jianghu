@@ -335,7 +335,7 @@ const CharacterCreationSystem = {
       <div class="mt-1"><b class="text-wuxiaGold">金錢：</b>${o.gold} 兩</div>`;
   },
 
-finish() {
+  finish() {
     if (this.state.freePoints > 0) {
       return alert(`請先分配剩下的 ${this.state.freePoints} 點潛力！`);
     }
@@ -345,29 +345,13 @@ finish() {
     const o = G.data.ORIGINS[s.origin];
     const sect = s.sect ? G.data.SECTS[s.sect] : null;
 
-    // 1. 計算真實屬性
+    // 1. 計算基礎真實屬性
     const finalStats = {};
     Object.keys(s.stats).forEach(k => {
       finalStats[k] = 10 + s.stats[k];
     });
 
-    const conMod = Math.floor((finalStats.con - 10) / 2);
-    const dexMod = Math.floor((finalStats.dex - 10) / 2);
-    const intMod = Math.floor((finalStats.int - 10) / 2);
-    const wisMod = Math.floor((finalStats.wis - 10) / 2); 
-    
-    let maxHp = (sect ? sect.baseHp : 24) + conMod * 3;
-    let maxPos = (sect ? sect.basePos : 14) + Math.max(0, intMod) * 2; 
-    let maxQi = (sect ? sect.baseQi : 5) + Math.max(0, wisMod);
-
-    // 2. 處理 Tags
-    const tags = [];
-    if (G.data.TAGS['origin_' + s.origin]) tags.push('origin_' + s.origin);
-    if (s.sect && G.data.TAGS['sect_' + s.sect]) tags.push('sect_' + s.sect);
-    tags.push(s.gender === 'male' ? 'gender_male' : 'gender_female');
-    (o.initialTags || []).forEach(t => { if (G.data.TAGS[t]) tags.push(t); });
-    
-    // 3. 處理武學與裝備
+    // 2. 處理武學與裝備
     const martialArts = [...(o.initialMartialArts || [])];
     if (sect) martialArts.push(...(sect.startingArts || []));
 
@@ -379,39 +363,65 @@ finish() {
       if (idx !== -1) loadout[a.slot][idx] = id;
     });
 
-    // 4. 建立玩家物件
+    // 3. 建立白板玩家物件
     G.player = {
       name, gender: s.gender, origin: s.origin, sect: s.sect,
       stats: finalStats, 
-      hp: maxHp, maxHp, pos: maxPos, maxPos, qi: maxQi, maxQi,
-      ac: 10 + dexMod,
+      hp: 1, maxHp: 1, pos: 1, maxPos: 1, qi: 1, maxQi: 1,
+      ac: 10,
       gold: o.gold,
-      martialArts,
-      tags: [...new Set(tags)],
+      martialArts: martialArts,
+      tags: [], 
       companions: [],
-      loadout,
+      loadout: loadout,
       prof: 2,
       morality: 0,
       reputation: 0,
       contribution: 0,
       punchDiceType: 8,
-      lifeLog: []
+      lifeLog: [],
+      savedPoints: 0,
+      buffs: {},
+      isPoisoned: 0,
+      isStunned: false
     };
 
-    // ★ 核心簡化：使用工具統一加上初始裝備的內功加成與 Tag
+    // 4. 計算基礎三維（★ 徹底移除門派 baseHp，只保留屬性修正）
+    const conMod = Math.floor((finalStats.con - 10) / 2);
+    const intMod = Math.floor((finalStats.int - 10) / 2);
+    const wisMod = Math.floor((finalStats.wis - 10) / 2);
+    const dexMod = Math.floor((finalStats.dex - 10) / 2);
+
+    G.player.maxHp = 30 + conMod * 3; 
+    G.player.maxPos = 15 + Math.max(0, intMod) * 2; 
+    G.player.maxQi = 5 + Math.max(0, wisMod);
+    G.player.ac = 10 + dexMod;
+
+    // 5. ★ 加上起源、性別、門派的 Tag (觸發 passiveStats 加乘)
+    const initialTagIds = [];
+    if (G.data.TAGS['origin_' + s.origin]) initialTagIds.push('origin_' + s.origin);
+    if (s.sect && G.data.TAGS['sect_' + s.sect]) initialTagIds.push('sect_' + s.sect);
+    initialTagIds.push(s.gender === 'male' ? 'gender_male' : 'gender_female');
+    (o.initialTags || []).forEach(t => { if (G.data.TAGS[t]) initialTagIds.push(t); });
+
+    [...new Set(initialTagIds)].forEach(t => TagUtils.add(t));
+
+    // 6. ★ 裝備初始武學 (觸發 innerEffect 的 maxHp / maxPos / maxQi 加成 及 grantTags)
     Object.keys(loadout).forEach(slotKey => {
       loadout[slotKey].forEach(artId => {
-        if (artId) {
-          MartialArtUtils.toggleInnerEffect(G.player, G.data.MARTIAL_ARTS[artId], true);
-        }
+        if (artId) MartialArtUtils.toggleInnerEffect(G.player, G.data.MARTIAL_ARTS[artId], true);
       });
     });
 
-    // 後續彈窗與音效保持不變...
+    // 7. ★ 補滿狀態
+    G.player.hp = G.player.maxHp;
+    G.player.pos = G.player.maxPos;
+    G.player.qi = G.player.maxQi;
+
+    // --- 以下彈窗與 UI 邏輯保持不變 ---
     const originTitle = o.name + (sect ? ` · ${sect.name}` : '');
     const introText = o.intro || `十三歲，${name} 正式邁入江湖。從此以後，一切靠自己。`;
 
-    // 寫入黃皮殘卷 DOM
     const badgeEl = document.getElementById('introScrollOriginBadge');
     if (badgeEl) badgeEl.innerHTML = `<span class="seal-stamp text-[11px] px-2.5 py-0.5">${originTitle}</span>`;
     
@@ -421,7 +431,6 @@ finish() {
     const scrollNameEl = document.getElementById('introScrollName');
     if (scrollNameEl) scrollNameEl.textContent = `【${name}】十三歲 · 志在四方`;
 
-    // 隱藏創角面板，彈出黃皮殘卷
     document.getElementById('screen-setup').classList.add('hidden');
     
     if (typeof soundEngine !== 'undefined' && soundEngine.playGong) {

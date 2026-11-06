@@ -17,7 +17,10 @@ const HUD = {
   },
 
   getStatusBadgeHtml(type, countOrVal, extra) {
-    if (type === 'poison') return `<span class="wuxia-status-badge status-poison shadow-xs"><span>☠️ 劇毒</span><span class="status-badge-count">${countOrVal}回</span></span>`;
+    if (type === 'poison') return `<span class="wuxia-status-badge status-poison shadow-xs"><span>☠️ 劇毒 ${countOrVal}層</span><span class="status-badge-count">${extra}回</span></span>`;
+    if (type === 'bleed') return `<span class="wuxia-status-badge !bg-[#fef2f2] !text-[#b91c1c] !border-[#fca5a5] shadow-xs"><span>🩸 流血 ${countOrVal}%</span><span class="status-badge-count">${extra}回</span></span>`;
+    if (type === 'seal') return `<span class="wuxia-status-badge !bg-[#7f1d1d] !text-[#fca5a5] !border-[#dc2626] shadow-xs"><span>🚫 封脈(全封)</span><span class="status-badge-count">${countOrVal}回</span></span>`;
+    if (type === 'silence') return `<span class="wuxia-status-badge !bg-[#fefce8] !text-[#854d0e] !border-[#fde047] shadow-xs"><span>🔇 封招</span><span class="status-badge-count">${countOrVal}回</span></span>`;
     if (type === 'stun') return `<span class="wuxia-status-badge status-stun shadow-xs"><span>⚡ 點穴眩暈</span></span>`;
     if (type === 'shield') return `<span class="wuxia-status-badge status-shield shadow-xs"><span>🛡️ 減傷 ${countOrVal}</span><span class="status-badge-count">${extra}回</span></span>`;
     if (type === 'shieldPct') return `<span class="wuxia-status-badge status-shield shadow-xs"><span>🛡️ 護體 ${countOrVal}%</span><span class="status-badge-count">${extra}回</span></span>`;
@@ -140,33 +143,53 @@ const HUD = {
     document.getElementById('ttTagDesc').textContent = tag.desc || '暫無詳細描述。';
 
     const bonusText = String(tag.bonus || '0').trim();
+    const passiveText = String(tag.passiveStats || '').trim(); // ★ 新增
     const bonusEl = document.getElementById('ttTagBonus');
     let effectStr = '';
 
-    // 判斷有冇實質加成
+    // 1. 解析檢定加成 (bonus)
     if (!isNaN(bonusText) && Number(bonusText) !== 0) {
       effectStr = `所有檢定 ${Number(bonusText) > 0 ? '+' : ''}${bonusText}`;
     } else if (bonusText.includes(':')) {
       effectStr = bonusText.split('|').map(part => {
         const [attr, val] = part.split(':');
         const num = Number(val);
-        if (num === 0) return ''; // 如果是 0 就不顯示
+        if (num === 0) return '';
         const attrName = { str: '臂力', dex: '身法', con: '根骨', int: '悟性', wis: '心法', cha: '魅力' }[attr] || attr;
         return `${attrName}檢定 ${num > 0 ? '+' : ''}${num}`;
       }).filter(Boolean).join('，');
     }
 
-    // ★ 核心修改：如果有效果字串，才顯示；否則直接隱藏整個效果行
-    if (effectStr) {
+    // 2. 解析上限加成 (passiveStats) ★ 新增
+    let passiveStr = '';
+    if (passiveText) {
+      passiveStr = passiveText.split('|').map(part => {
+        const [attr, val] = part.split(':');
+        const num = Number(val);
+        if (num === 0) return '';
+        const attrName = { maxHp: '氣血上限', maxPos: '架勢上限', maxQi: '真氣上限' }[attr] || attr;
+        return `${attrName} ${num > 0 ? '+' : ''}${num}`;
+      }).filter(Boolean).join('，');
+    }
+
+    // 3. 組合顯示
+    let finalEffect = [];
+    if (effectStr) finalEffect.push(effectStr);
+    if (passiveStr) finalEffect.push(passiveStr);
+
+    if (finalEffect.length > 0) {
       bonusEl.classList.remove('hidden');
       const isGlobal = String(tag.global).toLowerCase() === 'true';
-      const scopeTag = isGlobal 
-        ? `<span class="text-[9px] bg-[#fef08a] text-[#854d0e] px-1 rounded ml-1 border border-[#fde047]">全局生效</span>`
-        : `<span class="text-[9px] bg-[#e0f2fe] text-[#0369a1] px-1 rounded ml-1 border border-[#bae6fd]">特定觸發</span>`;
+      // 只有當有檢定加成時，才顯示「全局/特定觸發」標籤
+      const scopeTag = effectStr 
+        ? (isGlobal 
+            ? `<span class="text-[9px] bg-[#fef08a] text-[#854d0e] px-1 rounded ml-1 border border-[#fde047]">全局檢定</span>`
+            : `<span class="text-[9px] bg-[#e0f2fe] text-[#0369a1] px-1 rounded ml-1 border border-[#bae6fd]">特定檢定</span>`)
+        : '';
       
-      bonusEl.innerHTML = `效果：${effectStr} ${scopeTag}`;
+      bonusEl.innerHTML = `效果：${finalEffect.join('，')} ${scopeTag}`;
     } else {
-      bonusEl.classList.add('hidden'); // 冇加成，直接隱藏
+      bonusEl.classList.add('hidden');
     }
 
     this._positionTooltip(e, tt);
@@ -187,9 +210,12 @@ const HUD = {
     if (art.slot === 'attack' || art.slot === 'utility') {
       if (art.qiCost) effectParts.push(`消耗 ${art.qiCost} 真氣`);
       
-      if (art.slot === 'attack') {
-        if (art.fixedDamage) effectParts.push(`固定傷害 ${art.fixedDamage}`);
-        else if (art.basePower) effectParts.push(`威力 ${Math.max(1, Math.floor(art.basePower / 10))}d${art.diceType || 8}`);
+       if (art.slot === 'attack') {
+        if (art.fixedDamage) {
+          effectParts.push(`固定傷害 ${art.fixedDamage}`);
+        } else if (art.diceCount) {
+          effectParts.push(`威力 ${art.diceCount}d${art.diceType || 8}`);
+        }
         
         if (art.hits && Number(art.hits) > 1) effectParts.push(`${art.hits} 連擊`);
       }
@@ -533,7 +559,10 @@ if (repEl) {
       wrapper.className = 'player-status-tag flex items-center gap-1.5 flex-wrap';
       let badgesHtml = '';
 
-      if (p.isPoisoned > 0) badgesHtml += this.getStatusBadgeHtml('poison', p.isPoisoned);
+      if (p.isPoisoned > 0) badgesHtml += this.getStatusBadgeHtml('poison', p.poisonStacks || 1, p.isPoisoned);
+      if (p.isBleeding > 0) badgesHtml += this.getStatusBadgeHtml('bleed', Math.floor((p.bleedPct || 0.1) * 100), p.isBleeding);
+      if (p.isSealed > 0) badgesHtml += this.getStatusBadgeHtml('seal', p.isSealed);
+      if (p.isSilenced > 0) badgesHtml += this.getStatusBadgeHtml('silence', p.isSilenced);
       if (p.isStunned) badgesHtml += this.getStatusBadgeHtml('stun');
 
       if (p.buffs) {
@@ -654,18 +683,35 @@ renderChoices(choices) {
     choices.forEach(ch => {
       const btn = document.createElement('button');
       
-      // 1. 真氣不足或禁用狀態
+      // 1. 禁用狀態 (完美區分「真氣不足」與「事件未解鎖」)
       if (ch.disabled) {
-        btn.className = 'relative p-3.5 rounded-lg border border-[#e5dcce] bg-[#f5f3ee] text-left flex flex-col justify-between opacity-50 cursor-not-allowed select-none';
+        const isEventLocked = !!ch.lockReason; // 有 lockReason 就係事件鎖
+        
+        btn.className = `relative p-3.5 rounded-lg border border-[#e5dcce] bg-[#f5f3ee] text-left flex flex-col justify-between opacity-60 cursor-not-allowed select-none ${isEventLocked ? 'grayscale' : ''}`;
+        
+        // 右側標籤：事件鎖顯示鎖頭，戰鬥資源不足顯示原本嘅真氣提示
+        let rightBadge = '';
+        if (isEventLocked) {
+          rightBadge = `<span class="text-[10px] px-1.5 py-0.5 rounded font-bold bg-[#e8decb] text-[#78614c] border border-[#d8ccb8]"><i class="fa-solid fa-lock mr-1"></i>未解鎖</span>`;
+        } else if (ch.checkText) {
+          rightBadge = `<span class="text-[11px] px-2 py-0.5 rounded font-mono font-bold bg-[#e8decb] text-[#78614c] border border-[#d8ccb8]">${ch.checkText}</span>`;
+        }
+
         btn.innerHTML = `
           <div class="flex items-center justify-between w-full mb-1">
             <span class="font-black text-sm tracking-wide text-[#8a7561]">${ch.label}</span>
-            ${ch.checkText ? `<span class="text-[11px] px-2 py-0.5 rounded font-mono font-bold bg-[#e8decb] text-[#78614c] border border-[#d8ccb8]">${ch.checkText}</span>` : ''}
+            ${rightBadge}
           </div>
-          <span class="text-xs text-[#a89a88]">${ch.desc || ''}</span>`;
-          
+          <span class="text-xs text-[#a89a88]">${ch.desc || ''}</span>
+          ${isEventLocked ? `<div class="text-[11px] text-[#b91c1c] mt-1.5 font-bold bg-[#fef2f2] px-2 py-0.5 rounded inline-block w-max border border-[#fca5a5]">${ch.lockReason}</div>` : ''}
+        `;
+        
         btn.onclick = () => {
-          HUD.log('combat', '真氣不足，無法施展！', 'neutral');
+          if (ch.action) {
+            ch.action(); 
+          } else {
+            HUD.log('combat', '條件不足，無法使用！', 'neutral');
+          }
         };
         grid.appendChild(btn);
         return;

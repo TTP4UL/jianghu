@@ -18,63 +18,14 @@ const LifepathSystem = {
     if (!eventId) {
       HUD.setScene(`${G.currentAge}歲 · 平淡`, '歲月靜好');
       HUD.log('narrative', T('peaceful_year'));
-      this.renderLifepathChoices([]);
+      HUD.renderChoices([]);
       return;
     }
 
     G.usedEvents.push(eventId);
     
-    const event = G.data.EVENTS[eventId];
-    if (!event) return;
-
-    // ★ 如果事件是 modal，直接交給 EventSystem 處理彈窗！
-    if (event.uiType === 'modal') {
-      return EventSystem.load(eventId);
-    }
-
-    // ★ 終極防呆：如果連 text 都沒有，直接當作無事發生跳過
-    if (!event.text || String(event.text).trim() === '') {
-      console.warn('Event missing text:', eventId);
-      HUD.setScene(`${G.currentAge}歲 · 平淡`, '歲月靜好');
-      HUD.log('narrative', T('peaceful_year'));
-      this.renderLifepathChoices([]);
-      return;
-    }
-
-    // 普通事件維持原樣
-    HUD.setScene(`${G.currentAge}歲 · 成長`, event.title || '江湖事');
-    HUD.log(event.speaker ? 'dialogue' : 'narrative', event.text, event.speaker || '旁白');
-    
-    const choices = event.choices || [];
-    this.renderLifepathChoices(choices);
-  },
-
-  renderLifepathChoices(choices) {
-    const validChoices = choices.filter(c => {
-      if (c.requireTags && c.requireTags.length > 0 && !TagUtils.hasAll(c.requireTags)) return false;
-      if (c.forbidTags && c.forbidTags.length > 0 && !TagUtils.hasNone(c.forbidTags)) return false;
-      return true;
-    });
-
-    const renderList = validChoices.map(c => ({
-      label: c.text,
-      checkText: c.type === 'check' ? `${STATS_INFO[c.attr]?.name || c.attr} DC ${c.dc}` : '',
-      desc: c.desc,
-      primary: c.type === 'check',
-      action: () => EventSystem.handleChoice(c)
-    }));
-
-    if (renderList.length > 0) {
-      HUD.renderChoices(renderList);
-    } else {
-      // 如果 Excel 忘記填選項，系統會給個安全退出，避免卡死
-      HUD.renderChoices([{
-        label: '度過這一年',
-        desc: '這一年平淡無奇地過去了。',
-        primary: true,
-        action: () => { G.currentAge++; setTimeout(() => this.runYear(), 300); }
-      }]);
-    }
+    // ★ 核心簡化：無論係咩事件，直接交畀 EventSystem 處理！
+    return EventSystem.load(eventId);
   },
 
   pickEvent() {

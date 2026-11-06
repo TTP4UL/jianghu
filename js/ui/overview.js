@@ -55,17 +55,21 @@ const OverviewUI = {
       const gradeColor = { EX: 'text-[#b45309]', S: 'text-[#b91c1c]', A: 'text-[#7e22ce]', B: 'text-[#1d4ed8]', C: 'text-[#047857]', D: 'text-[#57534e]' }[c.grade] || 'text-[#57534e]';
       const passiveStr = Object.entries(c.passiveStats || {}).map(([k, v]) => `${STATS_INFO[k]?.name || k}+${v}`).join(' · ');
       return `
-        <div class="p-2.5 bg-white rounded-lg border border-[#d8ccb8] text-xs shadow-xs">
+        <div class="p-2.5 bg-white rounded-lg border border-[#d8ccb8] text-xs shadow-xs relative">
           <div class="flex items-center justify-between">
             <div>
               <span class="${gradeColor} font-black font-mono">[${c.grade}]</span>
               <span class="text-[#2c1f14] font-black ml-1 text-[13px]">${c.name}</span>
             </div>
+            <!-- ★ 新增：送別按鈕 -->
+            <button onclick="OverviewUI.dismissCompanion('${cid}')" class="text-[10px] text-[#b91c1c] border border-[#fca5a5] bg-[#fef2f2] px-2 py-0.5 rounded hover:bg-[#fee2e2] transition">送別</button>
           </div>
-          <div class="text-[#6d5541] text-[11px] mt-1 leading-relaxed">${c.desc || ''}</div>
+          <div class="text-[#6d5541] text-[11px] mt-1 leading-relaxed pr-8">${c.desc || ''}</div>
           ${passiveStr ? `<div class="text-[#15803d] text-[10px] mt-1 font-bold">被動加成：${passiveStr}</div>` : ''}
         </div>`;
     }).join('') || '<div class="text-xs text-[#8a7561] italic">獨自一人</div>';
+
+    
 
     // 4. 計算當前狀態
     const finalAC = typeof CombatSystem !== 'undefined' ? CombatSystem.getEffectiveAC(p) : p.ac;
@@ -146,7 +150,22 @@ const OverviewUI = {
       
     modal.classList.remove('hidden');
   },
-
+    dismissCompanion(compId) {
+      if (!confirm(`確定要與 ${G.data.COMPANIONS[compId]?.name} 分道揚鑣嗎？`)) return;
+      
+      const idx = G.player.companions.indexOf(compId);
+      if (idx !== -1) G.player.companions.splice(idx, 1);
+      
+      // 清理羈絆 Tag
+      const shortId = compId.replace('comp_', '');
+      const tagsToRemove = (G.player.tags || []).filter(t => t.startsWith('bond_') && t.includes(shortId));
+      tagsToRemove.forEach(t => TagUtils.remove(t));
+      
+      HUD.log('lifepath', `你與 ${G.data.COMPANIONS[compId]?.name} 分道揚鑣。`);
+      this.open(); // 刷新概覽 UI
+      HUD.render();
+      SaveSystem.save();
+    },
   close() {
     document.getElementById('overviewModal').classList.add('hidden');
   }

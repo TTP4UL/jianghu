@@ -4,7 +4,7 @@
 
 const SYSTEM_TEXTS = {
   // 戰鬥 (Combat)
-  meditate: "你退後半步，雙目微閉，運轉真氣。回復 {qi} 點真氣與 {pos} 點架勢。",
+  meditate: "你退後半步，雙目微閉，運轉真氣。回復 {qi} 點真氣。",
   parry: "你沉肩墜肘，擺出防禦架勢。架勢回復 {pos} 點，若成功架開攻擊，將順勢反擊！",
   enemy_stunned: "敵方處於眩暈，無法行動！",
   poison_player: "你劇毒發作！無視架勢，直接受到 {dmg} 點真實傷害！",

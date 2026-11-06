@@ -100,13 +100,11 @@ const LoadoutUI = {
       badges.push(this._makeBadge(`真氣 ${cost}`, 'gray'));
 
       if (art.slot === 'attack') {
-        if (art.fixedDamage) {
-          badges.push(this._makeBadge(`傷害 ${art.fixedDamage}`, 'red'));
-        } else if (art.basePower) {
-          const diceCount = Math.max(1, Math.floor(art.basePower / 10));
-          const diceType = art.diceType || 8;
-          badges.push(this._makeBadge(`威力 ${diceCount}d${diceType}`, 'red'));
-        }
+      if (art.fixedDamage) {
+        badges.push(`<span class="bg-[#fef2f2] text-[#b91c1c] px-2 py-0.5 rounded text-[11px] border border-[#fca5a5] font-mono font-bold">傷害 ${art.fixedDamage}</span>`);
+      } else if (art.diceCount) {
+        badges.push(`<span class="bg-[#fef2f2] text-[#b91c1c] px-2 py-0.5 rounded text-[11px] border border-[#fca5a5] font-mono font-bold">威力 ${art.diceCount}d${art.diceType || 8}</span>`);
+      }
         if (art.hits && Number(art.hits) > 1) {
           badges.push(this._makeBadge(`${art.hits}連擊`, 'orange'));
         }
